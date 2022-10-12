@@ -1,0 +1,17 @@
+.nav-color {
+    background-color: var(--burnt);
+}
+.nav-link {
+    color: var(--yellow);
+}
+.nav-link:hover {
+    color: var(--Grey-Water);
+}
+.navbar-brand {
+    color: var(--Red-Highlight);
+    font-size: xx-large;
+}
+
+.navbar-brand:hover {
+    color: var(--grey);
+}

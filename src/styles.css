@@ -1,4 +1,56 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
+
+:root {
+
+    --Blue-Minded: #004E7C;
+    --Maroon-6: #591C0B;    
+    --Grey-Water: #5C5F58;    
+
+
+    --gold: #eed7a1;
+    --blue: #475c6c;
+    --grey: #8a8583;
+    --burnt: #cd8b62;
+    --yellow: #f7efd3;
+    --Red-Highlight: #B73225;
+    --Lighter-Grey: #DCE1E3;
+  }
+
+
+html, body { height: 100%; background-color: var(--blue) }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.custom-card {
+    background-color: var(--gold);
+}
+
+.form-control {
+    background-color: var(--yellow) !important;
+    border: 1px black !important;
+    opacity: 1 !important;
+}
+
+.form-control:focus {
+    background-color: var(--yellow) !important;
+    border: 1px black !important;
+    opacity: 1 !important;
+}
+.form-control.ng-valid.ng-dirty {
+    background-color: var(--yellow) !important;
+    border: 1px black !important;
+    opacity: 1 !important;
+}
+
+select  {
+    background-color: var(--yellow) !important;
+    border: 1px black !important;
+    opacity: 1 !important;
+}
+
+option:checked  {
+    background-color: var(--yellow) !important;
+    border: 1px black !important;
+    opacity: 1 !important;
+}
+
