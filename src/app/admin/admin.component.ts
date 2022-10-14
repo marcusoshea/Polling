@@ -19,7 +19,8 @@ export class AdminComponent implements OnInit {
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService, private memberService: MemberService, private storageService: StorageService, private router: Router, public dialog: MatDialog) { }
   private showAdmin = false;
-  public changeOccurred = false;
+  public changeAdminOccurred = false;
+  public changeAsstOccurred = false;
   private errorMessage = '';
   private accessToken = '';
 
@@ -60,7 +61,7 @@ export class AdminComponent implements OnInit {
   }
 
   changeOrderAdmin(e) {
-    this.changeOccurred = true;
+    this.changeAdminOccurred = true;
     this.selectOrderAdmin.setValue(e.target.value, {
       onlySelf: true
     })
@@ -71,7 +72,7 @@ export class AdminComponent implements OnInit {
   }
 
   changeOrderAdminAsst(e) {
-    this.changeOccurred = true;
+    this.changeAsstOccurred = true;
     this.selectOrderAdminAsst.setValue(e.target.value, {
       onlySelf: true
     })
