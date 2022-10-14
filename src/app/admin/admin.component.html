@@ -1,30 +1,43 @@
-
-
-
-
-Need a table that contains the admin and admin clark here that we can update.
-
-dropdown list of all members
-
 <div class="col-md-12 mt-5">
-    <div class="card card-container custom-card">
-        <form name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div class="card card-container custom-card">
+          <form [formGroup]="orderAdminForm" (ngSubmit)="openDialog('500ms', '1500ms', false)">
+            <div class="form-group m-3">
+              <label for="pollingOrder">Order Clerk</label>
+              <select class="form-select" formControlName="orderAdmin" (change)="changeOrderAdmin($event)">
+                <option disabled>Choose Value</option>
+                <option *ngFor="let option of orderMemberList" [value]="option.polling_order_member_id">
+                  {{option.name}}
+                </option>
+              </select>
+            </div>
+            <div class="form-group m-3 d-flex justify-content-end">
+              <button type="submit" class="btn btn-success mt-3">Update Clerk</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card card-container custom-card">
+          <form [formGroup]="orderAdminAsstForm" (ngSubmit)="openDialog('500ms', '1500ms', true)">
+            <div class="form-group m-3">
+              <label for="pollingOrder">Order Assistant Clerk</label>
+              <select class="form-select" formControlName="orderAdminAsst" (change)="changeOrderAdminAsst($event)">
+                <option disabled>Choose Value</option>
+                <option *ngFor="let option of orderMemberList" [value]="option.polling_order_member_id">
+                  {{option.name}}
+                </option>
+              </select>
+            </div>
 
-<div class="form-group m-3">
-    <label for="pollingOrder">Order Member</label>
-    <select name="pollingOrder" id="#" class="form-control" [(ngModel)]="form.pollingOrder"
-        #pollingOrder="ngModel">
-        <option [ngValue]="null" selected disabled>Select Polling Order</option>
-        <option *ngFor="let option of orderMemberList" [ngValue]="option.polling_order_member_id">
-            {{ option.name }}
-        </option>
-    </select>
-</div>
-<div class="form-group m-3">
-    <button class="btn btn-primary btn-block">
-        Login
-    </button>
-</div>
-</form>
-</div>
+            <div class="form-group m-3 d-flex justify-content-end">
+              <button type="submit" class="btn btn-success mt-3">Update Assistant Clerk</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

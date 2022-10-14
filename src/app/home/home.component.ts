@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { StorageService } from '../services/storage.service';
+import { PollingOrder } from '../interfaces/polling-order'
 
 @Component({
   selector: 'app-home',
@@ -7,9 +9,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+
+  pollingOrder = {} as PollingOrder;
+
+  constructor( private storageService: StorageService) { }
 
   ngOnInit(): void {
+        this.pollingOrder = this.storageService.getPollingOrder();
   }
 
 }

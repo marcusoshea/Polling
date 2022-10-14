@@ -1,5 +1,6 @@
 .nav-color {
     background-color: var(--burnt);
+    font-size: medium;
 }
 .nav-link {
     color: var(--yellow);

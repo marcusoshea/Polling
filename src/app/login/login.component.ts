@@ -1,14 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../_services/auth.service';
-import { PollingOrderService } from '../_services/polling-order.service';
-import { StorageService } from '../_services/storage.service';
-
-interface PollingOrder {
-  polling_order_id: Number;
-  polling_order_name: String;
-  polling_order_admin: Number;
-  polling_order_admin_assistant: Number;
-}
+import { AuthService } from '../services/auth.service';
+import { PollingOrderService } from '../services/polling-order.service';
+import { StorageService } from '../services/storage.service';
+import { PollingOrder } from '../interfaces/polling-order'
  
 @Component({
   selector: 'app-login',
@@ -32,8 +26,6 @@ export class LoginComponent implements OnInit {
     this.pollingOrderService.getAllOrders().subscribe({
       next: response => {
         this.pollingOrderList = response;
-        console.log('this.pollingOrderList', this.pollingOrderList);
-        console.log('this.datadatadatadata', response);
       },
       error: err => {
 
@@ -49,13 +41,14 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     const { email, password, pollingOrder } = this.form;
 
-    this.authService.login(email, password, pollingOrder).subscribe({
+    this.authService.login(email, password, pollingOrder.polling_order_id).subscribe({
       next: data => {
-        this.storageService.saveUser(data);
+        this.storageService.saveMember(data);
+        this.storageService.savePollingOrder(pollingOrder);
 
         this.isLoginFailed = false;
         this.isLoggedIn = true;
-        this.reloadPage();
+        location.replace('/home');
       },
       error: err => {
         this.errorMessage = err.error.message;

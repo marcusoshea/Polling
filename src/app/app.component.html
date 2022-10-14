@@ -2,14 +2,17 @@
   <nav class="px-2 navbar navbar-expand navbar-dark nav-color">
      <a href="#" class="navbar-brand">Polling</a>
     <ul class="navbar-nav mr-auto" routerLinkActive="active">
-      <li class="nav-item">
-        <a href="/home" class="nav-link" routerLink="home">Home </a>
-      </li>
       <li class="nav-item" *ngIf="showAdmin">
         <a href="/admin" class="nav-link" routerLink="admin">Admin</a>
       </li>
       <li class="nav-item">
+        <a href="/profile" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Profile</a>
+      </li>
+      <li class="nav-item">
         <a href="/pollings" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Pollings</a>
+      </li>
+      <li class="nav-item">
+        <a href="/candidates" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Candidates</a>
       </li>
     </ul>
 

@@ -12,13 +12,17 @@
 
             <div class="form-group m-3">
                 <label for="pollingOrder">Polling Order</label>
-                <select name="pollingOrder" id="#" class="form-control" [(ngModel)]="form.pollingOrder"
+                <select name="pollingOrder" id="#" class="form-select" [(ngModel)]="form.pollingOrder"
                     #pollingOrder="ngModel">
                     <option [ngValue]="null" selected disabled>Select Polling Order</option>
-                    <option *ngFor="let option of pollingOrderList" [ngValue]="option.polling_order_id">
+                    <option *ngFor="let option of pollingOrderList" [ngValue]="option">
                         {{ option.polling_order_name }}
                     </option>
                 </select>
+
+                <div *ngIf="pollingOrder.errors && f.submitted" class="invalid-feedback">
+                    pollingOrder is required!
+                </div>
             </div>
 
             <div class="form-group m-3">

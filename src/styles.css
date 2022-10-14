@@ -54,3 +54,11 @@ option:checked  {
     opacity: 1 !important;
 }
 
+.custom-dialog-container .mat-dialog-container {
+    background-color: var(--yellow);
+    font-size: medium;
+}
+
+.text-centered {
+    text-align: center;
+}

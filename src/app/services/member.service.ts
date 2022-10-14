@@ -10,7 +10,7 @@ const API_URL = 'http://localhost:3000/';
 export class MemberService {
   constructor(private http: HttpClient) {}
 
-  getAllOrderMembers(orderID: string, accessToken: string): Observable<any> {
+  getAllOrderMembers(orderID: Number, accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({ 
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken

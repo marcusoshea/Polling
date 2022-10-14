@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { StorageService } from './_services/storage.service';
-import { AuthService } from './_services/auth.service';
+import { StorageService } from './services/storage.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +20,7 @@ export class AppComponent {
     this.isLoggedIn = this.storageService.isLoggedIn();
 
     if (this.isLoggedIn) {
-      const user = this.storageService.getUser();
+      const user = this.storageService.getMember();
       this.showAdmin = user.isOrderAdmin;
     }
   }
