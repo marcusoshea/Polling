@@ -19,6 +19,7 @@ export class AdminComponent implements OnInit {
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService, private memberService: MemberService, private storageService: StorageService, private router: Router, public dialog: MatDialog) { }
   private showAdmin = false;
+  public changeOccurred = false;
   private errorMessage = '';
   private accessToken = '';
 
@@ -59,6 +60,7 @@ export class AdminComponent implements OnInit {
   }
 
   changeOrderAdmin(e) {
+    this.changeOccurred = true;
     this.selectOrderAdmin.setValue(e.target.value, {
       onlySelf: true
     })
@@ -69,6 +71,7 @@ export class AdminComponent implements OnInit {
   }
 
   changeOrderAdminAsst(e) {
+    this.changeOccurred = true;
     this.selectOrderAdminAsst.setValue(e.target.value, {
       onlySelf: true
     })
@@ -76,7 +79,7 @@ export class AdminComponent implements OnInit {
 
   openDialog(enterAnimationDuration: string, exitAnimationDuration: string, Asst: boolean): void {
     let admin = 0;
-    if(Asst) {
+    if (Asst) {
       admin = parseInt(this.orderAdminAsstForm.value.orderAdminAsst)
     } else {
       admin = parseInt(this.orderAdminForm.value.orderAdmin)
@@ -117,12 +120,17 @@ export class AdminComponent implements OnInit {
 export class AdminConfirm {
   public newClerk: OrderMember;
   public pollingOrderDialog: PollingOrder;
+  public assistant = '';
   constructor(
     public dialogRef: MatDialogRef<AdminConfirm>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this.newClerk = data.orderMember[0];
     this.pollingOrderDialog = data.pollingOrder;
+
+    if (this.data.assistantUpdate) {
+      this.assistant = 'Assistant';
+    }
   }
 
   reset(): void {
