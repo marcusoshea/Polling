@@ -7,6 +7,7 @@ import { PollingOrder } from '../interfaces/polling-order'
 import { OrderMember } from '../interfaces/order-member'
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, Validators } from '@angular/forms';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-admin',
@@ -16,6 +17,8 @@ import { FormBuilder, Validators } from '@angular/forms';
 export class AdminComponent implements OnInit {
   pollingOrder = {} as PollingOrder;
   orderMemberList: OrderMember[] = [];
+  UnapprovedOrderMemberList: OrderMember[] = [];
+
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService, private memberService: MemberService, private storageService: StorageService, private router: Router, public dialog: MatDialog) { }
   private showAdmin = false;
@@ -24,29 +27,38 @@ export class AdminComponent implements OnInit {
   private errorMessage = '';
   private accessToken = '';
 
+  public displayedColumns = ['buttonDeny', 'buttonApprove', 'name', 'email'];
+  public dataSource = new MatTableDataSource<OrderMember>();
+
+
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
-    this.selectOrderAdmin.setValue(this.pollingOrder.polling_order_admin.toString(), {
-      onlySelf: true
-    })
-    this.selectOrderAdminAsst.setValue(this.pollingOrder.polling_order_admin_assistant.toString(), {
-      onlySelf: true
-    })
     this.showAdmin = member.isOrderAdmin;
     this.accessToken = member.access_token;
 
     if (!this.showAdmin) {
       this.router.navigate(['/home']);
     }
+
+    this.selectOrderAdmin.setValue(this.pollingOrder.polling_order_admin.toString(), {
+      onlySelf: true
+    })
+    this.selectOrderAdminAsst.setValue(this.pollingOrder.polling_order_admin_assistant.toString(), {
+      onlySelf: true
+    })
+
     this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
-        this.orderMemberList = data;
+        this.orderMemberList = data.filter(e => e.approved === true);
+        this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
+        this.dataSource.data = this.UnapprovedOrderMemberList;
       },
       error: err => {
         this.errorMessage = err.error.message;
       }
     });
+
   }
 
   orderAdminForm = this.fb.group({
@@ -111,8 +123,39 @@ export class AdminComponent implements OnInit {
     });
   }
 
-}
+  approveNewMember(memberInQuestion: any, approved: boolean): void {
+    if (approved) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      const created = year + '-' + month + '-' + day;
 
+      this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken).subscribe({
+        next: data => {
+          let index = this.UnapprovedOrderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
+          this.orderMemberList.push(this.UnapprovedOrderMemberList[index]);
+          this.UnapprovedOrderMemberList.splice(index, 1);
+          this.dataSource.data = this.UnapprovedOrderMemberList;
+        },
+        error: err => {
+          this.errorMessage = err.error.message;
+        }
+      });
+    } else {
+      this.memberService.removeMember(memberInQuestion.polling_order_member_id, this.accessToken).subscribe({
+        next: data => {
+          let index = this.UnapprovedOrderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
+          this.UnapprovedOrderMemberList.splice(index, 1);
+          this.dataSource.data = this.UnapprovedOrderMemberList;
+        },
+        error: err => {
+          this.errorMessage = err.error.message;
+        }
+      });
+    }
+  };
+}
 
 @Component({
   selector: 'confirm-admin',

@@ -16,6 +16,11 @@ import {MatSelectModule} from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
 
 
+import {MatTableModule} from '@angular/material/table';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatInputModule} from '@angular/material/input';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSortModule} from '@angular/material/sort';
 
 
 @NgModule({
@@ -36,7 +41,12 @@ import { MatDialogModule } from '@angular/material/dialog';
     HttpClientModule,
     MatSelectModule,
     MatDialogModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatTableModule,
+    MatSortModule,
+    MatProgressSpinnerModule,
+    MatInputModule,
+    MatPaginatorModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

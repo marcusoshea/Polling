@@ -9,10 +9,10 @@
     color: var(--Grey-Water);
 }
 .navbar-brand {
-    color: var(--Blue-Minded);
+    color: var(--So-Blue);
     font-size: xx-large;
 }
 
 .navbar-brand:hover {
-    color: var(--grey);
+    color: var(--Grey-Water);
 }

@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit {
       this.isLoggedIn = true;
     }
   }
-
+ 
   onSubmit(): void {
     const { email, password, pollingOrder } = this.form;
 
