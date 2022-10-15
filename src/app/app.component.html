@@ -5,8 +5,12 @@
         aria-controls="navbarNavAltMarkup" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-
-      <a href="#" class="d-sm-block d-md-none d-lg-none d-xl-none navbar-brand">{{this.pollingOrder.polling_order_name}}</a>
+      <a href="#" class="d-sm-block d-md-none d-lg-none d-xl-none navbar-brand">
+        <span class="comeBack_up" 
+        *ngIf="(this.pollingOrder.polling_order_name) == null">Polling
+      </span>
+        {{this.pollingOrder.polling_order_name}}
+      </a>
       <a href="#" class="d-none d-md-block d-lg-block d-xl-block navbar-brand">Polling {{this.pollingOrder.polling_order_name}}</a>
 
       <div class="collapse navbar-collapse" id="n_bar">
