@@ -10,9 +10,21 @@
 }
 .navbar-brand {
     color: var(--So-Blue);
-    font-size: xx-large;
+    font-size: x-large;
+    padding-left: .25rem;
 }
 
 .navbar-brand:hover {
     color: var(--Grey-Water);
 }
+
+
+
+
+  .navbar {
+    text-align: left;
+  }
+
+  .navbar-toggler {
+    vertical-align: left;
+  }

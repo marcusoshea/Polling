@@ -1,42 +1,51 @@
 <div id="app">
-  <nav class="px-2 navbar navbar-expand navbar-dark nav-color">
-     <a href="#" class="navbar-brand">Polling {{this.pollingOrder.polling_order_name}}</a>
-    <ul class="navbar-nav mr-auto" routerLinkActive="active">
-      <li class="nav-item" *ngIf="showAdmin">
-        <a href="/admin" class="nav-link" routerLink="admin">Admin</a>
-      </li>
-      <li class="nav-item">
-        <a href="/profile" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Profile</a>
-      </li>
-      <li class="nav-item">
-        <a href="/pollings" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Pollings</a>
-      </li>
-      <li class="nav-item">
-        <a href="/candidates" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Candidates</a>
-      </li>
-    </ul>
+  <nav class="px-2 p-0 navbar navbar-expand-sm navbar-dark nav-color">
+    <div class="container">
+      <button class="navbar-toggler p-0 m-0" type="button" data-bs-toggle="collapse" data-bs-target="#n_bar"
+        aria-controls="navbarNavAltMarkup" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <ul class="navbar-nav ml-auto" *ngIf="!isLoggedIn">
-      <li class="nav-item">
-        <a href="/register" class="nav-link" routerLink="register">Register</a>
-      </li>
-      <li class="nav-item">
-        <a href="/login" class="nav-link" routerLink="login">Login</a>
-      </li>
-    </ul>
+      <a href="#" class="d-sm-block d-md-none d-lg-none d-xl-none navbar-brand">{{this.pollingOrder.polling_order_name}}</a>
+      <a href="#" class="d-none d-md-block d-lg-block d-xl-block navbar-brand">Polling {{this.pollingOrder.polling_order_name}}</a>
 
-    <ul class="navbar-nav ml-auto" *ngIf="isLoggedIn">
-      <li class="nav-item">
-        <a href="/profile" class="nav-link" routerLink="profile">{{ email }}</a>
-      </li>
-      <li class="nav-item">
-        <a href class="nav-link" (click)="logout()">LogOut</a>
-      </li>
-    </ul>
+      <div class="collapse navbar-collapse" id="n_bar">
+        <ul class="navbar-nav mr-auto" routerLinkActive="active">
+          <li class="nav-item" *ngIf="showAdmin">
+            <a href="/admin" class="nav-link" routerLink="admin">Admin</a>
+          </li>
+          <li class="nav-item">
+            <a href="/profile" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a href="/pollings" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Pollings</a>
+          </li>
+          <li class="nav-item">
+            <a href="/candidates" class="nav-link" *ngIf="isLoggedIn" routerLink="pollings">Candidates</a>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav ml-auto" *ngIf="!isLoggedIn">
+          <li class="nav-item">
+            <a href="/register" class="nav-link" routerLink="register">Register</a>
+          </li>
+          <li class="nav-item">
+            <a href="/login" class="nav-link" routerLink="login">Login</a>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav ml-auto" *ngIf="isLoggedIn">
+          <li class="nav-item">
+            <a href="/profile" class="nav-link" routerLink="profile">{{ email }}</a>
+          </li>
+          <li class="nav-item">
+            <a href class="nav-link" (click)="logout()">LogOut</a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </nav>
-
   <div class="container">
     <router-outlet></router-outlet>
   </div>
 </div>
-  
