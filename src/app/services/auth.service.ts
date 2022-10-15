@@ -26,13 +26,21 @@ export class AuthService {
     );
   }
 
-  register(email: string, password: string, polling_order_id: string): Observable<any> {
+  register(memberName: string, email: string, password: string, polling_order_id: string): Observable<any> {
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    const created = year + '-' + month + '-' + day;
+
     return this.http.post(
-      AUTH_API + '/member/signup',
-      {
+      AUTH_API + '/member/create',
+      { "name": memberName,
         "email": email,
         "password": password, 
-        "polling_order_id": polling_order_id
+        "polling_order_id": polling_order_id,
+        "pom_created_at": created,
       },
       httpOptions
     );

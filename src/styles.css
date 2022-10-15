@@ -68,3 +68,7 @@ option:checked  {
 .text-centered {
     text-align: center;
 }
+
+.title  {
+    color: var(--yellow);
+}

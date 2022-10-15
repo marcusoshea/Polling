@@ -125,6 +125,9 @@ export class AdminComponent implements OnInit {
 
   approveNewMember(memberInQuestion: any, approved: boolean): void {
     if (approved) {
+
+      //TODO: should set an email to go out to the newly approved member
+
       const today = new Date();
       const year = today.getFullYear();
       const month = today.getMonth() + 1;
