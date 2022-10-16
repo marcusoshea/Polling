@@ -27,7 +27,7 @@ export class AdminComponent implements OnInit {
   private errorMessage = '';
   private accessToken = '';
 
-  public displayedColumns = ['buttonDeny', 'buttonApprove', 'name', 'email'];
+  public displayedColumns = ['buttons', 'name', 'email'];
   public dataSource = new MatTableDataSource<OrderMember>();
 
 
