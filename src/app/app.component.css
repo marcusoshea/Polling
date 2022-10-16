@@ -2,12 +2,15 @@
     background-color: var(--burnt);
     font-size: medium;
 }
+
 .nav-link {
     color: var(--yellow);
 }
+
 .nav-link:hover {
     color: var(--Grey-Water);
 }
+
 .navbar-brand {
     color: var(--So-Blue);
     font-size: x-large;
@@ -18,13 +21,10 @@
     color: var(--Grey-Water);
 }
 
-
-
-
-  .navbar {
+.navbar {
     text-align: left;
-  }
+}
 
-  .navbar-toggler {
+.navbar-toggler {
     vertical-align: left;
-  }
+}
