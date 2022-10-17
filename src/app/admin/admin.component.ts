@@ -129,10 +129,12 @@ export class AdminComponent implements OnInit {
       //TODO: should set an email to go out to the newly approved member
 
       const today = new Date();
-      const year = today.getFullYear();
+/*       const year = today.getFullYear();
       const month = today.getMonth() + 1;
       const day = today.getDate();
-      const created = year + '-' + month + '-' + day;
+      const created = year + '-' + month + '-' + day; */
+
+      const created = today.toISOString().split('T')[0];
 
       this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken).subscribe({
         next: data => {
