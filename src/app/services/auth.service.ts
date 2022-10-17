@@ -28,11 +28,13 @@ export class AuthService {
   }
 
   register(memberName: string, email: string, password: string, polling_order_id: string): Observable<any> {
-    const today = new Date();
-    const year = today.getFullYear();
+     const today = new Date();
+    /*const year = today.getFullYear();
     const month = today.getMonth() + 1;
     const day = today.getDate();
-    const created = year + '-' + month + '-' + day;
+    const created = year + '-' + month + '-' + day; */
+
+    const created = today.toISOString().split('T')[0];
 
     return this.http.post(
       AUTH_API + '/member/create',
@@ -67,4 +69,22 @@ export class AuthService {
       }       
     );  
   }
+
+  updatePassword(email: string, password: string, newPassword: string, pollingOrderId: string, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({ 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+   });
+     
+    return this.http.put(
+      AUTH_API + '/member/changePassword',
+      {
+        "email":email,
+        "password": password,
+        "newPassword": newPassword,
+        "pollingOrderId": pollingOrderId
+      }, { headers: reqHeader }
+    );
+  }
+
 }

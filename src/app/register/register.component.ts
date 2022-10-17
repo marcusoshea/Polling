@@ -19,6 +19,7 @@ export class RegisterComponent implements OnInit {
   isRegistered = false;
   errorMessage = '';
   pollingOrderList: PollingOrder[] = [];
+  showError = false;
 
   constructor(private authService: AuthService, private storageService: StorageService, private pollingOrderService: PollingOrderService) { }
 
@@ -41,6 +42,10 @@ export class RegisterComponent implements OnInit {
         this.isRegistered = true;
       },
       error: err => {
+        this.showError = true;
+        setTimeout(() => {
+          this.showError = false;
+        }, 3000);  
         this.errorMessage = err.error.message;
       }
     }); 

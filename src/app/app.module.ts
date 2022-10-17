@@ -12,7 +12,6 @@ import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 import { AdminComponent } from './admin/admin.component';
-import { MemberComponent } from './member/member.component';
 import {MatSelectModule} from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
@@ -32,7 +31,6 @@ import {MatSortModule} from '@angular/material/sort';
     HomeComponent,
     ProfileComponent,
     AdminComponent,
-    MemberComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent
   ],

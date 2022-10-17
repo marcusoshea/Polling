@@ -18,13 +18,22 @@ export class MemberService {
 
     return this.http.get(API_URL + 'member/all/' + orderID, { headers: reqHeader });
   }
+
+  getMember(memberId: Number, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get(API_URL + 'member/' + memberId, { headers: reqHeader });
+  }
   
-   updateMember(memberId: Number, memberName: string, memberEmail: string, memberApproved: boolean, memberOrderId, created, accessToken: string): Observable<any> {
+  updateMember(memberId: Number, memberName: string, memberEmail: string, memberApproved: boolean, memberOrderId, created, accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({ 
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
    });
-
+     
     return this.http.put(
       API_URL + 'member/edit/'+memberId,
       {
@@ -34,6 +43,25 @@ export class MemberService {
         "approved": memberApproved,
         "polling_order_id": memberOrderId,
         "pom_created_at": created,
+        "authToken": accessToken
+      }, { headers: reqHeader }
+    );
+  }
+
+  
+  updateProfile(memberId: Number, memberName: string, memberEmail: string, memberOrderId, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({ 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+   });
+     
+    return this.http.put(
+      API_URL + 'member/edit/'+memberId,
+      {
+        "name": memberName,
+        "email": memberEmail,
+        "polling_order_member_id": memberId,
+        "polling_order_id": memberOrderId,
         "authToken": accessToken
       }, { headers: reqHeader }
     );
