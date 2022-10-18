@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment'
 
-const API_URL = 'http://localhost:3000/';
+const API_URL = environment.apiUrl;
 
 @Injectable({
   providedIn: 'root',
 })
 export class MemberService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getAllOrderMembers(orderID: Number, accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({
@@ -16,7 +17,7 @@ export class MemberService {
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + 'member/all/' + orderID, { headers: reqHeader });
+    return this.http.get(API_URL + '/member/all/' + orderID, { headers: reqHeader });
   }
 
   getMember(memberId: Number, accessToken: string): Observable<any> {
@@ -25,7 +26,7 @@ export class MemberService {
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + 'member/' + memberId, { headers: reqHeader });
+    return this.http.get(API_URL + '/member/' + memberId, { headers: reqHeader });
   }
   
   updateMember(memberId: Number, memberName: string, memberEmail: string, memberApproved: boolean, memberOrderId, created, accessToken: string): Observable<any> {
@@ -35,7 +36,7 @@ export class MemberService {
    });
      
     return this.http.put(
-      API_URL + 'member/edit/'+memberId,
+      API_URL + '/member/edit/'+memberId,
       {
         "name": memberName,
         "email": memberEmail,
@@ -56,7 +57,7 @@ export class MemberService {
    });
      
     return this.http.put(
-      API_URL + 'member/edit/'+memberId,
+      API_URL + '/member/edit/'+memberId,
       {
         "name": memberName,
         "email": memberEmail,
@@ -79,7 +80,7 @@ export class MemberService {
       },
     };
     return this.http.delete(
-      API_URL + 'member/delete', options
+      API_URL + '/member/delete', options
     );
   }
 

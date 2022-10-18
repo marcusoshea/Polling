@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { environment } from '../../environments/environment'
 
-const AUTH_API = 'http://localhost:3000';
+const API_URL = environment.apiUrl;
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -17,7 +18,7 @@ export class AuthService {
 
   login(email: string, password: string, polling_order_id: string): Observable<any> {
     return this.http.post(
-      AUTH_API + '/member/login',
+      API_URL + '/member/login',
       {
         "email": email,
         "password": password,
@@ -37,7 +38,7 @@ export class AuthService {
     const created = today.toISOString().split('T')[0];
 
     return this.http.post(
-      AUTH_API + '/member/create',
+      API_URL + '/member/create',
       { "name": memberName,
         "email": email,
         "password": password, 
@@ -50,7 +51,7 @@ export class AuthService {
   
   getPasswordToken(email: string, polling_order_id: string): Observable<any> {
     return this.http.post(
-      AUTH_API + '/member/passwordToken',
+      API_URL + '/member/passwordToken',
       {
         "email": email,
         "polling_order_id": polling_order_id
@@ -62,7 +63,7 @@ export class AuthService {
   async resetPassword(email: string, password: string): Promise<Observable<any>> {
    const token = this.activatedRoute.snapshot.queryParamMap.get("token");
     return await this.http.post(
-      AUTH_API + '/member/verify/'+token,
+      API_URL + '/member/verify/'+token,
       {
         "email": email,
         "password": password
@@ -77,7 +78,7 @@ export class AuthService {
    });
      
     return this.http.put(
-      AUTH_API + '/member/changePassword',
+      API_URL + '/member/changePassword',
       {
         "email":email,
         "password": password,
