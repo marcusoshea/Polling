@@ -8,6 +8,7 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
 import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 import { AdminComponent } from './admin/admin.component';
+import { CandidatesComponent } from './candidates/candidates.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'admin', component: AdminComponent },
+  { path: 'candidates', component: CandidatesComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ]; 
 
