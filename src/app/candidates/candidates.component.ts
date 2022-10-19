@@ -25,8 +25,10 @@ export class CandidatesComponent implements OnInit {
   UnapprovedOrderMemberList: OrderMember[] = [];
   candidateList: Candidate[] = [];
   candidateSelected = false;
+  candidateName = '';
   private errorMessage = '';
   noteList: any[];
+  newExternalNote = '';
 
   constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService:NotesService) { }
   private accessToken = '';
@@ -52,6 +54,7 @@ export class CandidatesComponent implements OnInit {
   }
 
   viewCandidate(element: any) {
+    this.candidateName = element.name;
     console.log('element', element);
     this.notesService.getExternalNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
       next: data => {
@@ -66,5 +69,10 @@ export class CandidatesComponent implements OnInit {
 
     this.candidateSelected = true;
     console.log(element);
+  }
+
+ public addExternalNote() {
+    console.log(this.newExternalNote);
+
   }
 }

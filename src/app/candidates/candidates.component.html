@@ -1,7 +1,9 @@
-<div class="col-md-12 m-2 title">
+<div class="col-md-12 m-2 title"  *ngIf="!candidateSelected">
     <h2>Candidates</h2>
 </div>
-
+<div class="col-md-12 m-2 title" *ngIf="candidateSelected">
+  <h2>Candidate - {{candidateName}}</h2>
+</div>
 <div class="col-md-6 col-xs-12 mt-5 pb-4" *ngIf="!candidateSelected">
     <div class="container">
       <div class="row">
@@ -21,7 +23,25 @@
       </div>
     </div>
   </div>
-
+<div class="col-md-6 col-xs-12 mt-5 pb-4" *ngIf="candidateSelected">
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div class="card card-container custom-card">
+            <div class="row">
+                <div class="p-4 d-flex justify-content-end">
+                  <label for="cn">Create New External Candidate Note</label>
+                  <textarea class="form-control ps-4" name="newCandidateName" [(ngModel)]="newExternalNote"
+                    required></textarea> 
+                    <button type="input" (click)="addExternalNote()" class="btn btn-success mt-2 mb-2">Create
+                </button>  
+              </div>
+            </div>         
+          </div>      
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="col-md-6 col-xs-12 mt-5 pb-4" *ngIf="candidateSelected">
     <div class="container">
       <div class="row">
@@ -29,10 +49,10 @@
           <div class="card card-container custom-card">
             <table mat-table [dataSource]="dataSourceNotes" class="mat-table custom-card">
               <ng-container matColumnDef="external_note">
-                <th mat-header-cell *matHeaderCellDef class="p-4 h4"> Notes </th>
+                <th mat-header-cell *matHeaderCellDef class="p-4 h4"> External Notes </th>
                 <td mat-cell *matCellDef="let element"> 
                   <div>"{{element.external_note}}"</div>
-                  <div class="px-3">- {{element.polling_order_member_id?.name}} on {{element.en_created_at | date }} </div>
+                  <div class="px-3 fst-italic">- {{element.polling_order_member_id?.name}} on {{element.en_created_at | date }} </div>
                 </td>
               </ng-container>  
               <tr mat-header-row *matHeaderRowDef="displayedColumnsNotes"></tr>
@@ -43,3 +63,12 @@
       </div>
     </div>
   </div>
+
+  
+TODO:// 
+ADD EXTERNAL Notes
+
+
+View Polling Notes
+
+
