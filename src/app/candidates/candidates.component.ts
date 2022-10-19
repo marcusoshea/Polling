@@ -9,7 +9,9 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { Candidate } from '../interfaces/candidate';
+import { Note } from '../interfaces/note';
 import { CandidateService } from '../services/candidate.service';
+import { NotesService } from '../services/notes.service';
 
 
 @Component({
@@ -24,11 +26,14 @@ export class CandidatesComponent implements OnInit {
   candidateList: Candidate[] = [];
   candidateSelected = false;
   private errorMessage = '';
+  noteList: any[];
 
-  constructor(private candidateService: CandidateService, private storageService: StorageService) { }
+  constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService:NotesService) { }
   private accessToken = '';
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public displayedColumnsCandidates = ['name'];
+  public displayedColumnsNotes = ['external_note'];
+  public dataSourceNotes = new MatTableDataSource<Note>();
 
 
   async ngOnInit(): Promise<void> {
@@ -47,6 +52,18 @@ export class CandidatesComponent implements OnInit {
   }
 
   viewCandidate(element: any) {
+    console.log('element', element);
+    this.notesService.getExternalNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
+      next: data => {
+        console.log('data', data);
+        this.noteList = data;
+        this.dataSourceNotes.data = data;
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
+
     this.candidateSelected = true;
     console.log(element);
   }
