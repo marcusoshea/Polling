@@ -29,12 +29,14 @@ export class AdminComponent implements OnInit {
   public changeAsstOccurred = false;
   private errorMessage = '';
   private accessToken = '';
-  public displayedColumns = ['buttons', 'name', 'email'];
+  public displayedColumns = ['buttons', 'name'];
   public dataSource = new MatTableDataSource<OrderMember>();
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public displayedColumnsCandidates = ['buttons', 'name'];
   public newCandidateName = '';
   public showCandidateWarning = false;
+  public panelOpenStateMA = false;
+  public panelOpenStateCA = false;
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();

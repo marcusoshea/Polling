@@ -52,35 +52,41 @@
     <div class="row">
       <div class="col">
         <div class="card card-container custom-card">
-          <div class="p-3">Member Approval</div>
-          <div class="row" *ngIf="showCandidateWarning">
-            <div class="col">
-              <div class="ps-4">
-                <div class="h2 warning">Remove new member from candidate list below!</div>
+          <mat-accordion>
+            <mat-expansion-panel (opened)="panelOpenStateMA = true" (closed)="panelOpenStateMA = false"
+              class="card card-container custom-card">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  Member Approval
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="row" *ngIf="showCandidateWarning">
+                <div class="col">
+                  <div class="ps-4">
+                    <div class="h2 warning">Remove new member from candidate list below!</div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <table mat-table [dataSource]="dataSource" class="mat-table custom-card">
-            <ng-container matColumnDef="buttons">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let element"><button type="input" (click)="approveNewMember(element, false)"
-                  class="btn btn-danger mt-2 mb-2 mx-2">Deny</button>
-                <button type="input" (click)="approveNewMember(element, true)"
-                  class="btn btn-success mt-2 mb-2">Approve</button>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef> Name </th>
-              <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-            </ng-container>
-            <ng-container matColumnDef="email">
-              <th mat-header-cell *matHeaderCellDef> Email </th>
-              <td mat-cell *matCellDef="let element"> {{element.email}} </td>
-            </ng-container>
+              <table mat-table [dataSource]="dataSource" class="mat-table custom-card col-md-12">
+                <ng-container matColumnDef="buttons">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let element" class="col-md-2">
+                    <button type="input" (click)="approveNewMember(element, false)"
+                      class="btn btn-danger mt-2 mb-2 mx-2">Deny</button><br>
+                    <button type="input" (click)="approveNewMember(element, true)"
+                      class="btn btn-success mt-2 mb-4">Approve</button><br>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef> New Member </th>
+                  <td mat-cell *matCellDef="let element"> <div class="ms-2">{{element.name}}</div><div class="ms-2"> {{element.email}} </div></td>
+                </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </mat-expansion-panel>
+          </mat-accordion>
         </div>
       </div>
     </div>
@@ -92,35 +98,46 @@
     <div class="row">
       <div class="col">
         <div class="card card-container custom-card">
-          <div class="p-4">Candidate List</div>
-          <div class="row">
-            <div class="col-md-3">
-              <div class="ps-4">
-                <label for="cn">Candidate Name</label>
-                <input type="text" class="form-control" name="newCandidateName" [(ngModel)]="newCandidateName"
-                  required /> <button type="input" (click)="addNewCandidate()" class="btn btn-success mt-2 mb-2">Create
-                  New
-                  Candidate</button>
-              </div>
-            </div>
-          </div>
-          <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card">
-            <ng-container matColumnDef="buttons">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let element"><button type="input" (click)="openCandidateDialog('500ms', '1500ms', element)"
-                  class="btn btn-danger mt-2 mb-2 mx-2">Remove</button>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef> Name </th>
-              <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumnsCandidates"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumnsCandidates;"></tr>
-          </table>
+          <mat-accordion>
+            <mat-expansion-panel (opened)="panelOpenStateCA = true" (closed)="panelOpenStateCA = false"
+              class="card card-container custom-card">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  Candidate List
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="ps-4">
+                    <label for="cn">Candidate Name</label>
+                    <input type="text" class="form-control" name="newCandidateName" [(ngModel)]="newCandidateName"
+                      required /> <button type="input" (click)="addNewCandidate()"
+                      class="btn btn-success mt-2 mb-2">Create
+                      New
+                      Candidate</button>
+                  </div>
+                </div>
+              </div> 
+              <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card col-md-12">
+                <ng-container matColumnDef="buttons">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let element" class="col-md-1 ps-1"><button type="input"
+                      (click)="openCandidateDialog('500ms', '1500ms', element)"
+                      class="btn btn-danger me-3">Remove</button>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef> Name </th>
+                  <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsCandidates"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsCandidates;"></tr>
+              </table>
+            </mat-expansion-panel>
+          </mat-accordion>
         </div>
       </div>
     </div>
   </div>
 </div>
+
