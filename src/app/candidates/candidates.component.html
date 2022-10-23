@@ -2,7 +2,8 @@
     <h2>Candidates</h2>
 </div>
 <div class="col-md-12 m-2 title" *ngIf="candidateSelected">
-  <h2>Candidate - {{candidateName}}</h2>
+  <h2><a (click)="resetCandidates()"
+    class="nav-link mt-2 mb-2 mx-2"> <i class="bi bi-arrow-left-circle-fill"></i> </a> Candidate - {{candidateName}}</h2>
 </div>
 <div class="col-md-6 col-xs-12 mt-5 pb-4" *ngIf="!candidateSelected">
     <div class="container">
@@ -12,7 +13,7 @@
             <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card">
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef class="p-4 h4"> Candidate List </th>
-                <td mat-cell *matCellDef="let element"> <a (click)="viewCandidate(element)"
+                <td mat-cell *matCellDef="let element">  <a (click)="viewCandidate(element)"
                   class="link-primary mt-2 mb-2 mx-2">{{element.name}} </a></td>
               </ng-container>  
               <tr mat-header-row *matHeaderRowDef="displayedColumnsCandidates"></tr>
@@ -30,7 +31,7 @@
           <div class="card card-container custom-card">
             <div class="row">
                 <div class="p-4 d-flex justify-content-end">
-                  <label for="cn">Create New Non-Polling Candidate Note</label>
+                  <label for="cn">Create New Non-Polling Note</label>
                   <textarea class="form-control ps-4" name="newCandidateName" [(ngModel)]="newExternalNote"
                     required></textarea> 
                     <button type="input" (click)="addExternalNote()" class="btn btn-success mt-2 mb-2">Create
@@ -49,7 +50,7 @@
           <div class="card card-container custom-card">
             <table mat-table [dataSource]="dataSourceNotes" class="mat-table custom-card">
               <ng-container matColumnDef="external_note">
-                <th mat-header-cell *matHeaderCellDef class="p-4 h4"> Non-Polling Candidate Note </th>
+                <th mat-header-cell *matHeaderCellDef class="p-4 h4"> Non-Polling Notes </th>
                 <td mat-cell *matCellDef="let element"> 
                   <div>"{{element.external_note}}"</div>
                   <div class="px-3 fst-italic">- {{element.polling_order_member_id?.name}} on {{element.en_created_at | date }} </div>
@@ -63,12 +64,30 @@
       </div>
     </div>
   </div>
+  <div class="col-md-6 col-xs-12 mt-5 pb-4" *ngIf="candidateSelected">
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div class="card card-container custom-card">
+            <table mat-table [dataSource]="dataSourceNotesPolling" class="mat-table custom-card">
+              <ng-container matColumnDef="external_note">
+                <th mat-header-cell *matHeaderCellDef class="p-4 h4"> Polling Notes </th>
+                <td mat-cell *matCellDef="let element"> 
+                  <div>"{{element.note}}"</div>
+                  <div class="px-3 fst-italic">- {{element.name}} on {{element.pn_created_at | date }} during {{element.polling_name}} </div>
+                </td>
+              </ng-container>  
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsNotes"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsNotes;"></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   
 TODO:// 
-ADD EXTERNAL Notes
-
-
 View Polling Notes
 
 

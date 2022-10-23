@@ -24,6 +24,17 @@ export class NotesService {
     return this.http.get(API_URL + '/externalnote/candidate/' + id, { headers: reqHeader });
   }
 
+  
+  gePollingNoteByCandidateId(id: Number, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get(API_URL + '/polling/allpn/' + id, { headers: reqHeader });
+  }
+
+
   getCandidate(candidateId: Number, accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
@@ -49,19 +60,21 @@ export class NotesService {
     );
   }
 
-  createCandidate(name: string, polling_order_id: string, accessToken: string): Observable<any> {
+  createExternalNote(external_note: string, candidate_id: string, polling_order_member_id: string, accessToken: string): Observable<any> {
     const today = new Date();
+    today.setDate(today.getDate() + 1);
     const created = today.toISOString().split('T')[0];
     var reqHeader = new HttpHeaders({ 
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
    });
     return this.http.post(
-      API_URL + '/candidate/create',
+      API_URL + '/externalnote/create',
       {
-        "name": name,
-        "polling_order_id": polling_order_id,
-        "pom_created_at": created,
+        "external_note": external_note,
+        "candidate_id": candidate_id,
+        "polling_order_member_id": polling_order_member_id,
+        "en_created_at": created,
         "authToken": accessToken
       }, { headers: reqHeader }
     );

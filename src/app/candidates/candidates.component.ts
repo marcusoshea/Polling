@@ -28,20 +28,27 @@ export class CandidatesComponent implements OnInit {
   candidateName = '';
   private errorMessage = '';
   noteList: any[];
+  noteListPolling: any[];
   newExternalNote = '';
+  candidate_id = 0;
 
-  constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService:NotesService) { }
+  constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService: NotesService) { }
   private accessToken = '';
+  private memberId = '';
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public displayedColumnsCandidates = ['name'];
   public displayedColumnsNotes = ['external_note'];
   public dataSourceNotes = new MatTableDataSource<Note>();
+  public dataSourceNotesPolling = new MatTableDataSource<Note>();
+
+  
 
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
     this.accessToken = member.access_token;
+    this.memberId = member.memberId;
     this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList = data;
@@ -53,8 +60,17 @@ export class CandidatesComponent implements OnInit {
     });
   }
 
-  viewCandidate(element: any) {
+  resetCandidates():void {
+    this.candidateSelected = false;
+    this.candidateName = '';
+    this.candidate_id = 0;
+  }
+
+
+
+  viewCandidate(element: any):void {
     this.candidateName = element.name;
+    this.candidate_id = element.candidate_id;
     console.log('element', element);
     this.notesService.getExternalNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
       next: data => {
@@ -67,12 +83,35 @@ export class CandidatesComponent implements OnInit {
       }
     });
 
+    this.notesService.gePollingNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
+      next: data => {
+        console.log('data', data);
+        this.noteListPolling = data;
+        this.dataSourceNotesPolling.data = data;
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
+
     this.candidateSelected = true;
     console.log(element);
   }
 
- public addExternalNote() {
-    console.log(this.newExternalNote);
+  public async addExternalNote():Promise<void> {
+   const element = {
+      "name":this.candidateName,
+      "candidate_id": this.candidate_id
+    }
+    this.notesService.createExternalNote(this.newExternalNote, this.candidate_id.toString(),
+      this.memberId, this.accessToken).subscribe({
+        next: () => {
+         this.viewCandidate(element);
+        },
+        error: err => {
+          this.errorMessage = err.error.message;
+        }
 
+      })
   }
-}
+}  
