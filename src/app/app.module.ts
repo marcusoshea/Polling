@@ -23,6 +23,9 @@ import {MatInputModule} from '@angular/material/input';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSortModule} from '@angular/material/sort';
 import {MatExpansionModule} from '@angular/material/expansion';
+import {MatNativeDateModule} from '@angular/material/core';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatListModule} from '@angular/material/list';
 
 @NgModule({
   declarations: [
@@ -42,15 +45,18 @@ import {MatExpansionModule} from '@angular/material/expansion';
     BrowserAnimationsModule,
     FormsModule,
     HttpClientModule,
-    MatSelectModule,
     MatDialogModule,
     ReactiveFormsModule,
+    MatListModule,
+    MatSelectModule,
     MatTableModule,
     MatSortModule,
     MatProgressSpinnerModule,
     MatInputModule,
     MatPaginatorModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatNativeDateModule,
+    MatDatepickerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

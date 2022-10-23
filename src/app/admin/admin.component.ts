@@ -6,10 +6,14 @@ import { Router } from '@angular/router';
 import { PollingOrder } from '../interfaces/polling-order'
 import { OrderMember } from '../interfaces/order-member'
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { Candidate } from '../interfaces/candidate';
 import { CandidateService } from '../services/candidate.service';
+import { MatListOption, MatSelectionList } from '@angular/material/list'
+import { PollingService } from '../services/polling.service';
+import { Polling } from '../interfaces/polling';
+
 
 
 @Component({
@@ -18,12 +22,20 @@ import { CandidateService } from '../services/candidate.service';
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
+  @ViewChild(MatSelectionList) candidate: MatSelectionList;
   pollingOrder = {} as PollingOrder;
   orderMemberList: OrderMember[] = [];
   UnapprovedOrderMemberList: OrderMember[] = [];
   candidateList: Candidate[] = [];
+  pollingList: Polling[] = [];
+  range = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
+  });
 
-  constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService, private candidateService: CandidateService, private memberService: MemberService, private storageService: StorageService, private router: Router, public dialog: MatDialog) { }
+  constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
+    private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
+    private storageService: StorageService, private router: Router, public dialog: MatDialog) { }
   private showAdmin = false;
   public changeAdminOccurred = false;
   public changeAsstOccurred = false;
@@ -32,18 +44,24 @@ export class AdminComponent implements OnInit {
   public displayedColumns = ['buttons', 'name'];
   public dataSource = new MatTableDataSource<OrderMember>();
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
+  public dataSourcePollings = new MatTableDataSource<Polling>();
   public displayedColumnsCandidates = ['buttons', 'name'];
   public newCandidateName = '';
   public showCandidateWarning = false;
   public panelOpenStateMA = false;
   public panelOpenStateCA = false;
+  public panelOpenStatePO = false;
+  public selectedPollingCandidates: any[];
+  public newPollingName = '';
+  public selectAllBox = false;
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
     this.showAdmin = member.isOrderAdmin;
     this.accessToken = member.access_token;
-    
+
+
     if (!this.showAdmin) {
       this.router.navigate(['/home']);
     }
@@ -69,7 +87,21 @@ export class AdminComponent implements OnInit {
     this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList = data;
-        this.dataSourceCandidates.data = data;
+        for (var i = 0; i < this.candidateList.length; i++) {
+          this.candidateList[i].authToken = this.accessToken;
+        }
+
+        this.dataSourceCandidates.data = this.candidateList;
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
+
+    this.pollingService.getAllPollings(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
+      next: data => {
+        this.pollingList = data;
+        this.dataSourcePollings.data = data;
       },
       error: err => {
         this.errorMessage = err.error.message;
@@ -159,7 +191,7 @@ export class AdminComponent implements OnInit {
 
       setTimeout(() => {
         this.showCandidateWarning = false;
-      }, 3000);  
+      }, 3000);
 
     } else {
       this.memberService.removeMember(memberInQuestion.polling_order_member_id, this.accessToken).subscribe({
@@ -191,10 +223,10 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  removeCandidate(candidate_id: any): void {
-    this.candidateService.removeCandidate(candidate_id.data, this.accessToken).subscribe({
+  removeCandidate(candidate: any): void {
+    this.candidateService.removeCandidate(candidate.data, this.accessToken).subscribe({
       next: data => {
-        let index = this.candidateList.findIndex(e => e.candidate_id === candidate_id.data)
+        let index = this.candidateList.findIndex(e => e.candidate_id === candidate.data)
         this.candidateList.splice(index, 1);
         this.dataSourceCandidates.data = this.candidateList;
       },
@@ -209,7 +241,7 @@ export class AdminComponent implements OnInit {
       next: data => {
         this.candidateList.push(data);
         this.dataSourceCandidates.data = this.candidateList;
-        this.newCandidateName='';
+        this.newCandidateName = '';
       },
       error: err => {
         this.errorMessage = err.error.message;
@@ -217,8 +249,73 @@ export class AdminComponent implements OnInit {
     });
   }
 
-}
+  addNewPolling(): void {
+    if (this.newPollingName && this.range.value.start !== null
+      && this.range.value.end !== null && this.selectedPollingCandidates.length > 0) {
 
+      this.selectedPollingCandidates = this.selectedPollingCandidates.filter(item => item);
+      this.pollingService.createPolling(this.newPollingName, this.pollingOrder.polling_order_id.toString(), this.range.value.start.toISOString().split('T')[0], this.range.value.end.toISOString().split('T')[0], this.accessToken).subscribe({
+        next: data => {
+          this.pollingList.push(data);
+          this.dataSourcePollings.data = this.pollingList;
+          this.newPollingName = '';
+          for (var i = 0; i < this.selectedPollingCandidates.length; i++) {
+            this.selectedPollingCandidates[i].polling_id = data.polling_id;
+          }
+          this.pollingService.createPollingCandidates(this.selectedPollingCandidates, this.accessToken).subscribe({
+            next: () => {
+              alert("New Polling Created!");
+             },
+            error: err => {
+              this.errorMessage = err.error.message;
+            }
+          });
+        },
+        error: err => {
+          this.errorMessage = err.error.message;
+        }
+      });
+    }
+  }
+
+  selectAll(): void {
+    if (this.selectAllBox) {
+      this.candidate.deselectAll();
+      this.selectAllBox = false;
+    } else {
+      this.candidate.selectAll();
+      this.selectAllBox = true;
+    }
+  }
+
+  openPollingDialog(enterAnimationDuration: string, exitAnimationDuration: string, polling: Polling): void {
+    const dialogRef = this.dialog.open(PollingConfirm, {
+      panelClass: 'custom-dialog-container',
+      enterAnimationDuration,
+      exitAnimationDuration,
+      data: {
+        polling: polling
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(data => {
+      this.removePolling(data);
+    });
+  }
+
+  removePolling(polling: any): void {
+    this.pollingService.removePolling(polling.data, this.accessToken).subscribe({
+      next: data => {
+        let index = this.pollingList.findIndex(e => e.polling_id === polling.data)
+        this.pollingList.splice(index, 1);
+        this.dataSourcePollings.data = this.pollingList;
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
+  }
+}
 
 
 @Component({
@@ -256,7 +353,6 @@ export class AdminConfirm {
 }
 
 
-
 @Component({
   selector: 'confirm-candidate',
   templateUrl: 'confirm-candidate.html',
@@ -280,3 +376,33 @@ export class CandidateConfirm {
     this.dialogRef.close({ data: this.candidate_id });
   }
 }
+
+
+
+@Component({
+  selector: 'confirm-polling',
+  templateUrl: 'confirm-polling.html',
+})
+export class PollingConfirm {
+  public polling: Polling;
+  public polling_id: number;
+  constructor(
+    public dialogRef: MatDialogRef<PollingConfirm>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+  ) {
+    this.polling_id = data.polling.polling_id;
+    this.polling = data.polling
+  }
+
+  reset(): void {
+    window.location.reload();
+  }
+
+  removeConfirmedPolling(): void {
+    this.dialogRef.close({ data: this.polling_id });
+  }
+}
+
+
+
+

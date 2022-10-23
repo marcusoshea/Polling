@@ -1,0 +1,13 @@
+<h1 mat-dialog-title>You are removing {{polling.name}}.</h1>
+
+<div mat-dialog-content class="text-centered">
+  This will delete the {{polling.name}}. Pollings will close automatically on the end date.<br>
+  The only reason to do this is if there was an error in creating a polling.
+</div>
+
+<div class="form-group m-3 d-flex justify-content-end">
+  <div class="form-group m-3">
+    <button (click)="reset()" class="btn btn-success me-1">Reset</button>
+    <button (click)="removeConfirmedPolling()" class="btn btn-danger">You're not the boss of me.</button>
+  </div>
+</div>
