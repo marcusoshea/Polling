@@ -71,10 +71,8 @@ export class CandidatesComponent implements OnInit {
   viewCandidate(element: any):void {
     this.candidateName = element.name;
     this.candidate_id = element.candidate_id;
-    console.log('element', element);
     this.notesService.getExternalNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
       next: data => {
-        console.log('data', data);
         this.noteList = data;
         this.dataSourceNotes.data = data;
       },
@@ -85,7 +83,6 @@ export class CandidatesComponent implements OnInit {
 
     this.notesService.gePollingNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
       next: data => {
-        console.log('data', data);
         this.noteListPolling = data;
         this.dataSourceNotesPolling.data = data;
       },
@@ -95,7 +92,6 @@ export class CandidatesComponent implements OnInit {
     });
 
     this.candidateSelected = true;
-    console.log(element);
   }
 
   public async addExternalNote():Promise<void> {

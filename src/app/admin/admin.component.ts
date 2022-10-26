@@ -168,7 +168,6 @@ export class AdminComponent implements OnInit {
           this.errorMessage = err.error.message;
         }
       });
-      console.log('The dialog was closed');
     });
   }
 
