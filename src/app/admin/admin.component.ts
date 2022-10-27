@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ComponentFactoryResolver, Inject, OnInit, ViewChild } from '@angular/core';
 import { MemberService } from '../services/member.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrderService } from '../services/polling-order.service';
@@ -34,8 +34,8 @@ export class AdminComponent implements OnInit {
   });
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
-    private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
-    private storageService: StorageService, private router: Router, public dialog: MatDialog) { }
+  private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
+  private storageService: StorageService, private router: Router, public dialog: MatDialog) { }
   private showAdmin = false;
   public changeAdminOccurred = false;
   public changeAsstOccurred = false;
@@ -43,12 +43,14 @@ export class AdminComponent implements OnInit {
   private accessToken = '';
   public displayedColumns = ['buttons', 'name'];
   public dataSource = new MatTableDataSource<OrderMember>();
+  public dataSourceMemberList = new MatTableDataSource<OrderMember>();
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public dataSourcePollings = new MatTableDataSource<Polling>();
   public displayedColumnsCandidates = ['buttons', 'name'];
   public newCandidateName = '';
   public showCandidateWarning = false;
   public panelOpenStateMA = false;
+  public panelOpenStateML = false;
   public panelOpenStateCA = false;
   public panelOpenStatePO = false;
   public selectedPollingCandidates: any[];
@@ -75,8 +77,9 @@ export class AdminComponent implements OnInit {
 
     this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
-        this.orderMemberList = data.filter(e => e.approved === true);
+        this.orderMemberList = data.filter(e => e.approved === true && e.removed === false);
         this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
+        this.dataSourceMemberList.data = this.orderMemberList;
         this.dataSource.data = this.UnapprovedOrderMemberList;
       },
       error: err => {
@@ -176,7 +179,8 @@ export class AdminComponent implements OnInit {
       this.showCandidateWarning = true;
       const today = new Date();
       const created = today.toISOString().split('T')[0];
-      this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken).subscribe({
+
+      this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false).subscribe({
         next: data => {
           let index = this.UnapprovedOrderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
           this.orderMemberList.push(this.UnapprovedOrderMemberList[index]);
@@ -206,6 +210,37 @@ export class AdminComponent implements OnInit {
     }
   };
 
+  openMemberDialog(enterAnimationDuration: string, exitAnimationDuration: string, member: OrderMember): void {
+    const dialogRef = this.dialog.open(MemberConfirm, {
+      panelClass: 'custom-dialog-container',
+      enterAnimationDuration,
+      exitAnimationDuration,
+      data: {
+        "member": member
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(data => {
+      this.removeOrderMember(data.data);
+    });
+  }
+
+  removeOrderMember(memberInQuestion: any): void {
+    const today = new Date();
+    const created = today.toISOString().split('T')[0];
+    
+    this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true).subscribe({
+        next: data => {
+          let index = this.orderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
+          this.orderMemberList.splice(index, 1);
+          this.dataSourceMemberList.data = this.orderMemberList;
+        },
+        error: err => {
+          this.errorMessage = err.error.message;
+        }
+      });    
+  };
+
 
   openCandidateDialog(enterAnimationDuration: string, exitAnimationDuration: string, candidate: Candidate): void {
     const dialogRef = this.dialog.open(CandidateConfirm, {
@@ -213,7 +248,7 @@ export class AdminComponent implements OnInit {
       enterAnimationDuration,
       exitAnimationDuration,
       data: {
-        candidate: candidate
+        "candidate": candidate
       },
     });
 
@@ -222,10 +257,10 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  removeCandidate(candidate: any): void {
-    this.candidateService.removeCandidate(candidate.data, this.accessToken).subscribe({
+  removeCandidate(candidateId: any): void {
+    this.candidateService.removeCandidate(candidateId.data, this.accessToken).subscribe({
       next: data => {
-        let index = this.candidateList.findIndex(e => e.candidate_id === candidate.data)
+        let index = this.candidateList.findIndex(e => e.candidate_id === candidateId.data)
         this.candidateList.splice(index, 1);
         this.dataSourceCandidates.data = this.candidateList;
       },
@@ -293,7 +328,7 @@ export class AdminComponent implements OnInit {
       enterAnimationDuration,
       exitAnimationDuration,
       data: {
-        polling: polling
+        "polling": polling
       },
     });
 
@@ -373,6 +408,30 @@ export class CandidateConfirm {
 
   removeConfirmedCandidate(): void {
     this.dialogRef.close({ data: this.candidate_id });
+  }
+}
+
+
+@Component({
+  selector: 'confirm-member',
+  templateUrl: 'confirm-member.html',
+})
+export class MemberConfirm {
+  public member: OrderMember;
+
+  constructor(
+    public dialogRef: MatDialogRef<MemberConfirm>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+  ) {
+    this.member = data.member
+  }
+
+  reset(): void {
+    window.location.reload();
+  }
+
+  removeOrderMember(): void {
+    this.dialogRef.close({ data: this.member });
   }
 }
 

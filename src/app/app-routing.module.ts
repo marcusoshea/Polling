@@ -9,6 +9,7 @@ import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 import { AdminComponent } from './admin/admin.component';
 import { CandidatesComponent } from './candidates/candidates.component';
+import { PollingsComponent } from './pollings/pollings.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'profile', component: ProfileComponent },
   { path: 'admin', component: AdminComponent },
   { path: 'candidates', component: CandidatesComponent },
+  { path: 'pollings', component: PollingsComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ]; 
 

@@ -29,7 +29,7 @@ export class MemberService {
     return this.http.get(API_URL + '/member/' + memberId, { headers: reqHeader });
   }
   
-  updateMember(memberId: Number, memberName: string, memberEmail: string, memberApproved: boolean, memberOrderId, created, accessToken: string): Observable<any> {
+  updateMember(memberId: Number, memberName: string, memberEmail: string, memberApproved: boolean, memberOrderId, created, accessToken: string, removed:boolean): Observable<any> {
     var reqHeader = new HttpHeaders({ 
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
@@ -40,11 +40,12 @@ export class MemberService {
       {
         "name": memberName,
         "email": memberEmail,
-        "polling_order_member_id": memberId,
-        "approved": memberApproved,
         "polling_order_id": memberOrderId,
+        "polling_order_member_id": memberId,
+        "authToken": accessToken,
         "pom_created_at": created,
-        "authToken": accessToken
+        "approved": memberApproved,
+        "removed": removed
       }, { headers: reqHeader }
     );
   }

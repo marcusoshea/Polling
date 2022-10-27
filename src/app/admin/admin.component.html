@@ -101,6 +101,50 @@
   </div>
 </div>
 
+<div class="col-md-12 mt-5  d-flex  justify-content-center">
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div class="card card-container custom-card">
+          <mat-accordion>
+            <mat-expansion-panel (opened)="panelOpenStateML = true" (closed)="panelOpenStateML = false"
+              class="card card-container custom-card">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  Member List
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <table mat-table [dataSource]="dataSourceMemberList" class="mat-table custom-card col-md-12">
+                <ng-container matColumnDef="buttons">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let element" class="col-md-2">
+                    <div class="col-xs-12">
+                      <button type="input" (click)="openMemberDialog('500ms', '1500ms',element)"
+                        class="btn btn-danger  m-2">Remove Member</button>
+                    </div>
+
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef> Order Member </th>
+                  <td mat-cell *matCellDef="let element">
+                    <div class="ms-2">{{element.name}}</div>
+                    <div class="ms-2"> {{element.email}} </div>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="col-md-12 mt-5">
   <div class="container">
     <div class="row">
