@@ -42,6 +42,16 @@ export class PollingService {
     return this.http.get(API_URL + '/polling/currentpolling/' + orderId, { headers: reqHeader });
   }
 
+  getPollingSummary(pollingId: Number, pollingOrderMemberId: string, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get(API_URL + '/polling/pollingsummary/' + pollingId + '/' + pollingOrderMemberId, { headers: reqHeader });
+  }
+
+
   removePolling(pollingId: string, accessToken: string): Observable<any> {
     const options = {
       headers: new HttpHeaders({
