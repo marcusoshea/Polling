@@ -43,7 +43,7 @@ export class ProfileComponent implements OnInit {
   }
   
   onSubmit(): void {
-    this.memberService.updateProfile(this.member.memberId, this.form.name, this.form.email, this.member.pollingOrder, this.form.active, this.accessToken)
+    this.memberService.updateProfile(this.member.memberId, this.form.name, this.form.email, this.member.pollingOrder, this.form.active, true, false, this.accessToken)
    .subscribe({
       next: data => {
         this.storageService.clean();

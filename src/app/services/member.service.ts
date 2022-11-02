@@ -52,7 +52,7 @@ export class MemberService {
   }
 
   
-  updateProfile(memberId: Number, memberName: string, memberEmail: string, memberOrderId, active: boolean, accessToken: string): Observable<any> {
+  updateProfile(memberId: Number, memberName: string, memberEmail: string, memberOrderId, active: boolean, approved: boolean, removed: boolean, accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({ 
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
@@ -65,7 +65,9 @@ export class MemberService {
         "polling_order_member_id": memberId,
         "polling_order_id": memberOrderId,
         "active": active,
-        "authToken": accessToken
+        "authToken": accessToken,
+        "approved": approved,
+        "removed": removed,
       }, { headers: reqHeader }
     );
   }
