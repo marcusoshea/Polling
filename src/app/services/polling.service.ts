@@ -96,4 +96,19 @@ export class PollingService {
     );
   }
 
+
+  createPollingNotes(body: any, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({ 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+   });
+   body[0].authToken = accessToken;
+    return this.http.post(
+      API_URL + '/pollingnote/create',
+      body, { headers: reqHeader }
+    );
+  }
+
+
+
 }

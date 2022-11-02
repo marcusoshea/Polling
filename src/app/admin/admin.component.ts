@@ -63,7 +63,6 @@ export class AdminComponent implements OnInit {
     this.showAdmin = member.isOrderAdmin;
     this.accessToken = member.access_token;
 
-
     if (!this.showAdmin) {
       this.router.navigate(['/home']);
     }
@@ -75,18 +74,8 @@ export class AdminComponent implements OnInit {
       onlySelf: true
     })
 
-    this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
-      next: data => {
-        this.orderMemberList = data.filter(e => e.approved === true && e.removed === false);
-        this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
-        this.dataSourceMemberList.data = this.orderMemberList;
-        this.dataSource.data = this.UnapprovedOrderMemberList;
-      },
-      error: err => {
-        this.errorMessage = err.error.message;
-      }
-    });
-
+    this.getAllOrderMembers();
+    
     this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList = data;
@@ -112,6 +101,24 @@ export class AdminComponent implements OnInit {
     });
 
   }
+
+  getAllOrderMembers():void {
+  this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
+    next: data => {
+      this.orderMemberList = data.filter(e => e.approved === true && e.removed === false);
+      this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
+      this.dataSourceMemberList.data = this.orderMemberList;
+      this.dataSource.data = this.UnapprovedOrderMemberList;
+    },
+    error: err => {
+      this.errorMessage = err.error.message;
+    }
+  });
+  }
+
+
+
+
 
   orderAdminForm = this.fb.group({
     orderAdmin: ['', [Validators.required]],
@@ -180,7 +187,7 @@ export class AdminComponent implements OnInit {
       const today = new Date();
       const created = today.toISOString().split('T')[0];
 
-      this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false).subscribe({
+      this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, true).subscribe({
         next: data => {
           let index = this.UnapprovedOrderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
           this.orderMemberList.push(this.UnapprovedOrderMemberList[index]);
@@ -229,7 +236,7 @@ export class AdminComponent implements OnInit {
     const today = new Date();
     const created = today.toISOString().split('T')[0];
     
-    this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true).subscribe({
+    this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true, true).subscribe({
         next: data => {
           let index = this.orderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
           this.orderMemberList.splice(index, 1);
@@ -269,6 +276,26 @@ export class AdminComponent implements OnInit {
       }
     });
   }
+
+
+  activeMember(memberInQuestion: any, activate: boolean): void {
+      const today = new Date();
+      const created = today.toISOString().split('T')[0];
+
+      this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, activate).subscribe({
+        next: data => {
+          this.getAllOrderMembers();
+        },
+        error: err => {
+          this.errorMessage = err.error.message;
+        }
+      });
+
+      setTimeout(() => {
+        this.showCandidateWarning = false;
+      }, 3000);
+  };
+
 
   addNewCandidate(): void {
     this.candidateService.createCandidate(this.newCandidateName, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({

@@ -5,6 +5,7 @@
 
 .nav-link {
     color: var(--yellow);
+    cursor: pointer !important;
 }
 
 .nav-link:hover {

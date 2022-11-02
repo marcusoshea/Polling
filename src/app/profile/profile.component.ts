@@ -17,7 +17,8 @@ export class ProfileComponent implements OnInit {
     email: null,
     password: null,
     newPassword: null,
-    pollingOrder: null
+    pollingOrder: null,
+    active: null
   };
   isRegistered = false;
   showMessage = false;
@@ -31,16 +32,18 @@ export class ProfileComponent implements OnInit {
    await this.getMemberInfo();
   }
 
-  async getMemberInfo(): Promise<void> {
+  async getMemberInfo(): Promise<void> { 
     this.member = await this.storageService.getMember();
     this.form.name = this.member.name;
     this.form.email = this.member.email;
     this.form.pollingOrder = this.member.pollingOrder;
     this.accessToken = this.member.access_token;
+    this.form.active = this.member.active;
+
   }
   
   onSubmit(): void {
-    this.memberService.updateProfile(this.member.memberId, this.form.name, this.form.email, this.member.pollingOrder, this.accessToken)
+    this.memberService.updateProfile(this.member.memberId, this.form.name, this.form.email, this.member.pollingOrder, this.form.active, this.accessToken)
    .subscribe({
       next: data => {
         this.storageService.clean();
