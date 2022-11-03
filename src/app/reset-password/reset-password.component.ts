@@ -39,7 +39,7 @@ export class ResetPasswordComponent implements OnInit {
     (await this.authService.resetPassword(email, password)).subscribe({
       next: data => {
         this.messageSent = true;
-        // location.replace('/login');
+        location.replace('/login');
       },
       error: err => {
         this.errorMessage = err.error.message;

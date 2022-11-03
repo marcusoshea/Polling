@@ -10,6 +10,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { AdminComponent } from './admin/admin.component';
 import { CandidatesComponent } from './candidates/candidates.component';
 import { PollingsComponent } from './pollings/pollings.component';
+import { ReportComponent } from './report/report.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -21,6 +22,7 @@ const routes: Routes = [
   { path: 'admin', component: AdminComponent },
   { path: 'candidates', component: CandidatesComponent },
   { path: 'pollings', component: PollingsComponent },
+  { path: 'report', component: ReportComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ]; 
 

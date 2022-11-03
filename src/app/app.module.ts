@@ -17,7 +17,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { CandidatesComponent } from './candidates/candidates.component';
 import { PollingCandidate, PollingsComponent } from './pollings/pollings.component';
-
 import {MatTableModule, MatTableDataSource} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatInputModule} from '@angular/material/input';
@@ -28,6 +27,7 @@ import {MatNativeDateModule} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatListModule} from '@angular/material/list';
 import { CommonModule } from '@angular/common';  
+import { ReportComponent } from './report/report.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +41,8 @@ import { CommonModule } from '@angular/common';
     ResetPasswordComponent,
     CandidatesComponent,
     PollingsComponent,
-    PollingCandidate
+    PollingCandidate,
+    ReportComponent
   ],
   imports: [
     BrowserModule,
