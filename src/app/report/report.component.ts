@@ -1,9 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { StorageService } from '../services/storage.service';
 import { PollingOrder } from '../interfaces/polling-order'
 import { PollingService } from '../services/polling.service';
 import { NotesService } from '../services/notes.service';
 import { Subscription } from 'rxjs';
+
+
+declare var require: any;
+
+import * as pdfMake from "pdfmake/build/pdfmake";
+import * as pdfFonts from "pdfmake/build/vfs_fonts";
+const htmlToPdfmake = require("html-to-pdfmake");
+(pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
   selector: 'app-report',
@@ -29,6 +37,7 @@ export class ReportComponent implements OnInit {
   public participationRate = '';
   public certified = 'not certified.';
   public candidateList = [];
+  public showDownloadButton = false;
 
   public subscript1?: Subscription;
   public subscript2?: Subscription;
@@ -39,6 +48,7 @@ export class ReportComponent implements OnInit {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
     this.accessToken = member.access_token;
+    this.showDownloadButton = member.isOrderAdmin;
 
     this.subscript1 = this.pollingService.getPollingReport(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
@@ -72,8 +82,8 @@ export class ReportComponent implements OnInit {
               this.candidateList.forEach((x) => {
                 positive = 0;
                 negative = 0;
+                abstain = 0;
                 this.pollingTotal.forEach((element) => {
-                  ticker++;
                   if (x.name === element.name) {
                     if (element.vote === 'Yes') {
                       positive = positive + parseInt(element.total);
@@ -88,8 +98,10 @@ export class ReportComponent implements OnInit {
                       abstain = abstain + parseInt(element.total);
                     }
                   }
-                  if (this.pollingTotal.length === ticker) {
-                    let rating = (positive - negative) / (this.participatingMembers - abstain) * 100;
+                  console.log('ticker', ticker);
+                  console.log('this.pollingTotal.length', this.pollingTotal.length);
+                  if (this.pollingTotal.length - 1 === ticker) {
+                    let rating = (positive) / (this.participatingMembers - abstain) * 100;
                     if (rating < 0) {
                       rating = 0;
                     }
@@ -102,6 +114,8 @@ export class ReportComponent implements OnInit {
                     this.candidateList[candidateNumber].rating = rating;
                     this.candidateList[candidateNumber].recommended = recommended;
                     this.candidateList.sort(x => x.rating).reverse();
+                  } else {
+                    ticker++;
                   }
                 })
                 recommended = '';
@@ -132,5 +146,23 @@ export class ReportComponent implements OnInit {
     }
   }
 
+  @ViewChild('pdfTable')
+  pdfTable!: ElementRef;
 
+  public downloadAsPDF() {
+    const pdfTable = this.pdfTable.nativeElement;
+    var html = htmlToPdfmake(pdfTable.innerHTML);
+    const documentDefinition = {
+      content: html,  // a string or { width: number, height: number }
+      pageSize: 'A5',
+
+      // by default we use portrait, you can change it to landscape if you wish
+      pageOrientation: 'landscape',
+
+      // [left, top, right, bottom] or [horizontal, vertical] or just a number for equal margins
+      pageMargins: [40, 60, 40, 60]
+    };
+    pdfMake.createPdf(documentDefinition).download();
+
+  }
 }

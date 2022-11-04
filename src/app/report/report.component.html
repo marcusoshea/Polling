@@ -1,6 +1,10 @@
+
+<div id="pdfTable" #pdfTable>
+
 <div class="col-md-12 m-2 title">
     <h2>Polling Report</h2>
 </div>
+
 <div class="col-md-12 col-xs-6 mt-5 pb-4">
     <div class="container">
         <div class="row">
@@ -26,14 +30,16 @@
                         </div>
 
                         <div class="p-2"><span class="fw-bold">Polling Candidate List:</span>
-                            <div *ngFor="let cl of candidateList" class="p-2">
-                                <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
+                            <ul>
+                           <div *ngFor="let cl of candidateList" class="p-2">
+                             <li>    <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
                                 <span *ngFor="let pt of pollingTotal">
                                     <span *ngIf="cl.name === pt.name">
                                         -- {{pt.vote}}: {{pt.total}}
                                     </span>
                                 </span>
-                            </div>
+                            </li></div>
+                        </ul>
                         </div>
 
                         <div *ngIf="pollingOrderPollingType === 2" class="p-2">
@@ -47,4 +53,5 @@
         </div>
 
     </div>
-</div>
+</div></div>
+<button class="btn btn-primary" (click)="downloadAsPDF();" *ngIf="showDownloadButton">Export To PDF</button>
