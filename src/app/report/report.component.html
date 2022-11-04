@@ -1,14 +1,50 @@
 <div class="col-md-12 m-2 title">
     <h2>Polling Report</h2>
-  </div>
-  <div class="col-md-12 col-xs-6 mt-5 pb-4">
+</div>
+<div class="col-md-12 col-xs-6 mt-5 pb-4">
     <div class="container">
         <div class="row">
             <div class="col">
-                <div class="card card-container custom-card">
-                   
+                <div class="card card-container custom-card p-2">
+
+                    <div *ngIf="closedPollingAvailable">
+                        <h4>The most recent closed {{pollingOrder.polling_order_name}} polling was the {{pollingTitle}}
+                            which ran from
+                            {{startDate | date}} to {{endDate | date}}. </h4>
+
+                        <div *ngIf="pollingOrderPollingType === 1" class="p-2">
+                            The {{pollingOrder.polling_order_name}} order requires an active member participation rate
+                            of {{pollingOrderParticipation}}% to certify a polling.
+
+                            The {{pollingTitle}} had participation of {{participatingMembers}} of {{activeMembers}}
+                            active order members,
+                            resulting in a participation rate of {{participationRate}}%. The polling is thus
+                            <span class="fw-bold">{{certified}}</span>
+                            <br><br>
+                            A candidate must attain a rate of {{pollingOrderScore}}% to be recommended to join the
+                            order.
+                        </div>
+
+                        <div class="p-2"><span class="fw-bold">Polling Candidate List:</span>
+                            <div *ngFor="let cl of candidateList" class="p-2">
+                                <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
+                                <span *ngFor="let pt of pollingTotal">
+                                    <span *ngIf="cl.name === pt.name">
+                                        -- {{pt.vote}}: {{pt.total}}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div *ngIf="pollingOrderPollingType === 2" class="p-2">
+                            The {{pollingOrder.polling_order_name}} order recommends the top candidates within a polling
+                            exceeding a specific rating.
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>

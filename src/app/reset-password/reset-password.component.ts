@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { PollingOrderService } from '../services/polling-order.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrder } from '../interfaces/polling-order'
+import { Subscription } from 'rxjs';
  
 @Component({
   selector: 'app-reset-password',
@@ -18,11 +19,12 @@ export class ResetPasswordComponent implements OnInit {
 
   errorMessage = '';
   pollingOrderList: PollingOrder[] = [];
-
+  public subscript1?: Subscription;
+  
   constructor(private authService: AuthService, private storageService: StorageService, private pollingOrderService: PollingOrderService) { }
 
   ngOnInit(): void {
-    this.pollingOrderService.getAllOrders().subscribe({
+    this.subscript1 = this.pollingOrderService.getAllOrders().subscribe({
       next: response => {
         this.pollingOrderList = response;
       },
@@ -51,4 +53,11 @@ export class ResetPasswordComponent implements OnInit {
   reloadPage(): void {
     window.location.reload();
   }
+  
+  ngOnDestroy(): void {
+    if (this.subscript1) {
+      this.subscript1.unsubscribe();
+    }
+  }
+
 }

@@ -12,6 +12,7 @@ import { Candidate } from '../interfaces/candidate';
 import { Note } from '../interfaces/note';
 import { CandidateService } from '../services/candidate.service';
 import { NotesService } from '../services/notes.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -31,6 +32,10 @@ export class CandidatesComponent implements OnInit {
   noteListPolling: any[];
   newExternalNote = '';
   candidate_id = 0;
+  public subscript1?: Subscription;
+  public subscript2?: Subscription;
+  public subscript3?: Subscription;
+  public subscript4?: Subscription;
 
   constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService: NotesService) { }
   private accessToken = '';
@@ -41,15 +46,12 @@ export class CandidatesComponent implements OnInit {
   public dataSourceNotes = new MatTableDataSource<Note>();
   public dataSourceNotesPolling = new MatTableDataSource<Note>();
 
-  
-
-
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
     this.accessToken = member.access_token;
     this.memberId = member.memberId;
-    this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
+    this.subscript1 = this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList = data;
         this.dataSourceCandidates.data = data;
@@ -66,12 +68,10 @@ export class CandidatesComponent implements OnInit {
     this.candidate_id = 0;
   }
 
-
-
   viewCandidate(element: any):void {
     this.candidateName = element.name;
     this.candidate_id = element.candidate_id;
-    this.notesService.getExternalNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
+    this.subscript2 = this.notesService.getExternalNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
       next: data => {
         this.noteList = data;
         this.dataSourceNotes.data = data;
@@ -81,7 +81,7 @@ export class CandidatesComponent implements OnInit {
       }
     });
 
-    this.notesService.gePollingNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
+    this.subscript3 = this.notesService.getPollingNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
       next: data => {
         this.noteListPolling = data;
         this.dataSourceNotesPolling.data = data;
@@ -99,7 +99,7 @@ export class CandidatesComponent implements OnInit {
       "name":this.candidateName,
       "candidate_id": this.candidate_id
     }
-    this.notesService.createExternalNote(this.newExternalNote, this.candidate_id.toString(),
+    this.subscript4 = this.notesService.createExternalNote(this.newExternalNote, this.candidate_id.toString(),
       this.memberId, this.accessToken).subscribe({
         next: () => {
          this.viewCandidate(element);
@@ -108,6 +108,22 @@ export class CandidatesComponent implements OnInit {
           this.errorMessage = err.error.message;
         }
 
-      })
+      });
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscript1) {
+      this.subscript1.unsubscribe();
+    }
+    if (this.subscript2) {
+      this.subscript2.unsubscribe();
+    }
+    if (this.subscript3) {
+      this.subscript3.unsubscribe();
+    }
+    if (this.subscript4) {
+      this.subscript4.unsubscribe();
+    }
+
   }
 }  

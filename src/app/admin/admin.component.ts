@@ -13,6 +13,7 @@ import { CandidateService } from '../services/candidate.service';
 import { MatListOption, MatSelectionList } from '@angular/material/list'
 import { PollingService } from '../services/polling.service';
 import { Polling } from '../interfaces/polling';
+import { Subscription } from 'rxjs';
 
 
 
@@ -32,6 +33,17 @@ export class AdminComponent implements OnInit {
     start: new FormControl<Date | null>(null),
     end: new FormControl<Date | null>(null),
   });
+  public subscript1?: Subscription;
+  public subscript2?: Subscription;
+  public subscript3?: Subscription;
+  public subscript4?: Subscription;
+  public subscript5?: Subscription;
+  public subscript6?: Subscription;
+  public subscript7?: Subscription;
+  public subscript8?: Subscription;
+  public subscript9?: Subscription;
+  public subscript10?: Subscription;
+  public subscript11?: Subscription;
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
   private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
@@ -76,7 +88,7 @@ export class AdminComponent implements OnInit {
 
     this.getAllOrderMembers();
     
-    this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
+    this.subscript1 = this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList = data;
         for (var i = 0; i < this.candidateList.length; i++) {
@@ -90,7 +102,7 @@ export class AdminComponent implements OnInit {
       }
     });
 
-    this.pollingService.getAllPollings(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
+    this.subscript2 = this.pollingService.getAllPollings(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.pollingList = data;
         this.dataSourcePollings.data = data;
@@ -103,7 +115,7 @@ export class AdminComponent implements OnInit {
   }
 
   getAllOrderMembers():void {
-  this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
+    this.subscript3 = this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
     next: data => {
       this.orderMemberList = data.filter(e => e.approved === true && e.removed === false);
       this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
@@ -115,10 +127,6 @@ export class AdminComponent implements OnInit {
     }
   });
   }
-
-
-
-
 
   orderAdminForm = this.fb.group({
     orderAdmin: ['', [Validators.required]],
@@ -187,7 +195,7 @@ export class AdminComponent implements OnInit {
       const today = new Date();
       const created = today.toISOString().split('T')[0];
 
-      this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, true).subscribe({
+      this.subscript4 =  this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, true).subscribe({
         next: data => {
           let index = this.UnapprovedOrderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
           this.orderMemberList.push(this.UnapprovedOrderMemberList[index]);
@@ -204,7 +212,7 @@ export class AdminComponent implements OnInit {
       }, 3000);
 
     } else {
-      this.memberService.removeMember(memberInQuestion.polling_order_member_id, this.accessToken).subscribe({
+      this.subscript5 =  this.memberService.removeMember(memberInQuestion.polling_order_member_id, this.accessToken).subscribe({
         next: data => {
           let index = this.UnapprovedOrderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
           this.UnapprovedOrderMemberList.splice(index, 1);
@@ -236,7 +244,7 @@ export class AdminComponent implements OnInit {
     const today = new Date();
     const created = today.toISOString().split('T')[0];
     
-    this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true, true).subscribe({
+    this.subscript6 =  this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true, true).subscribe({
         next: data => {
           let index = this.orderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
           this.orderMemberList.splice(index, 1);
@@ -265,7 +273,7 @@ export class AdminComponent implements OnInit {
   }
 
   removeCandidate(candidateId: any): void {
-    this.candidateService.removeCandidate(candidateId.data, this.accessToken).subscribe({
+    this.subscript7 =  this.candidateService.removeCandidate(candidateId.data, this.accessToken).subscribe({
       next: data => {
         let index = this.candidateList.findIndex(e => e.candidate_id === candidateId.data)
         this.candidateList.splice(index, 1);
@@ -282,7 +290,7 @@ export class AdminComponent implements OnInit {
       const today = new Date();
       const created = today.toISOString().split('T')[0];
 
-      this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, activate).subscribe({
+      this.subscript8 =  this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, activate).subscribe({
         next: data => {
           this.getAllOrderMembers();
         },
@@ -298,7 +306,7 @@ export class AdminComponent implements OnInit {
 
 
   addNewCandidate(): void {
-    this.candidateService.createCandidate(this.newCandidateName, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
+    this.subscript9 =  this.candidateService.createCandidate(this.newCandidateName, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
       next: data => {
         this.candidateList.push(data);
         this.dataSourceCandidates.data = this.candidateList;
@@ -315,7 +323,7 @@ export class AdminComponent implements OnInit {
       && this.range.value.end !== null && this.selectedPollingCandidates.length > 0) {
 
       this.selectedPollingCandidates = this.selectedPollingCandidates.filter(item => item);
-      this.pollingService.createPolling(this.newPollingName, this.pollingOrder.polling_order_id.toString(), this.range.value.start.toISOString().split('T')[0], this.range.value.end.toISOString().split('T')[0], this.accessToken).subscribe({
+      this.subscript10 =  this.pollingService.createPolling(this.newPollingName, this.pollingOrder.polling_order_id.toString(), this.range.value.start.toISOString().split('T')[0], this.range.value.end.toISOString().split('T')[0], this.accessToken).subscribe({
         next: data => {
           this.pollingList.push(data);
           this.dataSourcePollings.data = this.pollingList;
@@ -365,7 +373,7 @@ export class AdminComponent implements OnInit {
   }
 
   removePolling(polling: any): void {
-    this.pollingService.removePolling(polling.data, this.accessToken).subscribe({
+    this.subscript11 =  this.pollingService.removePolling(polling.data, this.accessToken).subscribe({
       next: data => {
         let index = this.pollingList.findIndex(e => e.polling_id === polling.data)
         this.pollingList.splice(index, 1);
@@ -376,7 +384,46 @@ export class AdminComponent implements OnInit {
       }
     });
   }
+
+  
+  ngOnDestroy(): void {
+    if (this.subscript1) {
+      this.subscript1.unsubscribe();
+    }
+    if (this.subscript2) {
+      this.subscript2.unsubscribe();
+    }
+    if (this.subscript3) {
+      this.subscript3.unsubscribe();
+    }
+    if (this.subscript4) {
+      this.subscript4.unsubscribe();
+    }
+    if (this.subscript5) {
+      this.subscript5.unsubscribe();
+    }
+    if (this.subscript6) {
+      this.subscript6.unsubscribe();
+    }
+    if (this.subscript7) {
+      this.subscript7.unsubscribe();
+    }
+    if (this.subscript8) {
+      this.subscript8.unsubscribe();
+    }
+    if (this.subscript9) {
+      this.subscript9.unsubscribe();
+    }
+    if (this.subscript10) {
+      this.subscript10.unsubscribe();
+    }
+    if (this.subscript11) {
+      this.subscript11.unsubscribe();
+    }
+  }
+
 }
+
 
 
 @Component({

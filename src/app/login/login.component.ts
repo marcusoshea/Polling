@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { PollingOrderService } from '../services/polling-order.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrder } from '../interfaces/polling-order'
+import { Subscription } from 'rxjs';
  
 @Component({
   selector: 'app-login',
@@ -19,11 +20,13 @@ export class LoginComponent implements OnInit {
   isLoginFailed = false;
   errorMessage = '';
   pollingOrderList: PollingOrder[] = [];
+  public subscript1?: Subscription;
+  public subscript2?: Subscription;
 
   constructor(private authService: AuthService, private storageService: StorageService, private pollingOrderService: PollingOrderService) { }
 
   ngOnInit(): void {
-    this.pollingOrderService.getAllOrders().subscribe({
+    this.subscript1 = this.pollingOrderService.getAllOrders().subscribe({
       next: response => {
         this.pollingOrderList = response;
       },
@@ -41,7 +44,7 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     const { email, password, pollingOrder } = this.form;
 
-    this.authService.login(email, password, pollingOrder.polling_order_id).subscribe({
+    this.subscript2 = this.authService.login(email, password, pollingOrder.polling_order_id).subscribe({
       next: data => {
         this.storageService.saveMember(data);
         this.storageService.savePollingOrder(pollingOrder);
@@ -60,4 +63,14 @@ export class LoginComponent implements OnInit {
   reloadPage(): void {
     window.location.reload();
   }
+
+  ngOnDestroy(): void {
+    if (this.subscript1) {
+      this.subscript1.unsubscribe();
+    }
+    if (this.subscript2) {
+      this.subscript2.unsubscribe();
+    }
+  }
+
 }

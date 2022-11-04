@@ -25,7 +25,7 @@ export class NotesService {
   }
 
   
-  gePollingNoteByCandidateId(id: Number, accessToken: string): Observable<any> {
+  getPollingNoteByCandidateId(id: Number, accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
@@ -79,5 +79,15 @@ export class NotesService {
       }, { headers: reqHeader }
     );
   }
+
+  getPollingReportTotals(pollingId: Number, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get(API_URL + '/pollingnote/totals/' + pollingId, { headers: reqHeader });
+  }
+
 
 }

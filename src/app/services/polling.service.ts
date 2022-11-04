@@ -109,6 +109,15 @@ export class PollingService {
     );
   }
 
+  getPollingReport(orderId: Number, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get(API_URL + '/polling/pollingreport/' + orderId, { headers: reqHeader });
+  }
+
 
 
 }

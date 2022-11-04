@@ -9,6 +9,7 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { NotesService } from '../services/notes.service';
 import { CandidateService } from '../services/candidate.service';
 import { Note } from '../interfaces/note';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-pollings',
@@ -28,6 +29,9 @@ export class PollingsComponent implements OnInit {
   public dataSourcePS = new MatTableDataSource<PollingSummary>();
   public dataSourceNotes = new MatTableDataSource<Note>();
   public dataSourceNotesPolling = new MatTableDataSource<Note>();
+  public subscript1?: Subscription;
+  public subscript2?: Subscription;
+  public subscript3?: Subscription;
 
   constructor(private pollingService: PollingService, private storageService: StorageService, public dialog: MatDialog) { }
   public displayedColumnsPS = ['name', 'note', 'vote'];
@@ -45,19 +49,19 @@ export class PollingsComponent implements OnInit {
   pn_created_at: string;
   polling_order_member_id: Number;
   public completed: boolean = true;
-  
-  async ngOnInit(): Promise<void> {
+
+    async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
 
     this.accessToken = member.access_token;
-    this.pollingService.getCurrentPolling(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
+    this.subscript1 = this.pollingService.getCurrentPolling(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.currentPolling = data;
         this.startDate = this.currentPolling?.start_date.split('T')[0];
         this.endDate = this.currentPolling?.end_date.split('T')[0];
         if (this.currentPolling?.polling_id) {
-          this.pollingService.getPollingSummary(this.currentPolling?.polling_id, member.memberId, this.accessToken).subscribe({
+          this.subscript2 = this.pollingService.getPollingSummary(this.currentPolling?.polling_id, member.memberId, this.accessToken).subscribe({
             next: data => {
               this.pollingSummary = data;
               this.dataSourcePS.data = data;
@@ -85,7 +89,7 @@ export class PollingsComponent implements OnInit {
       x.completed = draft;
       finished++;
       if (finished === this.dataSourcePS.data.length) {
-        this.pollingService.createPollingNotes(this.dataSourcePS.data, this.accessToken).subscribe({
+        this.subscript3 = this.pollingService.createPollingNotes(this.dataSourcePS.data, this.accessToken).subscribe({
           next: data => {
             if(draft) {
               alert("Polling Submitted");
@@ -118,10 +122,19 @@ export class PollingsComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    if (this.subscript1) {
+      this.subscript1.unsubscribe();
+    }
+    if (this.subscript2) {
+      this.subscript2.unsubscribe();
+    }
+    if (this.subscript3) {
+      this.subscript3.unsubscribe();
+    }
+  }
+
 }
-
-
-
 
 @Component({
   selector: 'polling-candidate',
@@ -148,7 +161,7 @@ export class PollingCandidate {
       }
     });
 
-    this.notesService.gePollingNoteByCandidateId(data.candidate.candidate_id, data.accessToken).subscribe({
+    this.notesService.getPollingNoteByCandidateId(data.candidate.candidate_id, data.accessToken).subscribe({
       next: data => {
         this.dataSourceNotesPolling.data = data;
       },
@@ -162,4 +175,6 @@ export class PollingCandidate {
   returnToPolling(): void {
     this.dialogRef.close();
   }
+
+
 }

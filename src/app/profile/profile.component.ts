@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MemberService } from '../services/member.service';
 import { StorageService } from '../services/storage.service';
 import { AuthService } from '../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -25,6 +26,8 @@ export class ProfileComponent implements OnInit {
   showPasswordMessage=false;
   showPasswordError=false;
   showError=false;
+  public subscript1?: Subscription;
+  public subscript2?: Subscription;
 
   constructor(private memberService: MemberService, private storageService: StorageService, private authService: AuthService) { }
 
@@ -39,11 +42,10 @@ export class ProfileComponent implements OnInit {
     this.form.pollingOrder = this.member.pollingOrder;
     this.accessToken = this.member.access_token;
     this.form.active = this.member.active;
-
   }
   
   onSubmit(): void {
-    this.memberService.updateProfile(this.member.memberId, this.form.name, this.form.email, this.member.pollingOrder, this.form.active, true, false, this.accessToken)
+    this.subscript1 = this.memberService.updateProfile(this.member.memberId, this.form.name, this.form.email, this.member.pollingOrder, this.form.active, true, false, this.accessToken)
    .subscribe({
       next: data => {
         this.storageService.clean();
@@ -65,7 +67,7 @@ export class ProfileComponent implements OnInit {
   }
 
   onSubmitPassword(): void {
-    this.authService.updatePassword(this.member.email, this.form.password, this.form.newPassword, this.member.pollingOrder, this.accessToken)
+    this.subscript2 = this.authService.updatePassword(this.member.email, this.form.password, this.form.newPassword, this.member.pollingOrder, this.accessToken)
    .subscribe({
       next: data => {
         this.storageService.clean();
@@ -85,4 +87,14 @@ export class ProfileComponent implements OnInit {
       }
     }); 
   }
+
+  ngOnDestroy(): void {
+    if (this.subscript1) {
+      this.subscript1.unsubscribe();
+    }
+    if (this.subscript2) {
+      this.subscript2.unsubscribe();
+    }
+  }
+
 }
