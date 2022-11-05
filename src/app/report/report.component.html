@@ -5,7 +5,7 @@
     <h2>Polling Report</h2>
 </div>
 
-<div class="col-md-12 col-xs-6 mt-5 pb-4">
+<div class="col-md-12 col-xs-6 mt-5 pb-4" *ngIf="closedPollingAvailable">
     <div class="container">
         <div class="row">
             <div class="col">
@@ -17,14 +17,14 @@
                             {{startDate | date}} to {{endDate | date}}. </h4>
 
                         <div *ngIf="pollingOrderPollingType === 1" class="p-2">
-                            The {{pollingOrder.polling_order_name}} order requires an active member participation rate
+                           <span *ngIf="pollingOrderParticipation > 0"> The {{pollingOrder.polling_order_name}} order requires an active member participation rate
                             of {{pollingOrderParticipation}}% to certify a polling.
 
                             The {{pollingTitle}} had participation of {{participatingMembers}} of {{activeMembers}}
                             active order members,
                             resulting in a participation rate of {{participationRate}}%. The polling is thus
-                            <span class="fw-bold">{{certified}}</span>
-                            <br><br>
+                            <span class="fw-bold">{{certified}}</span>           <br><br></span>
+                 
                             A candidate must attain a rate of {{pollingOrderScore}}% to be recommended to join the
                             order.
                         </div>
@@ -34,7 +34,7 @@
                            <div *ngFor="let cl of candidateList" class="p-2">
                              <li>    <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
                                 <span *ngFor="let pt of pollingTotal">
-                                    <span *ngIf="cl.name === pt.name">
+                                    <span *ngIf="cl.name === pt.name && pt.vote !== 'Null'">
                                         -- {{pt.vote}}: {{pt.total}}
                                     </span>
                                 </span>
@@ -46,7 +46,10 @@
                             The {{pollingOrder.polling_order_name}} order recommends the top candidates within a polling
                             exceeding a specific rating.
                         </div>
+                    </div>
 
+                    <div *ngIf="closedPollingAvailable === false">
+                        No Polling Report Data Available
                     </div>
                 </div>
             </div>
@@ -54,4 +57,4 @@
 
     </div>
 </div></div>
-<button class="btn btn-primary" (click)="downloadAsPDF();" *ngIf="showDownloadButton">Export To PDF</button>
+<button class="btn btn-primary" (click)="downloadAsPDF();" *ngIf="showDownloadButton && closedPollingAvailable">Export To PDF</button>

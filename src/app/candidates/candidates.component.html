@@ -81,7 +81,7 @@
                   <span *ngSwitchCase=3>No</span>
                   <span *ngSwitchCase=4>Abstain</span>
                 </span>
-                <div *ngIf="element.note.length > 0">Note: "{{element.note}}"</div>
+                <div *ngIf="element.note?.length > 0">Note: "{{element.note}}"</div>
 
 
                 <div class="px-3 fst-italic">- {{element.name}} during

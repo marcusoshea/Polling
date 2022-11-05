@@ -25,6 +25,12 @@ export class AppComponent {
       const user = this.storageService.getMember();
       this.pollingOrder = this.storageService.getPollingOrder();
       this.showAdmin = user.isOrderAdmin;
+    } else {
+      if(window.location.pathname.includes('profile') || window.location.pathname.includes('admin')
+      || window.location.pathname.includes('candidates') || window.location.pathname.includes('pollings')
+      || window.location.pathname.includes('report') ) {
+        location.replace('/login');
+      }
     }
   }
 

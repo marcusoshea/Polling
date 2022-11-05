@@ -52,7 +52,10 @@ export class ReportComponent implements OnInit {
 
     this.subscript1 = this.pollingService.getPollingReport(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
-        if (data.length > 0) {
+        if (data[0]?.end_date === undefined) {
+          this.closedPollingAvailable = false;
+        } else {
+          this.closedPollingAvailable = true;
           this.pollingReport = data;
           this.pollingTitle = this.pollingReport[0].polling_name;
           this.pollingOrderPollingType = this.pollingReport[0].polling_order_polling_type;
@@ -94,14 +97,12 @@ export class ReportComponent implements OnInit {
                     if (element.vote === 'Wait') {
                       negative = negative + parseInt(element.total);
                     }
-                    if (element.vote === 'Abstain') {
+                    if (element.vote === 'Abstain' || element.vote === 'Null') {
                       abstain = abstain + parseInt(element.total);
                     }
                   }
-                  console.log('ticker', ticker);
-                  console.log('this.pollingTotal.length', this.pollingTotal.length);
                   if (this.pollingTotal.length - 1 === ticker) {
-                    let rating = (positive) / (this.participatingMembers - abstain) * 100;
+                    let rating = parseFloat(((positive) / (this.participatingMembers - abstain) * 100).toFixed(2)) ;
                     if (rating < 0) {
                       rating = 0;
                     }
@@ -113,7 +114,10 @@ export class ReportComponent implements OnInit {
                     ticker = 0;
                     this.candidateList[candidateNumber].rating = rating;
                     this.candidateList[candidateNumber].recommended = recommended;
-                    this.candidateList.sort(x => x.rating).reverse();
+                    //this.candidateList.sort(x => x.rating).reverse();
+
+                    this.candidateList = this.candidateList.sort((a, b) => (a.rating > b.rating ? -1 : 1));
+
                   } else {
                     ticker++;
                   }
@@ -127,8 +131,6 @@ export class ReportComponent implements OnInit {
             }
           });
 
-        } else {
-          this.closedPollingAvailable = false;
         }
       },
       error: err => {
