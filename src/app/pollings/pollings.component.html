@@ -34,6 +34,15 @@
                   </mat-select>
                 </td>
               </ng-container>
+              <ng-container matColumnDef="private">
+                <th mat-header-cell *matHeaderCellDef class="p-4 h6 d-flex justify-content-center"> Private Response </th>
+                <td mat-cell *matCellDef="let element" class="p-4 h6 mt-2 mb-2 mx-2 d-flex justify-content-center">
+                    <input type="checkbox" [value]="element.private" name="private" checked="element.private" [(ngModel)]="element.private" #active="ngModel" class="m-2"/>
+                </td>
+              </ng-container>
+
+
+
               <tr mat-header-row *matHeaderRowDef="displayedColumnsPS"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumnsPS;"></tr>
             </table>

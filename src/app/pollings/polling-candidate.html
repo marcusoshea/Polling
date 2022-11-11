@@ -4,30 +4,34 @@
           class="bi bi-arrow-left-circle-fill"></i> </a>
       Candidate - {{candidateName}} </h4>
   </div>
-  <div class="col-md-12 col-xs-12 mt-5 pb-4">
+  <div class="col-md-12 col-xs-12 mt-5 pb-1">
     <div class="container">
       <div class="row">
         <div class="col">
-          <div class="card card-container custom-card">
-            <table mat-table [dataSource]="dataSourceNotesPolling" class="mat-table custom-card">
-              <ng-container matColumnDef="external_note">
-                <th mat-header-cell *matHeaderCellDef class="p-4 h6"> Polling Notes </th>
-                <td mat-cell *matCellDef="let element">
-                  <span [ngSwitch]="element.vote">
-                    Vote: <span *ngSwitchCase=1>Yes</span>
-                    <span *ngSwitchCase=2>Wait</span>
-                    <span *ngSwitchCase=3>No</span>
-                    <span *ngSwitchCase=4>Abstain</span>
-                  </span>
-                  <div *ngIf="element.note?.length > 0">Note: "{{element?.note}}"</div>
-                  <div class="px-3 fst-italic">- {{element.name}} during
-                    {{element.polling_name}} </div>
-                </td>
-              </ng-container>
-              <tr mat-header-row *matHeaderRowDef="displayedColumnsNotes"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsNotes;"></tr>
-            </table>
-          </div>
+            <div class="card card-container custom-card">
+              <mat-accordion>
+                <mat-expansion-panel *ngFor="let polls of this.pollingNotes; let i = index"
+                  class="card card-container custom-card">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      Polling Notes - {{this.pollingNames[i]}}
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div *ngFor="let pollNote of polls;">
+                    <span [ngSwitch]="pollNote.vote">
+                      Vote: <span *ngSwitchCase=1>Yes</span>
+                      <span *ngSwitchCase=2>Wait</span>
+                      <span *ngSwitchCase=3>No</span>
+                      <span *ngSwitchCase=4>Abstain</span>
+                    </span>
+                    <div *ngIf="pollNote.note?.length > 0">Note: "{{pollNote?.note}}"</div>
+                    <div class="px-3 fst-italic">- {{pollNote.name}}</div>
+                    <hr>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </div>
+
         </div>
       </div>
     </div>

@@ -34,7 +34,7 @@ export class PollingsComponent implements OnInit {
   public subscript3?: Subscription;
 
   constructor(private pollingService: PollingService, private storageService: StorageService, public dialog: MatDialog) { }
-  public displayedColumnsPS = ['name', 'note', 'vote'];
+  public displayedColumnsPS = ['name', 'note', 'vote', 'private'];
   polling_id: Number;
   polling_name: string;
   start_date: string;
@@ -50,7 +50,7 @@ export class PollingsComponent implements OnInit {
   polling_order_member_id: Number;
   public completed: boolean = true;
 
-    async ngOnInit(): Promise<void> {
+  async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
 
@@ -65,7 +65,7 @@ export class PollingsComponent implements OnInit {
             next: data => {
               this.pollingSummary = data;
               this.dataSourcePS.data = data;
-              if (data.filter(e => e.completed === false).length > 0){
+              if (data.filter(e => e.completed === false).length > 0) {
                 this.completed = false;
               };
             },
@@ -91,15 +91,15 @@ export class PollingsComponent implements OnInit {
       if (finished === this.dataSourcePS.data.length) {
         this.subscript3 = this.pollingService.createPollingNotes(this.dataSourcePS.data, this.accessToken).subscribe({
           next: data => {
-            if(draft) {
+            if (draft) {
               alert("Polling Submitted");
               setTimeout(() => {
                 window.location.reload();
-              }, 1000); 
+              }, 1000);
             } else {
               alert("Daft Saved, Polling NOT submitted");
             }
-           },
+          },
           error: err => {
             this.errorMessage = err.error.message;
           }
@@ -145,9 +145,10 @@ export class PollingCandidate {
   public polling_id: number;
   public displayedColumnsNotes = ['external_note'];
   public dataSourceNotes = new MatTableDataSource<Note>();
-  public dataSourceNotesPolling = new MatTableDataSource<Note>();
   private errorMessage = '';
   public candidateName = '';
+  public pollingNames = [];
+  public pollingNotes = [];
 
   constructor(public dialogRef: MatDialogRef<PollingCandidate>, private notesService: NotesService, @Inject(MAT_DIALOG_DATA) public data: any) {
     this.candidateName = this.data.candidate.name;
@@ -163,7 +164,12 @@ export class PollingCandidate {
 
     this.notesService.getPollingNoteByCandidateId(data.candidate.candidate_id, data.accessToken).subscribe({
       next: data => {
-        this.dataSourceNotesPolling.data = data;
+        //get unique polling names
+        this.pollingNames = [...new Set(data.map(item => item.polling_name))];
+        this.pollingNames.forEach((element, index) => {
+          this.pollingNotes.push(data.filter(e => e.polling_name === element && e.private === false));
+        }
+        )
       },
       error: err => {
         this.errorMessage = err.error.message;

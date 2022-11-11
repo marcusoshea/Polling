@@ -44,7 +44,8 @@ export class CandidatesComponent implements OnInit {
   public displayedColumnsCandidates = ['name'];
   public displayedColumnsNotes = ['external_note'];
   public dataSourceNotes = new MatTableDataSource<Note>();
-  public dataSourceNotesPolling = new MatTableDataSource<Note>();
+  public pollingNames = [];
+  public pollingNotes = [];
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -66,6 +67,8 @@ export class CandidatesComponent implements OnInit {
     this.candidateSelected = false;
     this.candidateName = '';
     this.candidate_id = 0;
+    this.pollingNames = [];
+    this.pollingNotes = [];
   }
 
   viewCandidate(element: any):void {
@@ -83,8 +86,12 @@ export class CandidatesComponent implements OnInit {
 
     this.subscript3 = this.notesService.getPollingNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
       next: data => {
-        this.noteListPolling = data;
-        this.dataSourceNotesPolling.data = data;
+        //get unique polling names
+        this.pollingNames = [...new Set(data.map(item => item.polling_name))];
+        this.pollingNames.forEach((element, index) => {
+          this.pollingNotes.push(data.filter(e => e.polling_name === element && e.private === false));
+        }
+        )
       },
       error: err => {
         this.errorMessage = err.error.message;
