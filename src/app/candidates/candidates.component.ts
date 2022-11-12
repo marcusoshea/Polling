@@ -74,6 +74,8 @@ export class CandidatesComponent implements OnInit {
   viewCandidate(element: any):void {
     this.candidateName = element.name;
     this.candidate_id = element.candidate_id;
+    this.pollingNames = [];
+    this.pollingNotes = [];
     this.subscript2 = this.notesService.getExternalNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
       next: data => {
         this.noteList = data;
