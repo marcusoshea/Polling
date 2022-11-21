@@ -97,12 +97,14 @@ export class PollingService {
   }
 
 
-  createPollingNotes(body: any, accessToken: string): Observable<any> {
+  createPollingNotes(body: any, accessToken: string, memberId: number): Observable<any> {
     var reqHeader = new HttpHeaders({ 
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
    });
    body[0].authToken = accessToken;
+   body[0].polling_order_member_id = memberId;
+
     return this.http.post(
       API_URL + '/pollingnote/create',
       body, { headers: reqHeader }

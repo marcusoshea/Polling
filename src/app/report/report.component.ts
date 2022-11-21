@@ -25,6 +25,7 @@ export class ReportComponent implements OnInit {
   public pollingReport: any;
   public pollingTotal: any;
   public pollingTitle = '';
+  public allPollingNotes: any;
   public pollingOrderParticipation = 0;
   public pollingOrderScore = 0;
   public pollingOrderPollingType = 0;
@@ -41,6 +42,7 @@ export class ReportComponent implements OnInit {
 
   public subscript1?: Subscription;
   public subscript2?: Subscription;
+  public subscript3?: Subscription;
 
   constructor(private pollingService: PollingService, private storageService: StorageService, private notesService: NotesService) { }
 
@@ -69,6 +71,15 @@ export class ReportComponent implements OnInit {
           if (((this.participatingMembers / this.activeMembers) * 100) >= this.pollingOrderScore) {
             this.certified = 'certified.';
           }
+
+          this.subscript3 = this.notesService.getAllPollingNotesById(this.pollingReport[0]?.polling_id, this.accessToken).subscribe({
+            next: data => {
+              this.allPollingNotes = data;
+            },
+            error: err => {
+              this.errorMessage = err.error.message;
+            }
+          });
 
           this.subscript2 = this.notesService.getPollingReportTotals(this.pollingReport[0].polling_id, this.accessToken).subscribe({
             next: data => {
@@ -136,6 +147,7 @@ export class ReportComponent implements OnInit {
       error: err => {
         this.errorMessage = err.error.message;
       }
+      
     })
   }
 
@@ -145,6 +157,9 @@ export class ReportComponent implements OnInit {
     }
     if (this.subscript2) {
       this.subscript2.unsubscribe();
+    }
+    if (this.subscript3) {
+      this.subscript3.unsubscribe();
     }
   }
 

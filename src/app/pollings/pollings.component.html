@@ -5,6 +5,17 @@
 <div class="col-md-12  m-2 title" *ngIf="currentPolling">
   <h2>{{currentPolling?.polling_name}}</h2>
   <h3>Polling Dates: {{this.startDate}} thru {{this.endDate}} </h3>
+
+  <div class="form-group m-3" *ngIf="isAdmin" >
+    <label for="pollingOrder">Order Clerk Proxy Vote As:</label>
+    <select class="form-select col-md-6" (change)="changeVoter($event)">
+      <option disabled selected>Voting as Self</option>
+      <option *ngFor="let option of orderMemberList" [value]="option.polling_order_member_id">
+        {{option.name}}
+      </option>
+    </select>
+  </div>
+
   <div class="col-md-12 col-xs-6 mt-5 pb-4">
     <div class="container">
       <div class="row">
@@ -40,9 +51,6 @@
                     <input type="checkbox" [value]="element.private" name="private" checked="element.private" [(ngModel)]="element.private" #active="ngModel" class="m-2"/>
                 </td>
               </ng-container>
-
-
-
               <tr mat-header-row *matHeaderRowDef="displayedColumnsPS"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumnsPS;"></tr>
             </table>

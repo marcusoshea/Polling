@@ -34,6 +34,15 @@ export class NotesService {
     return this.http.get(API_URL + '/polling/allpn/' + id, { headers: reqHeader });
   }
 
+    
+  getAllPollingNotesById(id: Number, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get(API_URL + '/pollingnote/all/' + id, { headers: reqHeader });
+  }
 
   getCandidate(candidateId: Number, accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({
