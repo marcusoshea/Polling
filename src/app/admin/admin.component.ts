@@ -14,7 +14,7 @@ import { MatListOption, MatSelectionList } from '@angular/material/list'
 import { PollingService } from '../services/polling.service';
 import { Polling } from '../interfaces/polling';
 import { Subscription } from 'rxjs';
-
+import { AuthService } from '../services/auth.service';
 
 
 @Component({
@@ -46,8 +46,8 @@ export class AdminComponent implements OnInit {
   public subscript11?: Subscription;
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
-  private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
-  private storageService: StorageService, private router: Router, public dialog: MatDialog) { }
+    private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
+    private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService) { }
   private showAdmin = false;
   public changeAdminOccurred = false;
   public changeAsstOccurred = false;
@@ -60,6 +60,8 @@ export class AdminComponent implements OnInit {
   public dataSourcePollings = new MatTableDataSource<Polling>();
   public displayedColumnsCandidates = ['buttons', 'name'];
   public newCandidateName = '';
+  public newOrderMemberName = '';
+  public newOrderMemberEmail = '';
   public showCandidateWarning = false;
   public panelOpenStateMA = false;
   public panelOpenStateML = false;
@@ -87,7 +89,7 @@ export class AdminComponent implements OnInit {
     })
 
     this.getAllOrderMembers();
-    
+
     this.subscript1 = this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList = data;
@@ -114,18 +116,18 @@ export class AdminComponent implements OnInit {
 
   }
 
-  getAllOrderMembers():void {
+  getAllOrderMembers(): void {
     this.subscript3 = this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
-    next: data => {
-      this.orderMemberList = data.filter(e => e.approved === true && e.removed === false);
-      this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
-      this.dataSourceMemberList.data = this.orderMemberList;
-      this.dataSource.data = this.UnapprovedOrderMemberList;
-    },
-    error: err => {
-      this.errorMessage = err.error.message;
-    }
-  });
+      next: data => {
+        this.orderMemberList = data.filter(e => e.approved === true && e.removed === false);
+        this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
+        this.dataSourceMemberList.data = this.orderMemberList;
+        this.dataSource.data = this.UnapprovedOrderMemberList;
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
   }
 
   orderAdminForm = this.fb.group({
@@ -156,6 +158,33 @@ export class AdminComponent implements OnInit {
       onlySelf: true
     })
   }
+
+  randomizer(): string {
+    let ts = String(new Date().getTime()),
+        i = 0,
+        out = '';
+      for (i = 0; i < ts.length; i += 2) {
+        out += Number(ts.substr(i, 2)).toString(36);
+      }
+      return Math.ceil(Math.random()*10000) + out;
+;
+  }
+
+  addNewMember(): void {
+    if (this.newOrderMemberEmail === '') {
+      this.newOrderMemberEmail = this.randomizer() + '@aepolling.org';
+    }
+    let password = this.randomizer();
+
+    this.authService.forceRegister(this.newOrderMemberName, this.newOrderMemberEmail, password, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
+         next: data => {
+           alert("New Member Created");
+           setTimeout(() => {
+             window.location.reload();
+           }, 1000);
+         }
+       });  
+   }
 
   openDialog(enterAnimationDuration: string, exitAnimationDuration: string, Asst: boolean): void {
     let admin = 0;
@@ -195,7 +224,7 @@ export class AdminComponent implements OnInit {
       const today = new Date();
       const created = today.toISOString().split('T')[0];
 
-      this.subscript4 =  this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, true).subscribe({
+      this.subscript4 = this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, true).subscribe({
         next: data => {
           let index = this.UnapprovedOrderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
           this.orderMemberList.push(this.UnapprovedOrderMemberList[index]);
@@ -212,7 +241,7 @@ export class AdminComponent implements OnInit {
       }, 3000);
 
     } else {
-      this.subscript5 =  this.memberService.removeMember(memberInQuestion.polling_order_member_id, this.accessToken).subscribe({
+      this.subscript5 = this.memberService.removeMember(memberInQuestion.polling_order_member_id, this.accessToken).subscribe({
         next: data => {
           let index = this.UnapprovedOrderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
           this.UnapprovedOrderMemberList.splice(index, 1);
@@ -243,17 +272,17 @@ export class AdminComponent implements OnInit {
   removeOrderMember(memberInQuestion: any): void {
     const today = new Date();
     const created = today.toISOString().split('T')[0];
-    
-    this.subscript6 =  this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true, true).subscribe({
-        next: data => {
-          let index = this.orderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
-          this.orderMemberList.splice(index, 1);
-          this.dataSourceMemberList.data = this.orderMemberList;
-        },
-        error: err => {
-          this.errorMessage = err.error.message;
-        }
-      });    
+
+    this.subscript6 = this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true, true).subscribe({
+      next: data => {
+        let index = this.orderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
+        this.orderMemberList.splice(index, 1);
+        this.dataSourceMemberList.data = this.orderMemberList;
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
   };
 
 
@@ -273,7 +302,7 @@ export class AdminComponent implements OnInit {
   }
 
   removeCandidate(candidateId: any): void {
-    this.subscript7 =  this.candidateService.removeCandidate(candidateId.data, this.accessToken).subscribe({
+    this.subscript7 = this.candidateService.removeCandidate(candidateId.data, this.accessToken).subscribe({
       next: data => {
         let index = this.candidateList.findIndex(e => e.candidate_id === candidateId.data)
         this.candidateList.splice(index, 1);
@@ -287,26 +316,26 @@ export class AdminComponent implements OnInit {
 
 
   activeMember(memberInQuestion: any, activate: boolean): void {
-      const today = new Date();
-      const created = today.toISOString().split('T')[0];
+    const today = new Date();
+    const created = today.toISOString().split('T')[0];
 
-      this.subscript8 =  this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, activate).subscribe({
-        next: data => {
-          this.getAllOrderMembers();
-        },
-        error: err => {
-          this.errorMessage = err.error.message;
-        }
-      });
+    this.subscript8 = this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, false, activate).subscribe({
+      next: data => {
+        this.getAllOrderMembers();
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
 
-      setTimeout(() => {
-        this.showCandidateWarning = false;
-      }, 3000);
+    setTimeout(() => {
+      this.showCandidateWarning = false;
+    }, 3000);
   };
 
 
   addNewCandidate(): void {
-    this.subscript9 =  this.candidateService.createCandidate(this.newCandidateName, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
+    this.subscript9 = this.candidateService.createCandidate(this.newCandidateName, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
       next: data => {
         this.candidateList.push(data);
         this.dataSourceCandidates.data = this.candidateList;
@@ -323,7 +352,7 @@ export class AdminComponent implements OnInit {
       && this.range.value.end !== null && this.selectedPollingCandidates.length > 0) {
 
       this.selectedPollingCandidates = this.selectedPollingCandidates.filter(item => item);
-      this.subscript10 =  this.pollingService.createPolling(this.newPollingName, this.pollingOrder.polling_order_id.toString(), this.range.value.start.toISOString().split('T')[0], this.range.value.end.toISOString().split('T')[0], this.accessToken).subscribe({
+      this.subscript10 = this.pollingService.createPolling(this.newPollingName, this.pollingOrder.polling_order_id.toString(), this.range.value.start.toISOString().split('T')[0], this.range.value.end.toISOString().split('T')[0], this.accessToken).subscribe({
         next: data => {
           this.pollingList.push(data);
           this.dataSourcePollings.data = this.pollingList;
@@ -334,7 +363,7 @@ export class AdminComponent implements OnInit {
           this.pollingService.createPollingCandidates(this.selectedPollingCandidates, this.accessToken).subscribe({
             next: () => {
               alert("New Polling Created!");
-             },
+            },
             error: err => {
               this.errorMessage = err.error.message;
             }
@@ -373,7 +402,7 @@ export class AdminComponent implements OnInit {
   }
 
   removePolling(polling: any): void {
-    this.subscript11 =  this.pollingService.removePolling(polling.data, this.accessToken).subscribe({
+    this.subscript11 = this.pollingService.removePolling(polling.data, this.accessToken).subscribe({
       next: data => {
         let index = this.pollingList.findIndex(e => e.polling_id === polling.data)
         this.pollingList.splice(index, 1);
@@ -385,7 +414,7 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  
+
   ngOnDestroy(): void {
     if (this.subscript1) {
       this.subscript1.unsubscribe();

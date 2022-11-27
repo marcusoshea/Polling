@@ -48,6 +48,33 @@ export class AuthService {
       httpOptions
     );
   }
+
+
+
+  forceRegister(memberName: string, email: string, password: string, polling_order_id: string, accessToken: string): Observable<any> {
+     var reqHeader = new HttpHeaders({ 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+   });
+
+      const today = new Date();
+      const created = today.toISOString().split('T')[0];
+
+      return this.http.post(
+        API_URL + '/member/forcecreate',
+        {
+          "name": memberName,
+          "email": email,
+          "password": password, 
+          "polling_order_id": polling_order_id,
+          "pom_created_at": created,
+          "authToken": accessToken,
+          "approved": true
+        }, { headers: reqHeader }
+      );
+
+    }
+
   
   getPasswordToken(email: string, polling_order_id: string): Observable<any> {
     return this.http.post(

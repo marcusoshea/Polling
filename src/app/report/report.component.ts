@@ -10,6 +10,7 @@ declare var require: any;
 
 import * as pdfMake from "pdfmake/build/pdfmake";
 import * as pdfFonts from "pdfmake/build/vfs_fonts";
+import { trigger } from '@angular/animations';
 const htmlToPdfmake = require("html-to-pdfmake");
 (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
 
@@ -38,7 +39,8 @@ export class ReportComponent implements OnInit {
   public participationRate = '';
   public certified = 'not certified.';
   public candidateList = [];
-  public showDownloadButton = false;
+  public isOrderClerk = false;
+  public showNotes = true;
 
   public subscript1?: Subscription;
   public subscript2?: Subscription;
@@ -50,7 +52,7 @@ export class ReportComponent implements OnInit {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
     this.accessToken = member.access_token;
-    this.showDownloadButton = member.isOrderAdmin;
+    this.isOrderClerk = member.isOrderAdmin;
 
     this.subscript1 = this.pollingService.getPollingReport(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
@@ -127,6 +129,12 @@ export class ReportComponent implements OnInit {
                     this.candidateList[candidateNumber].recommended = recommended;
                     //this.candidateList.sort(x => x.rating).reverse();
 
+                    if(this.isOrderClerk) {
+                      this.candidateList[candidateNumber].notes = this.allPollingNotes.filter(e => e.candidate_id === this.candidateList[candidateNumber].candidate_id)
+                    } else {
+                      this.candidateList[candidateNumber].notes = this.allPollingNotes.filter(e => e.candidate_id === this.candidateList[candidateNumber].candidate_id && e.private === false)
+                    }               
+
                     this.candidateList = this.candidateList.sort((a, b) => (a.rating > b.rating ? -1 : 1));
 
                   } else {
@@ -142,15 +150,21 @@ export class ReportComponent implements OnInit {
             }
           });
 
-        }
+       }
       },
       error: err => {
         this.errorMessage = err.error.message;
       }
       
     })
+
   }
 
+
+ public notesView():void {
+    this.showNotes = !this.showNotes;
+  }
+  
   ngOnDestroy(): void {
     if (this.subscript1) {
       this.subscript1.unsubscribe();
@@ -177,7 +191,7 @@ export class ReportComponent implements OnInit {
       pageOrientation: 'landscape',
 
       // [left, top, right, bottom] or [horizontal, vertical] or just a number for equal margins
-      pageMargins: [40, 60, 40, 60]
+      pageMargins: [10, 10, 10, 10]
     };
     pdfMake.createPdf(documentDefinition).download();
 

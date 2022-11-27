@@ -114,6 +114,28 @@
                   Member List
                 </mat-panel-title>
               </mat-expansion-panel-header>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="ps-4">
+                    <label for="cn">Member Name</label>
+                    <input type="text" class="form-control" name="newOrderMember" [(ngModel)]="newOrderMemberName"
+                      required /> <br>
+                      <label for="cn">Member Email <br><b>(leave blank for random email @aepolling.org for members who will not be logging in)</b></label>
+                      <input type="text" class="form-control" name="newOrderMemberEmail" [(ngModel)]="newOrderMemberEmail"
+                         />  
+                      <button type="input" (click)="addNewMember()"
+                      class="btn btn-success mt-2 mb-2">Create New Member</button>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
+
               <table mat-table [dataSource]="dataSourceMemberList" class="mat-table custom-card col-md-12">
                 <ng-container matColumnDef="buttons">
                   <th mat-header-cell *matHeaderCellDef></th>

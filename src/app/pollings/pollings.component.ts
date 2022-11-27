@@ -123,7 +123,7 @@ export class PollingsComponent implements OnInit {
                 window.location.reload();
               }, 1000);
             } else {
-              alert("Daft Saved, Polling NOT submitted");
+              alert("Draft Saved, Polling NOT submitted");
               setTimeout(() => {
                 window.location.reload();
               }, 1000);
