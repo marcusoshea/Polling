@@ -4,7 +4,11 @@
         <h2>Polling Report</h2>
     </div>
 
-    <div class="col-md-12 col-xs-6 mt-5 pb-4" *ngIf="closedPollingAvailable">
+    <button type="submit" class="btn btn-success mt-3" (click)="toggleReport()" *ngIf="closedPollingAvailable">
+        <span *ngIf="toggleReport && closedPollingAvailable">Show Most Recent Closed Polling</span>
+        <span *ngIf="!toggleReport">Show Current Polling</span>
+    </button>
+    <div class="col-md-12 col-xs-6 mt-5 pb-4">
         <div class="container">
             <div class="row">
                 <div class="col">
@@ -41,16 +45,14 @@
                                 </span>
                                 <input type="checkbox" [value]="showNotes" name="showNotes" checked="showNotes"
                                     class="m-2" (change)="notesView()" /> Show Notes
-
-
                                 <ul>
                                     <span *ngFor="let cl of candidateList" class="p-2">
                                         <li> <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
-                                            <span *ngFor="let pt of pollingTotal">
+                                            (<span *ngFor="let pt of pollingTotal">
                                                 <span *ngIf="cl.name === pt.name && pt.vote !== 'Null'">
-                                                    -- {{pt.vote}}: {{pt.total}}
+                                                     {{pt.vote}}: {{pt.total}},
                                                 </span>
-                                            </span>
+                                            </span>) = {{cl.inProcessRating}}
                                             <span *ngIf="showNotes">
                                                 <mat-accordion>
                                                     <mat-expansion-panel class="card card-container custom-card">
@@ -67,27 +69,92 @@
                                             <span class="px-3 fst-italic">- {{note.member_name}}</span>
                                         </li>
                                     </span>
-                            </span>
-                            </mat-expansion-panel>
-                            </mat-accordion>
-                            </span>
+                                    </span>
+                                    </mat-expansion-panel>
+                                    </mat-accordion>
+                                    </span>
 
-                            </li>
-                            </span>
-                            </ul>
+                                    </li>
+                                    </span>
+                                </ul>
+                            </div>
                         </div>
 
-                    </div>
+                        <div *ngIf="closedPollingAvailable === false  && inProcessPollingAvailable === true">
+                            <div class="p-2"><span class="fw-bold">In Process Polling Candidate List (NOT FINALIZED):
+                                    <br>
+                                </span>
+                                <div *ngIf="pollingOrderPollingType === 1" class="p-2">
+                                    <span *ngIf="pollingOrderParticipation > 0"> The {{pollingOrder.polling_order_name}}
+                                        order requires an active member participation rate
+                                        of {{pollingOrderParticipation}}% to certify a polling.
 
-                    <div *ngIf="closedPollingAvailable === false">
-                        No Polling Report Data Available
+                                        The {{pollingTitle}} has a participation of {{participatingMembers}} of
+                                        {{activeMembers}}
+                                        active order members,
+                                        resulting in a participation rate of {{participationRate}}%. The polling is currently 
+                                        <span class="fw-bold">{{certified}}</span> <br><br></span>
+
+                                    A candidate must attain a rate of {{pollingOrderScore}}% to be recommended to join
+                                    the
+                                    order.
+                                </div>
+
+                                <div *ngIf="pollingOrderPollingType === 2" class="p-2">
+                                    The {{pollingOrder.polling_order_name}} order recommends the top candidates within a
+                                    polling
+                                    exceeding a specific rating.
+                                </div>
+                                <input type="checkbox" [value]="showNotes" name="showNotes" checked="showNotes"
+                                    class="m-2" (change)="notesView()" /> Show Notes
+                                <ul>
+                                    <span *ngFor="let cl of candidateList" class="p-2">
+                                        <li> <span class="fw-bold">{{cl.name}}</span>
+                                            (
+                                            <span *ngFor="let pt of pollingTotal">
+                                                <span *ngIf="cl.name === pt.name && pt.vote !== 'Null'">
+                                                    * {{pt.vote}}: {{pt.total}}
+                                                </span>
+                                            </span>) = {{cl.inProcessRating}}
+                                            <span
+                                                *ngIf="showNotes && cl.notes !== undefined  && cl.notes.length > 0 && cl.notes.length !==null">
+                                                <mat-accordion>
+                                                    <mat-expansion-panel class="card card-container custom-card">
+                                                        <mat-expansion-panel-header>
+                                                            <mat-panel-title>
+                                                                Notes
+                                                            </mat-panel-title>
+                                                        </mat-expansion-panel-header>
+
+                                                        <span *ngFor="let note of cl.notes">
+                                                            <span *ngIf="note.note && note.note !== ''">
+                                        <li>
+                                            "{{note.note}}"
+                                            <span class="px-3 fst-italic">- {{note.member_name}}</span>
+                                        </li>
+                                    </span>
+                                    </span>
+                                    </mat-expansion-panel>
+                                    </mat-accordion>
+                                    </span>
+
+                                    </li>
+                                    </span>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div *ngIf="closedPollingAvailable === false && inProcessPollingAvailable === false">
+                            No Polling Report Data Available
+                        </div>
+
+
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
-</div>
 </div>
 <button class="btn btn-primary" (click)="downloadAsPDF();" *ngIf="isOrderClerk && closedPollingAvailable">Export
     To PDF</button>
