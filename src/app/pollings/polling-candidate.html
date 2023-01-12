@@ -2,7 +2,11 @@
   <div class="col-md-12 m-2">
     <h4><a (click)="returnToPolling()" class="nav-link" style="cursor: pointer; display:inline !important"> <i
           class="bi bi-arrow-left-circle-fill"></i> </a>
-      Candidate - {{candidateName}} </h4>
+      Candidate - {{candidateName}} </h4> 
+      <div *ngIf="candidateLink?.length > 0">
+        <a class="nav-link" style="display:inline;text-decoration:underline;" 
+         href="{{candidateLink}}" target="new">Link to Additional Candidate Information</a>
+      </div>
   </div>
   <div class="col-md-12 col-xs-12 mt-5 pb-1">
     <div class="container">

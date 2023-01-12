@@ -192,10 +192,18 @@
                   <div class="ps-4">
                     <label for="cn">Candidate Name</label>
                     <input type="text" class="form-control" name="newCandidateName" [(ngModel)]="newCandidateName"
-                      required /> <button type="input" (click)="addNewCandidate()"
+                      required /> 
+                      <br/>
+                      <label for="cn">Candidate Link (optional)</label>
+                      <input type="text" class="form-control" name="newCandidateLink" [(ngModel)]="newCandidateLink"
+                       /> 
+                      
+                      <button type="input" (click)="addNewCandidate()"
                       class="btn btn-success mt-2 mb-2">Create
                       New
                       Candidate</button>
+
+
                   </div>
                 </div>
               </div>

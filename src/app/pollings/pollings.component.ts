@@ -178,12 +178,13 @@ export class PollingCandidate {
   public dataSourceNotes = new MatTableDataSource<Note>();
   private errorMessage = '';
   public candidateName = '';
+  public candidateLink = '';
   public pollingNames = [];
   public pollingNotes = [];
 
   constructor(public dialogRef: MatDialogRef<PollingCandidate>, private notesService: NotesService, @Inject(MAT_DIALOG_DATA) public data: any) {
     this.candidateName = this.data.candidate.name;
-
+    this.candidateLink = this.data.candidate.link;
     this.notesService.getExternalNoteByCandidateId(data.candidate.candidate_id, data.accessToken).subscribe({
       next: data => {
         this.dataSourceNotes.data = data;

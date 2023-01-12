@@ -27,6 +27,7 @@ export class CandidatesComponent implements OnInit {
   candidateList: Candidate[] = [];
   candidateSelected = false;
   candidateName = '';
+  candidateLink = '';
   private errorMessage = '';
   noteList: any[];
   noteListPolling: any[];
@@ -73,6 +74,7 @@ export class CandidatesComponent implements OnInit {
 
   viewCandidate(element: any):void {
     this.candidateName = element.name;
+    this.candidateLink = element.link;
     this.candidate_id = element.candidate_id;
     this.pollingNames = [];
     this.pollingNotes = [];

@@ -4,6 +4,10 @@
 <div class="col-md-12 m-2 title" *ngIf="candidateSelected">
   <h2><a (click)="resetCandidates()" class="nav-link mt-2 mb-2 mx-2"> <i class="bi bi-arrow-left-circle-fill"></i> </a>
     Candidate - {{candidateName}}</h2>
+    <div *ngIf="candidateLink?.length > 0">
+      <a class="nav-link" style="display:inline;text-decoration:underline;" 
+       href="{{candidateLink}}" target="new">Link to Additional Candidate Information</a>
+    </div>
 </div>
 <div class="col-md-6 col-xs-12 mt-5 pb-4" *ngIf="!candidateSelected">
   <div class="container">

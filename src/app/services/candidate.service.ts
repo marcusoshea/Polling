@@ -49,7 +49,7 @@ export class CandidateService {
     );
   }
 
-  createCandidate(name: string, polling_order_id: string, accessToken: string): Observable<any> {
+  createCandidate(name: string, link: string, polling_order_id: string, accessToken: string): Observable<any> {
     const today = new Date();
     const created = today.toISOString().split('T')[0];
     var reqHeader = new HttpHeaders({ 
@@ -60,6 +60,7 @@ export class CandidateService {
       API_URL + '/candidate/create',
       {
         "name": name,
+        "link": link,
         "polling_order_id": polling_order_id,
         "pom_created_at": created,
         "authToken": accessToken

@@ -60,6 +60,7 @@ export class AdminComponent implements OnInit {
   public dataSourcePollings = new MatTableDataSource<Polling>();
   public displayedColumnsCandidates = ['buttons', 'name'];
   public newCandidateName = '';
+  public newCandidateLink = '';
   public newOrderMemberName = '';
   public newOrderMemberEmail = '';
   public showCandidateWarning = false;
@@ -335,11 +336,12 @@ export class AdminComponent implements OnInit {
 
 
   addNewCandidate(): void {
-    this.subscript9 = this.candidateService.createCandidate(this.newCandidateName, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
+    this.subscript9 = this.candidateService.createCandidate(this.newCandidateName, this.newCandidateLink, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
       next: data => {
         this.candidateList.push(data);
         this.dataSourceCandidates.data = this.candidateList;
         this.newCandidateName = '';
+        this.newCandidateLink = '';
       },
       error: err => {
         this.errorMessage = err.error.message;
