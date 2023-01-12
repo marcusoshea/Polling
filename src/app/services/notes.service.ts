@@ -89,6 +89,21 @@ export class NotesService {
     );
   }
 
+  removeExternalNote(note_id: string, polling_order_member_id: string, accessToken: string): Observable<any> {
+       var reqHeader = new HttpHeaders({ 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+   });
+    return this.http.post(
+      API_URL + '/externalnote/delete',
+      {
+        "external_notes_id": note_id,
+        "polling_order_member_id": polling_order_member_id,
+        "authToken": accessToken
+      }, { headers: reqHeader }
+    );
+  }
+
   getPollingReportTotals(pollingId: Number, accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
