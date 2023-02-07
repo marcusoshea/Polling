@@ -68,4 +68,36 @@ export class CandidateService {
     );
   }
 
+
+  createCandidateImage(file: File, candidateId: string,   imageDesc: string, accessToken: string): Observable<any> {
+
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
+
+
+    const blobOverrides = new Blob([], {
+      type: 'application/json',
+    });
+
+    formData.append('overrides', blobOverrides);
+
+    const today = new Date();
+    const created = today.toISOString().split('T')[0];
+    var reqHeader = new HttpHeaders({ 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+   });
+   console.log('form4444444444444444444444', formData)
+    return this.http.post(
+      API_URL + '/candidate/createImage',
+      {
+        "file": formData,
+        "candidate_id": candidateId,
+        "pom_created_at": created,
+        "authToken": accessToken
+      }, { headers: reqHeader }
+    );
+  }
+
+
 }

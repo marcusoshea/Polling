@@ -44,6 +44,10 @@ export class AdminComponent implements OnInit {
   public subscript9?: Subscription;
   public subscript10?: Subscription;
   public subscript11?: Subscription;
+  public subscript12?: Subscription;
+
+  selectedFiles: FileList;
+
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
@@ -54,11 +58,12 @@ export class AdminComponent implements OnInit {
   private errorMessage = '';
   private accessToken = '';
   public displayedColumns = ['buttons', 'name'];
+  public displayedColumnsPollings = ['buttons', 'name'];
   public dataSource = new MatTableDataSource<OrderMember>();
   public dataSourceMemberList = new MatTableDataSource<OrderMember>();
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public dataSourcePollings = new MatTableDataSource<Polling>();
-  public displayedColumnsCandidates = ['buttons', 'name'];
+  public displayedColumnsCandidates = ['buttons', 'name', 'images'];
   public newCandidateName = '';
   public newCandidateLink = '';
   public newOrderMemberName = '';
@@ -71,6 +76,7 @@ export class AdminComponent implements OnInit {
   public selectedPollingCandidates: any[];
   public newPollingName = '';
   public selectAllBox = false;
+  public imageDesc = '';
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -162,13 +168,13 @@ export class AdminComponent implements OnInit {
 
   randomizer(): string {
     let ts = String(new Date().getTime()),
-        i = 0,
-        out = '';
-      for (i = 0; i < ts.length; i += 2) {
-        out += Number(ts.substr(i, 2)).toString(36);
-      }
-      return Math.ceil(Math.random()*10000) + out;
-;
+      i = 0,
+      out = '';
+    for (i = 0; i < ts.length; i += 2) {
+      out += Number(ts.substr(i, 2)).toString(36);
+    }
+    return Math.ceil(Math.random() * 10000) + out;
+    ;
   }
 
   addNewMember(): void {
@@ -178,14 +184,14 @@ export class AdminComponent implements OnInit {
     let password = this.randomizer();
 
     this.authService.forceRegister(this.newOrderMemberName, this.newOrderMemberEmail, password, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
-         next: data => {
-           alert("New Member Created");
-           setTimeout(() => {
-             window.location.reload();
-           }, 1000);
-         }
-       });  
-   }
+      next: data => {
+        alert("New Member Created");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    });
+  }
 
   openDialog(enterAnimationDuration: string, exitAnimationDuration: string, Asst: boolean): void {
     let admin = 0;
@@ -314,6 +320,43 @@ export class AdminComponent implements OnInit {
       }
     });
   }
+
+// MOVE TO IMAGE MODAL
+
+  upload(element: any) {
+    const file = this.selectedFiles.item(0);
+    console.log('filessssss', file);
+    console.log('imageDesc', this.imageDesc);
+    //this.uploadService.uploadfile(file);
+
+
+     this.subscript12 = this.candidateService.createCandidateImage(file, element.candidate_id,  this.imageDesc, this.accessToken).subscribe({
+      next: data => {
+        this.candidateList.push(data);
+        this.dataSourceCandidates.data = this.candidateList;
+        this.newCandidateName = '';
+        this.newCandidateLink = '';
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    }); 
+ 
+
+
+  }
+
+  selectFile(event) {
+    this.selectedFiles = event.target.files;
+  }
+
+
+
+
+
+
+
+
 
 
   activeMember(memberInQuestion: any, activate: boolean): void {
@@ -450,6 +493,9 @@ export class AdminComponent implements OnInit {
     }
     if (this.subscript11) {
       this.subscript11.unsubscribe();
+    }
+    if (this.subscript12) {
+      this.subscript12.unsubscribe();
     }
   }
 

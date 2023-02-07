@@ -121,11 +121,12 @@
                     <label for="cn">Member Name</label>
                     <input type="text" class="form-control" name="newOrderMember" [(ngModel)]="newOrderMemberName"
                       required /> <br>
-                      <label for="cn">Member Email <br><b>(leave blank for random email @aepolling.org for members who will not be logging in)</b></label>
-                      <input type="text" class="form-control" name="newOrderMemberEmail" [(ngModel)]="newOrderMemberEmail"
-                         />  
-                      <button type="input" (click)="addNewMember()"
-                      class="btn btn-success mt-2 mb-2">Create New Member</button>
+                    <label for="cn">Member Email <br><b>(leave blank for random email @aepolling.org for members who
+                        will not be logging in)</b></label>
+                    <input type="text" class="form-control" name="newOrderMemberEmail"
+                      [(ngModel)]="newOrderMemberEmail" />
+                    <button type="input" (click)="addNewMember()" class="btn btn-success mt-2 mb-2">Create New
+                      Member</button>
                   </div>
                 </div>
               </div>
@@ -148,7 +149,7 @@
                     <div class="col-xs-12">
                       <button type="input" *ngIf="!element.active" (click)="activeMember(element, true)"
                         class="btn btn-success  m-2">Activate</button>
-                        <button type="input" *ngIf="element.active" (click)="activeMember(element, false)"
+                      <button type="input" *ngIf="element.active" (click)="activeMember(element, false)"
                         class="btn btn-danger  m-2">Deactivate</button>
                     </div>
 
@@ -192,14 +193,12 @@
                   <div class="ps-4">
                     <label for="cn">Candidate Name</label>
                     <input type="text" class="form-control" name="newCandidateName" [(ngModel)]="newCandidateName"
-                      required /> 
-                      <br/>
-                      <label for="cn">Candidate Link (optional)</label>
-                      <input type="text" class="form-control" name="newCandidateLink" [(ngModel)]="newCandidateLink"
-                       /> 
-                      
-                      <button type="input" (click)="addNewCandidate()"
-                      class="btn btn-success mt-2 mb-2">Create
+                      required />
+                    <br />
+                    <label for="cn">Candidate Link (optional)</label>
+                    <input type="text" class="form-control" name="newCandidateLink" [(ngModel)]="newCandidateLink" />
+
+                    <button type="input" (click)="addNewCandidate()" class="btn btn-success mt-2 mb-2">Create
                       New
                       Candidate</button>
 
@@ -207,6 +206,9 @@
                   </div>
                 </div>
               </div>
+
+              <!--
+              -->
               <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card col-md-12">
                 <ng-container matColumnDef="buttons">
                   <th mat-header-cell *matHeaderCellDef></th>
@@ -219,6 +221,27 @@
                   <th mat-header-cell *matHeaderCellDef> Name </th>
                   <td mat-cell *matCellDef="let element"> {{element.name}} </td>
                 </ng-container>
+
+
+
+<!-- MOVE TO IMAGE MODAL -->
+                <ng-container matColumnDef="images">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let element" class="col-md-1 ps-1">
+                    <label class="btn btn-default">
+                      <input type="file" (change)="selectFile($event)">
+                    </label>
+                    <textarea class="form-control" name="imageDesc" [(ngModel)]="imageDesc" rows="3"></textarea>
+                    <br> <button class="btn btn-success" [disabled]="!selectedFiles" (click)="upload(element)">Upload</button>
+                  </td>
+                </ng-container>
+
+
+
+
+
+
+
                 <tr mat-header-row *matHeaderRowDef="displayedColumnsCandidates"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumnsCandidates;"></tr>
               </table>
@@ -279,7 +302,8 @@
                   </div>
                 </div>
               </div>
-              <table mat-table [dataSource]="dataSourcePollings" class="mat-table custom-card col-md-12" *ngIf="pollingList.length > 0">
+              <table mat-table [dataSource]="dataSourcePollings" class="mat-table custom-card col-md-12"
+                *ngIf="pollingList.length > 0">
                 <ng-container matColumnDef="buttons">
                   <th mat-header-cell *matHeaderCellDef></th>
                   <td mat-cell *matCellDef="let element" class="col-md-1 ps-1"><button type="input"
@@ -291,8 +315,8 @@
                   <th mat-header-cell *matHeaderCellDef> Polling Name </th>
                   <td mat-cell *matCellDef="let element"> {{element.polling_name}} </td>
                 </ng-container>
-                <tr mat-header-row *matHeaderRowDef="displayedColumnsCandidates"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumnsCandidates;"></tr>
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsPollings"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsPollings;"></tr>
               </table>
             </mat-expansion-panel>
           </mat-accordion>
