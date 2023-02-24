@@ -321,16 +321,14 @@ export class AdminComponent implements OnInit {
     });
   }
 
-// MOVE TO IMAGE MODAL
-
+  // MOVE TO IMAGE MODAL
   upload(element: any) {
     const file = this.selectedFiles.item(0);
     console.log('filessssss', file);
     console.log('imageDesc', this.imageDesc);
     //this.uploadService.uploadfile(file);
 
-
-     this.subscript12 = this.candidateService.createCandidateImage(file, element.candidate_id,  this.imageDesc, this.accessToken).subscribe({
+    this.subscript12 = this.candidateService.createCandidateImage(file, element.candidate_id, this.imageDesc, this.accessToken).subscribe({
       next: data => {
         this.candidateList.push(data);
         this.dataSourceCandidates.data = this.candidateList;
@@ -340,24 +338,12 @@ export class AdminComponent implements OnInit {
       error: err => {
         this.errorMessage = err.error.message;
       }
-    }); 
- 
-
-
+    });
   }
 
   selectFile(event) {
     this.selectedFiles = event.target.files;
   }
-
-
-
-
-
-
-
-
-
 
   activeMember(memberInQuestion: any, activate: boolean): void {
     const today = new Date();
@@ -502,7 +488,6 @@ export class AdminComponent implements OnInit {
 }
 
 
-
 @Component({
   selector: 'confirm-admin',
   templateUrl: 'confirm-admin.html',
@@ -587,7 +572,6 @@ export class MemberConfirm {
 }
 
 
-
 @Component({
   selector: 'confirm-polling',
   templateUrl: 'confirm-polling.html',
@@ -611,7 +595,3 @@ export class PollingConfirm {
     this.dialogRef.close({ data: this.polling_id });
   }
 }
-
-
-
-
