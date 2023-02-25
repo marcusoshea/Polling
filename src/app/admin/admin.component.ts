@@ -15,6 +15,7 @@ import { PollingService } from '../services/polling.service';
 import { Polling } from '../interfaces/polling';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { AngularEditorConfig } from '@kolkov/angular-editor';
 
 
 @Component({
@@ -24,6 +25,39 @@ import { AuthService } from '../services/auth.service';
 })
 export class AdminComponent implements OnInit {
   @ViewChild(MatSelectionList) candidate: MatSelectionList;
+
+  htmlContent = '';
+
+  config: AngularEditorConfig = {
+    editable: true,
+    spellcheck: true,
+    height: '15rem',
+    minHeight: '5rem',
+    placeholder: 'Enter text here...',
+    translate: 'no',
+    defaultParagraphSeparator: 'p',
+    defaultFontName: 'Arial',
+    toolbarHiddenButtons: [
+      ['insertImage', 'insertVideo','toggleEditorMode']
+      ],
+    customClasses: [
+      {
+        name: "quote",
+        class: "quote",
+      },
+      {
+        name: 'redText',
+        class: 'redText'
+      },
+      {
+        name: "titleText",
+        class: "titleText",
+        tag: "h1",
+      },
+    ]
+  };
+
+
   pollingOrder = {} as PollingOrder;
   orderMemberList: OrderMember[] = [];
   UnapprovedOrderMemberList: OrderMember[] = [];

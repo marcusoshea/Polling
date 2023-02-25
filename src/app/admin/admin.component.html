@@ -231,7 +231,13 @@
                     <label class="btn btn-default">
                       <input type="file" (change)="selectFile($event)">
                     </label>
+
+                    <angular-editor [placeholder]="'Enter text here...'" [(ngModel)]="htmlContent" [config]="config"></angular-editor>
+                    
                     <textarea class="form-control" name="imageDesc" [(ngModel)]="imageDesc" rows="3"></textarea>
+
+
+
                     <br> <button class="btn btn-success" [disabled]="!selectedFiles" (click)="upload(element)">Upload</button>
                   </td>
                 </ng-container>

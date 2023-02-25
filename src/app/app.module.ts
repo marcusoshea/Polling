@@ -28,6 +28,8 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatListModule} from '@angular/material/list';
 import { CommonModule } from '@angular/common';  
 import { ReportComponent } from './report/report.component';
+import { AngularEditorModule } from '@kolkov/angular-editor';
+
 
 @NgModule({
   declarations: [
@@ -45,6 +47,7 @@ import { ReportComponent } from './report/report.component';
     ReportComponent
   ],
   imports: [
+    AngularEditorModule, 
     BrowserModule,
     CommonModule,
     AppRoutingModule,
