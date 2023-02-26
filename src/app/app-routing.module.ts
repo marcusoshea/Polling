@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
@@ -11,6 +10,7 @@ import { AdminComponent } from './admin/admin.component';
 import { CandidatesComponent } from './candidates/candidates.component';
 import { PollingsComponent } from './pollings/pollings.component';
 import { ReportComponent } from './report/report.component';
+import { CandidateImagesComponent } from './candidate-images/candidate-images.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -21,6 +21,7 @@ const routes: Routes = [
   { path: 'profile', component: ProfileComponent },
   { path: 'admin', component: AdminComponent },
   { path: 'candidates', component: CandidatesComponent },
+  { path: 'candidate-images', component: CandidateImagesComponent },
   { path: 'pollings', component: PollingsComponent },
   { path: 'report', component: ReportComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }

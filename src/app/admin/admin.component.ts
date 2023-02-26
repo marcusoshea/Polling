@@ -2,7 +2,7 @@ import { Component, ComponentFactoryResolver, Inject, OnInit, ViewChild } from '
 import { MemberService } from '../services/member.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrderService } from '../services/polling-order.service';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { PollingOrder } from '../interfaces/polling-order'
 import { OrderMember } from '../interfaces/order-member'
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -16,7 +16,6 @@ import { Polling } from '../interfaces/polling';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
-
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
@@ -24,6 +23,7 @@ import { AuthService } from '../services/auth.service';
 })
 export class AdminComponent implements OnInit {
   @ViewChild(MatSelectionList) candidate: MatSelectionList;
+
   pollingOrder = {} as PollingOrder;
   orderMemberList: OrderMember[] = [];
   UnapprovedOrderMemberList: OrderMember[] = [];
@@ -44,6 +44,7 @@ export class AdminComponent implements OnInit {
   public subscript9?: Subscription;
   public subscript10?: Subscription;
   public subscript11?: Subscription;
+  public subscript12?: Subscription;
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
@@ -54,6 +55,7 @@ export class AdminComponent implements OnInit {
   private errorMessage = '';
   private accessToken = '';
   public displayedColumns = ['buttons', 'name'];
+  public displayedColumnsPollings = ['buttons', 'name'];
   public dataSource = new MatTableDataSource<OrderMember>();
   public dataSourceMemberList = new MatTableDataSource<OrderMember>();
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
@@ -71,6 +73,7 @@ export class AdminComponent implements OnInit {
   public selectedPollingCandidates: any[];
   public newPollingName = '';
   public selectAllBox = false;
+  public imageDesc = '';
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -162,13 +165,13 @@ export class AdminComponent implements OnInit {
 
   randomizer(): string {
     let ts = String(new Date().getTime()),
-        i = 0,
-        out = '';
-      for (i = 0; i < ts.length; i += 2) {
-        out += Number(ts.substr(i, 2)).toString(36);
-      }
-      return Math.ceil(Math.random()*10000) + out;
-;
+      i = 0,
+      out = '';
+    for (i = 0; i < ts.length; i += 2) {
+      out += Number(ts.substr(i, 2)).toString(36);
+    }
+    return Math.ceil(Math.random() * 10000) + out;
+    ;
   }
 
   addNewMember(): void {
@@ -178,14 +181,14 @@ export class AdminComponent implements OnInit {
     let password = this.randomizer();
 
     this.authService.forceRegister(this.newOrderMemberName, this.newOrderMemberEmail, password, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
-         next: data => {
-           alert("New Member Created");
-           setTimeout(() => {
-             window.location.reload();
-           }, 1000);
-         }
-       });  
-   }
+      next: data => {
+        alert("New Member Created");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    });
+  }
 
   openDialog(enterAnimationDuration: string, exitAnimationDuration: string, Asst: boolean): void {
     let admin = 0;
@@ -315,6 +318,16 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  goToCandidateImages(element): void {
+    const navigationExtras: NavigationExtras = {
+      state: {
+        candidateName: element.name,
+        candidateId: element.candidate_id
+      }
+    };
+
+    this.router.navigate(['candidate-images'], navigationExtras);
+  }
 
   activeMember(memberInQuestion: any, activate: boolean): void {
     const today = new Date();
@@ -451,10 +464,12 @@ export class AdminComponent implements OnInit {
     if (this.subscript11) {
       this.subscript11.unsubscribe();
     }
+    if (this.subscript12) {
+      this.subscript12.unsubscribe();
+    }
   }
 
 }
-
 
 
 @Component({
@@ -541,7 +556,6 @@ export class MemberConfirm {
 }
 
 
-
 @Component({
   selector: 'confirm-polling',
   templateUrl: 'confirm-polling.html',
@@ -565,7 +579,3 @@ export class PollingConfirm {
     this.dialogRef.close({ data: this.polling_id });
   }
 }
-
-
-
-
