@@ -2,7 +2,7 @@ import { Component, ComponentFactoryResolver, Inject, OnInit, ViewChild } from '
 import { MemberService } from '../services/member.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrderService } from '../services/polling-order.service';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { PollingOrder } from '../interfaces/polling-order'
 import { OrderMember } from '../interfaces/order-member'
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -15,8 +15,6 @@ import { PollingService } from '../services/polling.service';
 import { Polling } from '../interfaces/polling';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { AngularEditorConfig } from '@kolkov/angular-editor';
-
 
 @Component({
   selector: 'app-admin',
@@ -25,38 +23,6 @@ import { AngularEditorConfig } from '@kolkov/angular-editor';
 })
 export class AdminComponent implements OnInit {
   @ViewChild(MatSelectionList) candidate: MatSelectionList;
-
-  htmlContent = '';
-
-  config: AngularEditorConfig = {
-    editable: true,
-    spellcheck: true,
-    height: '15rem',
-    minHeight: '5rem',
-    placeholder: 'Enter text here...',
-    translate: 'no',
-    defaultParagraphSeparator: 'p',
-    defaultFontName: 'Arial',
-    toolbarHiddenButtons: [
-      ['insertImage', 'insertVideo','toggleEditorMode']
-      ],
-    customClasses: [
-      {
-        name: "quote",
-        class: "quote",
-      },
-      {
-        name: 'redText',
-        class: 'redText'
-      },
-      {
-        name: "titleText",
-        class: "titleText",
-        tag: "h1",
-      },
-    ]
-  };
-
 
   pollingOrder = {} as PollingOrder;
   orderMemberList: OrderMember[] = [];
@@ -80,9 +46,6 @@ export class AdminComponent implements OnInit {
   public subscript11?: Subscription;
   public subscript12?: Subscription;
 
-  selectedFiles: FileList;
-
-
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
     private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService) { }
@@ -97,7 +60,7 @@ export class AdminComponent implements OnInit {
   public dataSourceMemberList = new MatTableDataSource<OrderMember>();
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public dataSourcePollings = new MatTableDataSource<Polling>();
-  public displayedColumnsCandidates = ['buttons', 'name', 'images'];
+  public displayedColumnsCandidates = ['buttons', 'name'];
   public newCandidateName = '';
   public newCandidateLink = '';
   public newOrderMemberName = '';
@@ -355,28 +318,15 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  // MOVE TO IMAGE MODAL
-  upload(element: any) {
-    const file = this.selectedFiles.item(0);
-    console.log('filessssss', file);
-    console.log('imageDesc', this.imageDesc);
-    //this.uploadService.uploadfile(file);
-
-    this.subscript12 = this.candidateService.createCandidateImage(file, element.candidate_id, this.imageDesc, this.accessToken).subscribe({
-      next: data => {
-        this.candidateList.push(data);
-        this.dataSourceCandidates.data = this.candidateList;
-        this.newCandidateName = '';
-        this.newCandidateLink = '';
-      },
-      error: err => {
-        this.errorMessage = err.error.message;
+  goToCandidateImages(element): void {
+    const navigationExtras: NavigationExtras = {
+      state: {
+        candidateName: element.name,
+        candidateId: element.candidate_id
       }
-    });
-  }
+    };
 
-  selectFile(event) {
-    this.selectedFiles = event.target.files;
+    this.router.navigate(['candidate-images'], navigationExtras);
   }
 
   activeMember(memberInQuestion: any, activate: boolean): void {

@@ -12,6 +12,7 @@ import { Note } from '../interfaces/note';
 import { Subscription } from 'rxjs';
 import { OrderMember } from '../interfaces/order-member';
 import { MemberService } from '../services/member.service';
+import { CandidateImages } from '../interfaces/candidateImages';
 
 @Component({
   selector: 'app-pollings',
@@ -181,8 +182,11 @@ export class PollingCandidate {
   public candidateLink = '';
   public pollingNames = [];
   public pollingNotes = [];
+  public displayedColumnsCandidateImage = ['image','description'];
+  public dataSourceCandidateImages = new MatTableDataSource<CandidateImages>();
+  candidateImageList: CandidateImages[] = [];
 
-  constructor(public dialogRef: MatDialogRef<PollingCandidate>, private notesService: NotesService, @Inject(MAT_DIALOG_DATA) public data: any) {
+  constructor(public dialogRef: MatDialogRef<PollingCandidate>, private notesService: NotesService, private candidateService: CandidateService,  @Inject(MAT_DIALOG_DATA) public data: any) {
     this.candidateName = this.data.candidate.name;
     this.candidateLink = this.data.candidate.link;
     this.notesService.getExternalNoteByCandidateId(data.candidate.candidate_id, data.accessToken).subscribe({
@@ -202,6 +206,16 @@ export class PollingCandidate {
           this.pollingNotes.push(data.filter(e => e.polling_name === element && e.private === false));
         }
         )
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
+
+    this.candidateService.getAllCandidateImages(data.candidate.candidate_id, data.accessToken).subscribe({
+      next: data => {
+        this.candidateImageList = data;
+        this.dataSourceCandidateImages.data = data;
       },
       error: err => {
         this.errorMessage = err.error.message;

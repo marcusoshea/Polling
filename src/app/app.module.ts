@@ -16,6 +16,7 @@ import {MatSelectModule} from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { CandidatesComponent } from './candidates/candidates.component';
+import { CandidateImagesComponent } from './candidate-images/candidate-images.component';
 import { PollingCandidate, PollingsComponent } from './pollings/pollings.component';
 import {MatTableModule, MatTableDataSource} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
@@ -44,7 +45,8 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
     CandidatesComponent,
     PollingsComponent,
     PollingCandidate,
-    ReportComponent
+    ReportComponent,
+    CandidateImagesComponent
   ],
   imports: [
     AngularEditorModule, 

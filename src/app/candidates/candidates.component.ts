@@ -13,6 +13,7 @@ import { Note } from '../interfaces/note';
 import { CandidateService } from '../services/candidate.service';
 import { NotesService } from '../services/notes.service';
 import { Subscription } from 'rxjs';
+import { CandidateImages } from '../interfaces/candidateImages';
 
 
 @Component({
@@ -38,6 +39,7 @@ export class CandidatesComponent implements OnInit {
   public subscript3?: Subscription;
   public subscript4?: Subscription;
   public subscript5?: Subscription;
+  public subscript6?: Subscription;
 
   constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService: NotesService) { }
   private accessToken = '';
@@ -48,6 +50,9 @@ export class CandidatesComponent implements OnInit {
   public dataSourceNotes = new MatTableDataSource<Note>();
   public pollingNames = [];
   public pollingNotes = [];
+  public displayedColumnsCandidateImage = ['image','description'];
+  public dataSourceCandidateImages = new MatTableDataSource<CandidateImages>();
+  candidateImageList: CandidateImages[] = [];
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -103,6 +108,15 @@ export class CandidatesComponent implements OnInit {
       }
     });
 
+    this.subscript6 = this.candidateService.getAllCandidateImages(element.candidate_id, this.accessToken).subscribe({
+      next: data => {
+        this.candidateImageList = data;
+        this.dataSourceCandidateImages.data = data;
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
     this.candidateSelected = true;
   }
 
@@ -149,6 +163,9 @@ export class CandidatesComponent implements OnInit {
     }
     if (this.subscript5) {
       this.subscript5.unsubscribe();
+    }
+    if (this.subscript6) {
+      this.subscript6.unsubscribe();
     }
   }
 }  

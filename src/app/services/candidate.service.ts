@@ -92,5 +92,33 @@ export class CandidateService {
 
   }
 
+  getAllCandidateImages(candidate_id: string, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get(API_URL + '/candidate/candidateImages/' + candidate_id, { headers: reqHeader });
+  }
+
+  deleteCandidateImage(imageId: string, accessToken: string, candidate_id: string, key: string): Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
+      }),
+      body: {
+        "image_id": imageId,
+        "authToken": accessToken,
+        "all": false,
+        "candidate_id": candidate_id,
+        "keys":[{"Key":key}],
+      },
+    };
+    return this.http.delete(
+      API_URL + '/candidate/deleteImage', options
+    );
+  }
+
 
 }

@@ -131,12 +131,6 @@
                 </div>
               </div>
 
-
-
-
-
-
-
               <table mat-table [dataSource]="dataSourceMemberList" class="mat-table custom-card col-md-12">
                 <ng-container matColumnDef="buttons">
                   <th mat-header-cell *matHeaderCellDef></th>
@@ -212,41 +206,23 @@
               <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card col-md-12">
                 <ng-container matColumnDef="buttons">
                   <th mat-header-cell *matHeaderCellDef></th>
-                  <td mat-cell *matCellDef="let element" class="col-md-1 ps-1"><button type="input"
+                  <td mat-cell *matCellDef="let element" class="col-md-3 ps-1">
+                    <br>
+                    <button type="input"
                       (click)="openCandidateDialog('500ms', '1500ms', element)"
-                      class="btn btn-danger me-3">Remove</button>
+                      class="btn btn-danger me-3">Remove</button> 
+                      <br><br>
+                      <button class="btn btn-success" (click)="goToCandidateImages(element)">Manage Candidate Images and Text</button>
+                      <br><br>
+
+
                   </td>
                 </ng-container>
+              
                 <ng-container matColumnDef="name">
                   <th mat-header-cell *matHeaderCellDef> Name </th>
-                  <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                  <td mat-cell *matCellDef="let element" class="ps-2"> {{element.name}} </td>
                 </ng-container>
-
-
-
-<!-- MOVE TO IMAGE MODAL -->
-                <ng-container matColumnDef="images">
-                  <th mat-header-cell *matHeaderCellDef></th>
-                  <td mat-cell *matCellDef="let element" class="col-md-1 ps-1">
-                    <label class="btn btn-default">
-                      <input type="file" (change)="selectFile($event)">
-                    </label>
-
-                    <angular-editor [placeholder]="'Enter text here...'" [(ngModel)]="htmlContent" [config]="config"></angular-editor>
-                    
-                    <textarea class="form-control" name="imageDesc" [(ngModel)]="imageDesc" rows="3"></textarea>
-
-
-
-                    <br> <button class="btn btn-success" [disabled]="!selectedFiles" (click)="upload(element)">Upload</button>
-                  </td>
-                </ng-container>
-
-
-
-
-
-
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumnsCandidates"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumnsCandidates;"></tr>
