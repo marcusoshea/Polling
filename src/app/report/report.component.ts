@@ -94,10 +94,7 @@ export class ReportComponent implements OnInit {
     })
   }
 
-
-
   public reportBuilder(data) {
-
     this.pollingReport = data;
     this.pollingTitle = this.pollingReport[0].polling_name;
     this.pollingOrderPollingType = this.pollingReport[0].polling_order_polling_type;
@@ -110,6 +107,8 @@ export class ReportComponent implements OnInit {
     this.participationRate = ((this.participatingMembers / this.activeMembers) * 100).toFixed(2);
     if (((this.participatingMembers / this.activeMembers) * 100) >= this.pollingOrderScore) {
       this.certified = 'certified.';
+    } else {
+      this.certified = 'not certified.';
     }
 
     this.subscript3 = this.notesService.getAllPollingNotesById(this.pollingReport[0]?.polling_id, this.accessToken).subscribe({

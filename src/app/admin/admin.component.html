@@ -195,14 +195,10 @@
                     <button type="input" (click)="addNewCandidate()" class="btn btn-success mt-2 mb-2">Create
                       New
                       Candidate</button>
-
-
                   </div>
                 </div>
               </div>
 
-              <!--
-              -->
               <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card col-md-12">
                 <ng-container matColumnDef="buttons">
                   <th mat-header-cell *matHeaderCellDef></th>
@@ -214,8 +210,12 @@
                       <br><br>
                       <button class="btn btn-success" (click)="goToCandidateImages(element)">Manage Candidate Images and Text</button>
                       <br><br>
-
-
+                      <div class="col-xs-12">
+                        <button type="input" *ngIf="!element.watch_list" (click)="moveCandidate(element, true)"
+                          class="btn btn-success  m-2">Move to Watchlist</button>
+                        <button type="input" *ngIf="element.watch_list" (click)="moveCandidate(element, false)"
+                          class="btn btn-danger  m-2">Move to Polling List</button>
+                      </div>
                   </td>
                 </ng-container>
               
@@ -274,6 +274,7 @@
                       </mat-list-option>
                       <mat-list-option *ngFor="let candidate of candidateList" [value]="candidate">
                         {{candidate.name}}
+                        <span *ngIf="candidate.watch_list">(Watchlist)</span>
                       </mat-list-option>
                     </mat-selection-list>
 

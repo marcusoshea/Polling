@@ -49,6 +49,26 @@ export class CandidateService {
     );
   }
 
+  editCandidate(candidateInfo: any, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.put(
+      API_URL + '/candidate/edit',
+      {
+        "candidate_id": candidateInfo.candidate_id,
+        "watch_list": candidateInfo.watch_list,
+        "link": candidateInfo.link,
+        "name": candidateInfo.name,
+        "polling_order_id": candidateInfo.polling_order_id,
+        "authToken": accessToken
+      }, { headers: reqHeader }
+    );
+
+  }
+
   createCandidate(name: string, link: string, polling_order_id: string, accessToken: string): Observable<any> {
     const today = new Date();
     const created = today.toISOString().split('T')[0];
@@ -78,7 +98,7 @@ export class CandidateService {
 
     let re = /(?:\.([^.]+))?$/;
     let fileType = re.exec(file.name)[1];
-    
+
     let formData: FormData = new FormData();
     formData.append('file', file, candidateId + '_' + Math.floor(Date.now() * Math.random()) + '.' + fileType);
     formData.append('candidate_id', candidateId);
@@ -112,7 +132,7 @@ export class CandidateService {
         "authToken": accessToken,
         "all": false,
         "candidate_id": candidate_id,
-        "keys":[{"Key":key}],
+        "keys": [{ "Key": key }],
       },
     };
     return this.http.delete(

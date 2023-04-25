@@ -45,6 +45,7 @@ export class AdminComponent implements OnInit {
   public subscript10?: Subscription;
   public subscript11?: Subscription;
   public subscript12?: Subscription;
+  public subscript13?: Subscription;
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
@@ -347,6 +348,23 @@ export class AdminComponent implements OnInit {
     }, 3000);
   };
 
+  moveCandidate(candidateInQuestion: any, watchlist: boolean): void {
+    if (candidateInQuestion.link === null) {
+      candidateInQuestion.link = '';
+    } 
+
+    candidateInQuestion.watch_list = watchlist;
+    
+    this.subscript13 = this.candidateService.editCandidate(candidateInQuestion, this.accessToken).subscribe({
+      next: data => {
+        this.getAllOrderMembers();
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
+
+  };
 
   addNewCandidate(): void {
     this.subscript9 = this.candidateService.createCandidate(this.newCandidateName, this.newCandidateLink, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
@@ -466,6 +484,9 @@ export class AdminComponent implements OnInit {
     }
     if (this.subscript12) {
       this.subscript12.unsubscribe();
+    }
+    if (this.subscript13) {
+      this.subscript13.unsubscribe();
     }
   }
 

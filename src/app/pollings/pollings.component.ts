@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 import { OrderMember } from '../interfaces/order-member';
 import { MemberService } from '../services/member.service';
 import { CandidateImages } from '../interfaces/candidateImages';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-pollings',
@@ -37,7 +38,8 @@ export class PollingsComponent implements OnInit {
   public subscript3?: Subscription;
   public subscript4?: Subscription;
   public votingMember = 0;
-
+  @ViewChild(MatSort) sort: MatSort;
+  
   constructor(private pollingService: PollingService, private memberService: MemberService, private storageService: StorageService, public dialog: MatDialog) { }
   public displayedColumnsPS = ['name', 'note', 'vote', 'private'];
   polling_id: Number;
@@ -97,8 +99,9 @@ export class PollingsComponent implements OnInit {
           this.completed = false;
         } else {
           this.completed = true;
-        };
-      },
+        };    
+        this.dataSourcePS.sort = this.sort;
+      },      
       error: err => {
         this.errorMessage = err.error.message;
       }

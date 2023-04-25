@@ -3,4 +3,5 @@ export interface Candidate {
     name: String;
     pollingOrderId: Number;
     authToken: string;
+    watch_list?: boolean;
     }

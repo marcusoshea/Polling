@@ -34,6 +34,7 @@ export class CandidatesComponent implements OnInit {
   noteListPolling: any[];
   newExternalNote = '';
   candidate_id = 0;
+  watch_list = false;
   public subscript1?: Subscription;
   public subscript2?: Subscription;
   public subscript3?: Subscription;
@@ -45,7 +46,7 @@ export class CandidatesComponent implements OnInit {
   private accessToken = '';
   private memberId = '';
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
-  public displayedColumnsCandidates = ['name'];
+  public displayedColumnsCandidates = ['name', 'watch_list'];
   public displayedColumnsNotes = ['external_note'];
   public dataSourceNotes = new MatTableDataSource<Note>();
   public pollingNames = [];
@@ -82,6 +83,7 @@ export class CandidatesComponent implements OnInit {
     this.candidateName = element.name;
     this.candidateLink = element.link;
     this.candidate_id = element.candidate_id;
+    this.watch_list = element.watch_list;
     this.pollingNames = [];
     this.pollingNotes = [];
     this.subscript2 = this.notesService.getExternalNoteByCandidateId(element.candidate_id, this.accessToken).subscribe({
