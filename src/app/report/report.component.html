@@ -65,7 +65,7 @@
                                                         <span *ngFor="let note of cl.notes">
                                                             <span *ngIf="note.note && note.note !== ''">
                                         <li>
-                                            "{{note.note}}"
+                                            <span *ngIf="note.private"><b>--PRIVATE RESPONSE--</b></span>  "{{note.note}}"
                                             <span class="px-3 fst-italic">- {{note.member_name}}</span>
                                         </li>
                                     </span>
