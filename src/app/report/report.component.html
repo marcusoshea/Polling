@@ -48,11 +48,28 @@
                                 <ul>
                                     <span *ngFor="let cl of candidateList" class="p-2">
                                         <li> <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
-                                            (<span *ngFor="let pt of pollingTotal">
-                                                <span *ngIf="cl.name === pt.name && pt.vote !== 'Null'">
-                                                     {{pt.vote}}: {{pt.total}},
+                                            (
+                                                <span *ngFor="let pt of pollingTotal">
+                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
+                                                        {{pt.vote}}: {{pt.total}},
+                                                    </span>
                                                 </span>
-                                            </span>) = {{cl.inProcessRating}}
+                                                <span *ngFor="let pt of pollingTotal">
+                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Wait' && pt.vote !== 'Null'">
+                                                        {{pt.vote}}: {{pt.total}},
+                                                    </span>
+                                                </span>
+                                                <span *ngFor="let pt of pollingTotal">
+                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'No' && pt.vote !== 'Null'">
+                                                        {{pt.vote}}: {{pt.total}},
+                                                    </span>
+                                                </span>
+                                                <span *ngFor="let pt of pollingTotal">
+                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
+                                                        {{pt.vote}}: {{pt.total}},
+                                                    </span>
+                                                </span>
+                                            ) = {{cl.inProcessRating}}
                                             <span *ngIf="showNotes">
                                                 <mat-accordion>
                                                     <mat-expansion-panel class="card card-container custom-card">
