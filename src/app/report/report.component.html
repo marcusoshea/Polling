@@ -50,7 +50,7 @@
                                         <li> <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
                                             (
                                                 <span *ngFor="let pt of pollingTotal">
-                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
+                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
                                                         {{pt.vote}}: {{pt.total}},
                                                     </span>
                                                 </span>
@@ -65,7 +65,7 @@
                                                     </span>
                                                 </span>
                                                 <span *ngFor="let pt of pollingTotal">
-                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
+                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
                                                         {{pt.vote}}: {{pt.total}}
                                                     </span>
                                                 </span>
@@ -129,10 +129,26 @@
                                         <li> <span class="fw-bold">{{cl.name}}</span>
                                             (
                                             <span *ngFor="let pt of pollingTotal">
-                                                <span *ngIf="cl.name === pt.name && pt.vote !== 'Null'">
-                                                    * {{pt.vote}}: {{pt.total}}
+                                                <span *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
+                                                    {{pt.vote}}: {{pt.total}},
                                                 </span>
-                                            </span>) = {{cl.inProcessRating}}
+                                            </span>
+                                            <span *ngFor="let pt of pollingTotal">
+                                                <span *ngIf="cl.name === pt.name && pt.vote === 'Wait' && pt.vote !== 'Null'">
+                                                    {{pt.vote}}: {{pt.total}},
+                                                </span>
+                                            </span>
+                                            <span *ngFor="let pt of pollingTotal">
+                                                <span *ngIf="cl.name === pt.name && pt.vote === 'No' && pt.vote !== 'Null'">
+                                                    {{pt.vote}}: {{pt.total}},
+                                                </span>
+                                            </span>
+                                            <span *ngFor="let pt of pollingTotal">
+                                                <span *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
+                                                    {{pt.vote}}: {{pt.total}}
+                                                </span>
+                                            </span>
+                                            ) = {{cl.inProcessRating}}
                                             <span
                                                 *ngIf="showNotes && cl.notes !== undefined  && cl.notes.length > 0 && cl.notes.length !==null">
                                                 <mat-accordion>

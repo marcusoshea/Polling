@@ -105,7 +105,7 @@ export class ReportComponent implements OnInit {
     this.activeMembers = this.pollingReport[1].active_members;
     this.participatingMembers = this.pollingReport[2].member_participation;
     this.participationRate = ((this.participatingMembers / this.activeMembers) * 100).toFixed(2);
-    if (((this.participatingMembers / this.activeMembers) * 100) >= this.pollingOrderScore) {
+    if (((this.participatingMembers / this.activeMembers) * 100) >= this.pollingOrderParticipation) {
       this.certified = 'certified.';
     } else {
       this.certified = 'not certified.';

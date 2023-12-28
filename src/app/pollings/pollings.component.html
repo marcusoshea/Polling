@@ -59,6 +59,10 @@
               <button type="submit" class="btn btn-danger m-3" (click)="submitPolling(true)">Submit Your Polling
                 Vote</button>
             </div>
+            <div class="col-md-4 m-2 title d-flex align-self-end" *ngIf="completed">
+            <button type="submit" class="btn btn-danger m-3" (click)="submitPolling(true)">Update Your Submitted Polling
+              Vote</button>
+            </div>
           </div>
         </div>
       </div>
