@@ -24,7 +24,9 @@ export class ForgotPasswordComponent implements OnInit {
   ngOnInit(): void {
     this.pollingOrderService.getAllOrders().subscribe({
       next: response => {
-        this.pollingOrderList = response;
+        this.pollingOrderList = response.sort(function (a, b) {
+          return (a.polling_order_name < b.polling_order_name ? -1 : 1);
+        });
       },
       error: err => {
 
