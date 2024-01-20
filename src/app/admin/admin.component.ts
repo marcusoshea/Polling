@@ -124,7 +124,10 @@ export class AdminComponent implements OnInit {
   getAllOrderMembers(): void {
     this.subscript3 = this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
-        this.orderMemberList = data.filter(e => e.approved === true && e.removed === false);
+        this.orderMemberList = data.filter(e => e.approved === true && e.removed === false).sort(function (a, b) {
+          return (a.name < b.name ? -1 : 1);
+        });
+
         this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
         this.dataSourceMemberList.data = this.orderMemberList;
         this.dataSource.data = this.UnapprovedOrderMemberList;
@@ -351,7 +354,7 @@ export class AdminComponent implements OnInit {
   moveCandidate(candidateInQuestion: any, watchlist: boolean): void {
     if (candidateInQuestion.link === null) {
       candidateInQuestion.link = '';
-    } 
+    }
 
     candidateInQuestion.watch_list = watchlist;
     

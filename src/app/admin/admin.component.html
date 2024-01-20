@@ -272,9 +272,12 @@
                       <mat-list-option (click)="selectAll()">
                         Select All
                       </mat-list-option>
-                      <mat-list-option *ngFor="let candidate of candidateList" [value]="candidate">
-                        {{candidate.name}}
+                      <mat-list-option *ngFor="let candidate of candidateList" [value]="candidate"
+                      [ngClass]="{'font-italic':candidate.watch_list}">
+                        {{candidate.name}} 
                         <span *ngIf="candidate.watch_list">(Watchlist)</span>
+                        <span *ngIf="!candidate.watch_list">(Polling List)</span>
+                        <hr>
                       </mat-list-option>
                     </mat-selection-list>
 

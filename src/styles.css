@@ -76,3 +76,8 @@ option:checked  {
 .mat-cell {
     word-wrap: break-word;
 }
+
+.font-italic {
+    font-style: italic;
+    background-color: var(--grey) !important;
+}
