@@ -32,7 +32,8 @@ export class PollingOrderService {
         "polling_order_admin": pollingOrderAdmin,
         "polling_order_admin_assistant": pollingOrderAdminAsst,
         "polling_order_id": pollingOrderId,
-        "authToken": accessToken
+        "authToken": accessToken,
+        "polling_order_notes_time_visible": -1
       }, { headers: reqHeader }
     );
   }
