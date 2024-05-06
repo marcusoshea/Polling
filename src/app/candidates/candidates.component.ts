@@ -5,9 +5,9 @@ import { PollingOrderService } from '../services/polling-order.service';
 import { Router } from '@angular/router';
 import { PollingOrder } from '../interfaces/polling-order'
 import { OrderMember } from '../interfaces/order-member'
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
 import { FormBuilder, Validators } from '@angular/forms';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
 import { Candidate } from '../interfaces/candidate';
 import { Note } from '../interfaces/note';
 import { CandidateService } from '../services/candidate.service';

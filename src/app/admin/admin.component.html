@@ -121,7 +121,7 @@
                     <label for="cn">Member Name</label>
                     <input type="text" class="form-control" name="newOrderMember" [(ngModel)]="newOrderMemberName"
                       required /> <br>
-                    <label for="cn">Member Email <br><b>(leave blank for random email @aepolling.org for members who
+                    <label for="cn">Member Email <br><b>(leave blank for random email &#64;aepolling.org for members who
                         will not be logging in)</b></label>
                     <input type="text" class="form-control" name="newOrderMemberEmail"
                       [(ngModel)]="newOrderMemberEmail" />
@@ -258,7 +258,7 @@
 
                     <label for="cn">Polling Date Range</label>
                     <mat-form-field appearance="fill" class="form-control mb-3">
-                      <mat-label>Enter a date range</mat-label>
+               
                       <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
                         <input matStartDate formControlName="start" placeholder="Start date">
                         <input matEndDate formControlName="end" placeholder="End date">

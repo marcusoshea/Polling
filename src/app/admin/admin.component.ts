@@ -5,12 +5,12 @@ import { PollingOrderService } from '../services/polling-order.service';
 import { NavigationExtras, Router } from '@angular/router';
 import { PollingOrder } from '../interfaces/polling-order'
 import { OrderMember } from '../interfaces/order-member'
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
 import { Candidate } from '../interfaces/candidate';
 import { CandidateService } from '../services/candidate.service';
-import { MatListOption, MatSelectionList } from '@angular/material/list'
+import { MatLegacyListOption as MatListOption, MatLegacySelectionList as MatSelectionList } from '@angular/material/legacy-list'
 import { PollingService } from '../services/polling.service';
 import { Polling } from '../interfaces/polling';
 import { Subscription } from 'rxjs';
