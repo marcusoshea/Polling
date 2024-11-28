@@ -30,6 +30,7 @@ import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-lis
 import { CommonModule } from '@angular/common';  
 import { ReportComponent } from './report/report.component';
 import { AngularEditorModule } from '@kolkov/angular-editor';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 
 @NgModule({
@@ -69,7 +70,9 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
     MatNativeDateModule,
     MatDatepickerModule
   ],
-  providers: [],
+  providers: [
+    provideAnimationsAsync()
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
