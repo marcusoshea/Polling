@@ -3,9 +3,9 @@ import { PollingService } from '../services/polling.service';
 import { Polling } from '../interfaces/polling';
 import { StorageService } from '../services/storage.service';
 import { PollingOrder } from '../interfaces/polling-order';
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
+import { MatTableDataSource } from '@angular/material/table';
 import { PollingSummary } from '../interfaces/polling-summary';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NotesService } from '../services/notes.service';
 import { CandidateService } from '../services/candidate.service';
 import { Note } from '../interfaces/note';
@@ -15,9 +15,27 @@ import { MemberService } from '../services/member.service';
 import { CandidateImages } from '../interfaces/candidateImages';
 import { MatSort } from '@angular/material/sort';
 
+import { MatTableModule } from '@angular/material/table';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatListModule } from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatDialogModule } from '@angular/material/dialog';
+
 @Component({
   selector: 'app-pollings',
   templateUrl: './pollings.component.html',
+  imports: [
+    MatExpansionModule, 
+    MatTableModule, 
+    FormsModule, 
+    MatFormFieldModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule
+  ],
   styleUrls: ['./pollings.component.css']
 })
 export class PollingsComponent implements OnInit {
@@ -171,9 +189,20 @@ export class PollingsComponent implements OnInit {
 
 }
 
+
 @Component({
   selector: 'polling-candidate',
-  templateUrl: 'polling-candidate.html',
+  templateUrl: 'polling-candidate.html',  
+  imports: [
+    MatExpansionModule, 
+    MatTableModule, 
+    FormsModule, 
+    MatFormFieldModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule,
+    MatDialogModule,
+  ],
 })
 export class PollingCandidate {
   public polling: Polling;

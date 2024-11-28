@@ -4,10 +4,28 @@ import { PollingOrderService } from '../services/polling-order.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrder } from '../interfaces/polling-order'
 import { Subscription } from 'rxjs';
- 
+import { MatTableModule } from '@angular/material/table';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatListModule } from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { AngularEditorModule } from '@kolkov/angular-editor';
+
 @Component({
   selector: 'app-reset-password',
   templateUrl: './reset-password.component.html',
+  imports: [
+    MatExpansionModule, 
+    MatTableModule, 
+    FormsModule, 
+    MatFormFieldModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule,
+    AngularEditorModule
+  ],
   styleUrls: ['./reset-password.component.css']
 })
 export class ResetPasswordComponent implements OnInit {

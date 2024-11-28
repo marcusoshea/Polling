@@ -12,7 +12,8 @@ import { PollingsComponent } from './pollings/pollings.component';
 import { ReportComponent } from './report/report.component';
 import { CandidateImagesComponent } from './candidate-images/candidate-images.component';
 
-const routes: Routes = [
+
+export const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
@@ -28,7 +29,7 @@ const routes: Routes = [
 ]; 
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule,RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

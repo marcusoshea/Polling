@@ -1,7 +1,7 @@
-import { NgModule } from '@angular/core';
+import { ApplicationConfig, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -12,42 +12,31 @@ import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 import { AdminComponent } from './admin/admin.component';
-import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
-import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
+import { MatSelectModule} from '@angular/material/select';
+import { MatDialogModule } from '@angular/material/dialog';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { CandidatesComponent } from './candidates/candidates.component';
 import { CandidateImagesComponent } from './candidate-images/candidate-images.component';
 import { PollingCandidate, PollingsComponent } from './pollings/pollings.component';
-import {MatLegacyTableModule as MatTableModule, MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
-import {MatLegacyPaginatorModule as MatPaginatorModule} from '@angular/material/legacy-paginator';
-import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
-import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
-import {MatSortModule} from '@angular/material/sort';
-import {MatExpansionModule} from '@angular/material/expansion';
-import {MatNativeDateModule} from '@angular/material/core';
-import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import { MatTableModule,MatTableDataSource} from '@angular/material/table';
+import { MatPaginatorModule} from '@angular/material/paginator';
+import { MatInputModule} from '@angular/material/input';
+import { MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatSortModule} from '@angular/material/sort';
+import { MatExpansionModule} from '@angular/material/expansion';
+import { MatNativeDateModule} from '@angular/material/core';
+import { MatDatepickerModule} from '@angular/material/datepicker';
+import { MatListModule} from '@angular/material/list';
 import { CommonModule } from '@angular/common';  
 import { ReportComponent } from './report/report.component';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-
+import { bootstrapApplication } from '@angular/platform-browser';
+import { RouterModule, RouterOutlet } from '@angular/router';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    LoginComponent,
-    RegisterComponent,
-    HomeComponent,
-    ProfileComponent,
-    AdminComponent,
-    ForgotPasswordComponent,
-    ResetPasswordComponent,
-    CandidatesComponent,
-    PollingsComponent,
-    PollingCandidate,
-    ReportComponent,
-    CandidateImagesComponent
+
   ],
   imports: [
     AngularEditorModule, 
@@ -68,11 +57,23 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     MatPaginatorModule,
     MatExpansionModule,
     MatNativeDateModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    RouterModule,
+    RouterOutlet
   ],
   providers: [
-    provideAnimationsAsync()
-  ],
-  bootstrap: [AppComponent]
+    provideAnimationsAsync(), provideHttpClient(), HttpClientModule
+  ]
 })
 export class AppModule { }
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(withFetch())
+  ]
+};
+
+bootstrapApplication(AppComponent, {
+  providers: [appConfig.providers],
+});
+

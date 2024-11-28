@@ -8,11 +8,9 @@ import { Subscription } from 'rxjs';
 
 declare var require: any;
 
-import * as pdfMake from "pdfmake/build/pdfmake";
-import * as pdfFonts from "pdfmake/build/vfs_fonts";
 import { trigger } from '@angular/animations';
 const htmlToPdfmake = require("html-to-pdfmake");
-(pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+
 
 @Component({
   selector: 'app-report',
@@ -213,23 +211,4 @@ export class ReportComponent implements OnInit {
     }
   }
 
-  @ViewChild('pdfTable')
-  pdfTable!: ElementRef;
-
-  public downloadAsPDF() {
-    const pdfTable = this.pdfTable.nativeElement;
-    var html = htmlToPdfmake(pdfTable.innerHTML);
-    const documentDefinition = {
-      content: html,  // a string or { width: number, height: number }
-      pageSize: 'A5',
-
-      // by default we use portrait, you can change it to landscape if you wish
-      pageOrientation: 'landscape',
-
-      // [left, top, right, bottom] or [horizontal, vertical] or just a number for equal margins
-      pageMargins: [10, 10, 10, 10]
-    };
-    pdfMake.createPdf(documentDefinition).download();
-
-  }
 }

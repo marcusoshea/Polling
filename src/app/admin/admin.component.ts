@@ -5,20 +5,37 @@ import { PollingOrderService } from '../services/polling-order.service';
 import { NavigationExtras, Router } from '@angular/router';
 import { PollingOrder } from '../interfaces/polling-order'
 import { OrderMember } from '../interfaces/order-member'
-import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatTableDataSource } from '@angular/material/table';
 import { Candidate } from '../interfaces/candidate';
 import { CandidateService } from '../services/candidate.service';
-import { MatLegacyListOption as MatListOption, MatLegacySelectionList as MatSelectionList } from '@angular/material/legacy-list'
+import { MatListOption, MatSelectionList } from '@angular/material/list'
 import { PollingService } from '../services/polling.service';
 import { Polling } from '../interfaces/polling';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTableModule } from '@angular/material/table';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
+  imports: [
+    ReactiveFormsModule, 
+    MatExpansionModule, 
+    MatTableModule, 
+    FormsModule, 
+    MatFormFieldModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule
+  ],
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {

@@ -4,24 +4,41 @@ import { StorageService } from '../services/storage.service';
 import { PollingOrderService } from '../services/polling-order.service';
 import { NavigationExtras, Router } from '@angular/router';
 import { OrderMember } from '../interfaces/order-member'
-import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatLegacyTableDataSource as MatTableDataSource } from '@angular/material/legacy-table';
+import { MatTableDataSource } from '@angular/material/table';
 import { Candidate } from '../interfaces/candidate';
 import { CandidateService } from '../services/candidate.service';
-import { MatLegacyListOption as MatListOption, MatLegacySelectionList as MatSelectionList } from '@angular/material/legacy-list'
+import { MatListOption,  MatSelectionList } from '@angular/material/list'
 import { PollingService } from '../services/polling.service';
 import { Polling } from '../interfaces/polling';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
-import { ActivatedRoute } from '@angular/router';
 import { CandidateImages } from '../interfaces/candidateImages';
+import { MatTableModule } from '@angular/material/table';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatListModule } from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { AngularEditorModule } from '@kolkov/angular-editor';
 
 
 @Component({
   selector: 'app-candidate-images',
   templateUrl: './candidate-images.component.html',
+  imports: [
+    MatExpansionModule, 
+    MatTableModule, 
+    FormsModule, 
+    MatFormFieldModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule,
+    AngularEditorModule
+  ],
   styleUrls: ['./candidate-images.component.css']
 })
 export class CandidateImagesComponent implements OnInit {
@@ -61,7 +78,7 @@ export class CandidateImagesComponent implements OnInit {
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
-    private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService, private route: ActivatedRoute) {
+    private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService) {
      
     const navigation = this.router.getCurrentNavigation();
     const state = navigation.extras.state as {
