@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+
 import { environment } from '../../environments/environment'
 
 const API_URL = environment.apiUrl;
@@ -14,7 +15,7 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(private http: HttpClient, public activatedRoute: ActivatedRoute) {}
+  constructor(private http: HttpClient, private activatedRoute: ActivatedRoute) {}
 
   login(email: string, password: string, polling_order_id: string): Observable<any> {
     return this.http.post(
@@ -87,7 +88,13 @@ export class AuthService {
     );
   }
 
+  handleRouteInfo(routeInfo: any) {
+    console.log('Route Info:', routeInfo);
+    // Handle the route information as needed
+  }
+
   async resetPassword(email: string, password: string): Promise<Observable<any>> {
+    
    const token = this.activatedRoute.snapshot.queryParamMap.get("token");
     return await this.http.post(
       API_URL + '/member/verify/'+token,

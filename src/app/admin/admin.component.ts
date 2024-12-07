@@ -22,6 +22,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker'; 
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
+import { trigger, state, style, animate, transition } from '@angular/animations';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-admin',
@@ -34,9 +36,19 @@ import { MatListModule } from '@angular/material/list';
     MatFormFieldModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatListModule
+    MatListModule,
+    CommonModule
   ],
-  styleUrls: ['./admin.component.css']
+  styleUrls: ['./admin.component.css'],
+  animations: [
+    trigger('bodyExpansion', [
+      state('collapsed', style({ height: '0px', opacity: 0 })),
+      state('expanded', style({ height: '*', opacity: 1 })),
+      transition('collapsed <=> expanded', [
+        animate('300ms ease-in-out')
+      ])
+    ])
+  ]
 })
 export class AdminComponent implements OnInit {
   @ViewChild(MatSelectionList) candidate: MatSelectionList;

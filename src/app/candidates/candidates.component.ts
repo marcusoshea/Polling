@@ -2,24 +2,43 @@ import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { MemberService } from '../services/member.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrderService } from '../services/polling-order.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { PollingOrder } from '../interfaces/polling-order'
 import { OrderMember } from '../interfaces/order-member'
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, Validators } from '@angular/forms';
-import { MatTableDataSource } from '@angular/material/table';
+import { FormBuilder, FormsModule, Validators } from '@angular/forms';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Candidate } from '../interfaces/candidate';
 import { Note } from '../interfaces/note';
 import { CandidateService } from '../services/candidate.service';
 import { NotesService } from '../services/notes.service';
 import { Subscription } from 'rxjs';
 import { CandidateImages } from '../interfaces/candidateImages';
+import { CommonModule } from '@angular/common';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatListModule } from '@angular/material/list';
+import { AngularEditorModule } from '@kolkov/angular-editor';
 
 
 @Component({
   selector: 'app-candidates',
   templateUrl: './candidates.component.html',
-  styleUrls: ['./candidates.component.css']
+  styleUrls: ['./candidates.component.css'],
+  imports: [
+    MatExpansionModule, 
+    MatTableModule, 
+    FormsModule, 
+    MatFormFieldModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule,
+    AngularEditorModule,
+    RouterModule,
+    CommonModule,
+  ],
 })
 export class CandidatesComponent implements OnInit {
   pollingOrder = {} as PollingOrder;

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { StorageService } from './services/storage.service';
 import { AuthService } from './services/auth.service';
 import { PollingOrder } from './interfaces/polling-order';
@@ -6,10 +6,10 @@ import { RouterModule, RouterOutlet, RouterLink, RouterLinkActive, ActivatedRout
 import { CommonModule } from '@angular/common';  
 import { provideRouter } from '@angular/router';
 
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
+  standalone: true,
   imports: [
     RouterOutlet,
     RouterModule,
@@ -18,7 +18,7 @@ import { provideRouter } from '@angular/router';
   ],
   styleUrls: ['./app.component.css']
 }) 
-export class AppComponent {
+export class AppComponent implements OnInit {
   isLoggedIn = false;
   showAdmin = false;
   showModeratorBoard = false;
@@ -28,7 +28,7 @@ export class AppComponent {
   
   constructor(private storageService: StorageService, private authService: AuthService, private activatedRoute: ActivatedRoute) { }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.isLoggedIn = this.storageService.isLoggedIn();
 
     if (this.isLoggedIn) {
@@ -42,6 +42,10 @@ export class AppComponent {
         location.replace('/login');
       }
     }
+    this.activatedRoute.params.subscribe(params => {
+      this.authService.handleRouteInfo(params);
+      console.log(params)
+    });
   }
 
   logout(): void {

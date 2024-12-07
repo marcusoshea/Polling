@@ -4,18 +4,40 @@ import { PollingOrder } from '../interfaces/polling-order'
 import { PollingService } from '../services/polling.service';
 import { NotesService } from '../services/notes.service';
 import { Subscription } from 'rxjs';
-
+import { MatTableModule } from '@angular/material/table';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatListModule } from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { AngularEditorModule } from '@kolkov/angular-editor';
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 declare var require: any;
 
 import { trigger } from '@angular/animations';
+
 const htmlToPdfmake = require("html-to-pdfmake");
 
 
 @Component({
   selector: 'app-report',
   templateUrl: './report.component.html',
-  styleUrls: ['./report.component.css']
+  styleUrls: ['./report.component.css'],
+  imports: [
+    MatExpansionModule, 
+    MatTableModule, 
+    FormsModule, 
+    MatFormFieldModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule,
+    AngularEditorModule,
+    RouterModule,
+    CommonModule,
+  ],
 })
 export class ReportComponent implements OnInit {
   pollingOrder = {} as PollingOrder;

@@ -23,6 +23,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialogModule } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-pollings',
@@ -34,7 +35,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatFormFieldModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatListModule
+    MatListModule,
+    CommonModule
   ],
   styleUrls: ['./pollings.component.css']
 })

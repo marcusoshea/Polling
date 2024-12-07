@@ -1,9 +1,9 @@
 import { ApplicationConfig, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
-import { AppRoutingModule } from './app-routing.module';
+import { AppRoutingModule, routes } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoginComponent } from './login/login.component';
@@ -32,7 +32,7 @@ import { ReportComponent } from './report/report.component';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { provideRouter, RouterModule, RouterOutlet, withComponentInputBinding } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -45,7 +45,6 @@ import { RouterModule, RouterOutlet } from '@angular/router';
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule,
-    HttpClientModule,
     MatDialogModule,
     ReactiveFormsModule,
     MatListModule,
@@ -59,21 +58,22 @@ import { RouterModule, RouterOutlet } from '@angular/router';
     MatNativeDateModule,
     MatDatepickerModule,
     RouterModule,
-    RouterOutlet
+    RouterOutlet,
+    RouterModule.forRoot(routes)
   ],
   providers: [
-    provideAnimationsAsync(), provideHttpClient(), HttpClientModule
-  ]
+    provideAnimationsAsync(), provideHttpClient()
+    ]
 })
 export class AppModule { }
 
 export const appConfig: ApplicationConfig = {
-  providers: [
+  providers: [RouterModule,
     provideHttpClient(withFetch())
   ]
 };
 
 bootstrapApplication(AppComponent, {
-  providers: [appConfig.providers],
+  providers: [appConfig.providers,  provideRouter(routes, withComponentInputBinding())],
 });
 

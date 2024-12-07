@@ -13,6 +13,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,8 @@ import { RouterModule } from '@angular/router';
     MatNativeDateModule,
     MatListModule,
     AngularEditorModule,
-    RouterModule
+    RouterModule,
+    CommonModule,
   ],
   styleUrls: ['./login.component.css']
 })
