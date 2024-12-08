@@ -11,6 +11,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { AngularEditorModule } from '@kolkov/angular-editor';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
@@ -23,7 +24,8 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
     MatDatepickerModule,
     MatNativeDateModule,
     MatListModule,
-    AngularEditorModule
+    AngularEditorModule,
+    CommonModule
   ],
   styleUrls: ['./register.component.css']
 })
