@@ -14,7 +14,6 @@ import { OrderMember } from '../interfaces/order-member';
 import { MemberService } from '../services/member.service';
 import { CandidateImages } from '../interfaces/candidateImages';
 import { MatSort } from '@angular/material/sort';
-
 import { MatTableModule } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,6 +23,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-pollings',
@@ -36,7 +36,8 @@ import { CommonModule } from '@angular/common';
     MatDatepickerModule,
     MatNativeDateModule,
     MatListModule,
-    CommonModule
+    CommonModule,
+    MatSelectModule
   ],
   styleUrls: ['./pollings.component.css']
 })

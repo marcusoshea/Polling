@@ -110,8 +110,19 @@ export class CandidateImagesComponent implements OnInit {
 
   }
 
-  upload() {
-    const file = this.selectedFiles.item(0);
+  async upload() {
+
+    let file: File;
+    if (this.selectedFiles && this.selectedFiles.length > 0) {
+      file = this.selectedFiles.item(0);
+    } else {
+      const placeholderPath = 'assets/placeholder.png';
+      const response = await fetch(placeholderPath);
+      const blob = await response.blob();
+      file = new File([blob], 'placeholder.png', { type: 'image/png' });
+
+    }
+
      this.subscript2 = this.candidateService.createCandidateImage(file, this.candidateId, this.imageDesc, this.accessToken).subscribe({
        error: err => {
          this.errorMessage = err.error.message;
