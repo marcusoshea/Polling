@@ -3,10 +3,17 @@ import { AuthService } from '../services/auth.service';
 import { PollingOrderService } from '../services/polling-order.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrder } from '../interfaces/polling-order'
- 
+import { CommonModule } from '@angular/common';  
+import { FormsModule } from '@angular/forms';
+
+
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.component.html',
+  imports: [
+    FormsModule, 
+    CommonModule
+  ],
   styleUrls: ['./forgot-password.component.css']
 })
 export class ForgotPasswordComponent implements OnInit {

@@ -39,7 +39,7 @@
                 <td mat-cell *matCellDef="let element" class="p-4 h6 mt-2 mb-2 mx-2">
                   <mat-select [(ngModel)]="element.vote" placeholder="Select Your Vote">
                     <mat-option [value]="1">Yes</mat-option>
-                    <mat-option *ngIf="pollingOrder.polling_order_id !==1" [value]="2">Wait</mat-option>
+                    <mat-option *ngIf="pollingOrder.polling_order_id !==1 && pollingOrder.polling_order_id !==8" [value]="2">Wait</mat-option>
                     <mat-option [value]="3">No</mat-option>
                     <mat-option [value]="4">Abstain</mat-option>
                   </mat-select>

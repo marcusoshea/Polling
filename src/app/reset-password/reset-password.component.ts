@@ -12,6 +12,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { AngularEditorModule } from '@kolkov/angular-editor';
+import { CommonModule } from '@angular/common';  
 
 @Component({
   selector: 'app-reset-password',
@@ -24,7 +25,8 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
     MatDatepickerModule,
     MatNativeDateModule,
     MatListModule,
-    AngularEditorModule
+    AngularEditorModule,
+    CommonModule
   ],
   styleUrls: ['./reset-password.component.css']
 })

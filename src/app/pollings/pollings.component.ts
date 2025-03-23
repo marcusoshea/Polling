@@ -205,6 +205,8 @@ export class PollingsComponent implements OnInit {
     MatNativeDateModule,
     MatListModule,
     MatDialogModule,
+    FormsModule, 
+    CommonModule
   ],
 })
 export class PollingCandidate {
