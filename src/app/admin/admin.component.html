@@ -269,14 +269,17 @@
                     </mat-form-field>
 
                     <mat-selection-list #candidate [(ngModel)]="selectedPollingCandidates" multiple required>
-                      <mat-list-option (click)="selectAll()">
+                        <mat-list-option (click)="selectAll()" style="background-color: #f0f8ff;">
                         Select All
-                      </mat-list-option>
+                        </mat-list-option>
+                        <mat-list-option (click)="selectAllPollingList()" style="background-color: #f0f8ff;">
+                        Select Polling List Only
+                        </mat-list-option><br>
                       <mat-list-option *ngFor="let candidate of candidateList" [value]="candidate"
-                      [ngClass]="{'font-italic':candidate.watch_list}">
+                      [ngClass]="{'font-italic':candidate.watch_list}"><br>
                         {{candidate.name}} 
                         <span *ngIf="candidate.watch_list">(Watchlist)</span>
-                        <span *ngIf="!candidate.watch_list">(Polling List)</span>
+                        <span *ngIf="">(Polling List)</span>
                         <hr>
                       </mat-list-option>
                     </mat-selection-list>

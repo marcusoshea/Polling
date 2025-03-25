@@ -103,6 +103,7 @@ export class AdminComponent implements OnInit {
   public selectedPollingCandidates: any[];
   public newPollingName = '';
   public selectAllBox = false;
+  public selectPollingListBox = false;
   public imageDesc = '';
 
   async ngOnInit(): Promise<void> {
@@ -448,6 +449,18 @@ export class AdminComponent implements OnInit {
     } else {
       this.candidate.selectAll();
       this.selectAllBox = true;
+    }
+  }
+
+  selectAllPollingList(): void {
+    this.selectPollingListBox = !this.selectPollingListBox;
+    this.candidate.options.forEach((option: MatListOption) => {
+      if (option.value && !option.value.watch_list) {
+        option.selected = true;
+      }
+    });
+    if (this.selectPollingListBox === false) {
+      this.candidate.deselectAll();
     }
   }
 
