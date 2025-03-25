@@ -105,7 +105,10 @@ export class AdminComponent implements OnInit {
   public selectAllBox = false;
   public selectPollingListBox = false;
   public imageDesc = '';
-
+  public selectAllButtonText = 'Select All';
+  public selectAllPollingButtonText = 'Select Polling Candidates';
+  public selectPollingListBoxDisabled = false;
+  
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
@@ -442,18 +445,28 @@ export class AdminComponent implements OnInit {
     }
   }
 
+
+
   selectAll(): void {
     if (this.selectAllBox) {
       this.candidate.deselectAll();
       this.selectAllBox = false;
+      this.selectAllButtonText = 'Select All'; 
+      this.selectPollingListBoxDisabled = false;
     } else {
       this.candidate.selectAll();
       this.selectAllBox = true;
+      this.selectAllButtonText = 'Unselect All'; 
+      this.selectAllPollingButtonText = 'Select Polling Candidates';
+      this.selectPollingListBoxDisabled = true;
+
+
     }
   }
 
   selectAllPollingList(): void {
     this.selectPollingListBox = !this.selectPollingListBox;
+    this.selectAllPollingButtonText = 'Unselect Polling Candidates';
     this.candidate.options.forEach((option: MatListOption) => {
       if (option.value && !option.value.watch_list) {
         option.selected = true;
@@ -461,6 +474,7 @@ export class AdminComponent implements OnInit {
     });
     if (this.selectPollingListBox === false) {
       this.candidate.deselectAll();
+      this.selectAllPollingButtonText = 'Select Polling Candidates';
     }
   }
 

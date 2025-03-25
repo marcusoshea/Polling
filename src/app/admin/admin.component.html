@@ -267,14 +267,11 @@
                       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                       <mat-date-range-picker #picker></mat-date-range-picker>
                     </mat-form-field>
+                    <button type="input" (click)="selectAll()" class="btn btn-success mt-2 mb-2">  {{ selectAllButtonText }}</button> &nbsp;
+                    <button type="input" (click)="selectAllPollingList()" class="btn btn-success mt-2 mb-2" [disabled]="selectPollingListBoxDisabled">  {{ selectAllPollingButtonText }}</button>
 
                     <mat-selection-list #candidate [(ngModel)]="selectedPollingCandidates" multiple required>
-                        <mat-list-option (click)="selectAll()" style="background-color: #f0f8ff;">
-                        Select All
-                        </mat-list-option>
-                        <mat-list-option (click)="selectAllPollingList()" style="background-color: #f0f8ff;">
-                        Select Polling List Only
-                        </mat-list-option><br>
+                        
                       <mat-list-option *ngFor="let candidate of candidateList" [value]="candidate"
                       [ngClass]="{'font-italic':candidate.watch_list}"><br>
                         {{candidate.name}} 
