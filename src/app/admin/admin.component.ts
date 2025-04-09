@@ -19,24 +19,27 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTableModule } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { CommonModule } from '@angular/common';
+import { MatInputModule } from '@angular/material/input';
+
 
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
   imports: [
-    ReactiveFormsModule, 
-    MatExpansionModule, 
-    MatTableModule, 
-    FormsModule, 
+    ReactiveFormsModule,
+    MatExpansionModule,
+    MatTableModule,
+    FormsModule,
     MatFormFieldModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatListModule,
+    MatInputModule,
     CommonModule
   ],
   styleUrls: ['./admin.component.css'],
@@ -84,13 +87,13 @@ export class AdminComponent implements OnInit {
   public changeAsstOccurred = false;
   private errorMessage = '';
   private accessToken = '';
-  public displayedColumns = ['buttons', 'name'];
-  public displayedColumnsPollings = ['buttons', 'name'];
+  public displayedColumns = ['name', 'buttons'];
+  public displayedColumnsPollings: string[] = ['name', 'startDate', 'endDate', 'actions'];
   public dataSource = new MatTableDataSource<OrderMember>();
   public dataSourceMemberList = new MatTableDataSource<OrderMember>();
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public dataSourcePollings = new MatTableDataSource<Polling>();
-  public displayedColumnsCandidates = ['buttons', 'name'];
+  public displayedColumnsCandidates = ['name', 'buttons'];
   public newCandidateName = '';
   public newCandidateLink = '';
   public newOrderMemberName = '';
@@ -108,7 +111,7 @@ export class AdminComponent implements OnInit {
   public selectAllButtonText = 'Select All';
   public selectAllPollingButtonText = 'Select Polling Candidates';
   public selectPollingListBoxDisabled = false;
-  
+
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
     this.pollingOrder = await this.storageService.getPollingOrder();
@@ -145,13 +148,17 @@ export class AdminComponent implements OnInit {
     this.subscript2 = this.pollingService.getAllPollings(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.pollingList = data;
-        this.dataSourcePollings.data = data;
+        this.dataSourcePollings.data = data.sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
       },
       error: err => {
         this.errorMessage = err.error.message;
       }
     });
 
+  }
+
+  reset(): void {
+    window.location.reload();
   }
 
   getAllOrderMembers(): void {
@@ -221,7 +228,7 @@ export class AdminComponent implements OnInit {
       next: data => {
         alert("New Member Created");
         setTimeout(() => {
-          window.location.reload();
+          this.reset();
         }, 1000);
       }
     });
@@ -384,16 +391,19 @@ export class AdminComponent implements OnInit {
     }, 3000);
   };
 
-  moveCandidate(candidateInQuestion: any, watchlist: boolean): void {
+  updateCandidate(candidateInQuestion: any, watchlist: boolean, nameUpdate?: boolean): void {
     if (candidateInQuestion.link === null) {
       candidateInQuestion.link = '';
     }
 
     candidateInQuestion.watch_list = watchlist;
-    
+
     this.subscript13 = this.candidateService.editCandidate(candidateInQuestion, this.accessToken).subscribe({
       next: data => {
         this.getAllOrderMembers();
+        if (nameUpdate) {
+          this.reset();
+        }
       },
       error: err => {
         this.errorMessage = err.error.message;
@@ -445,18 +455,34 @@ export class AdminComponent implements OnInit {
     }
   }
 
+  editPolling(element): void {
 
+    console.log(element.polling_id)
+    if (element.polling_name && element.start_date !== null
+      && element.end_date !== null) {
+
+      this.subscript10 = this.pollingService.editPolling(element.polling_name, this.pollingOrder.polling_order_id.toString(), element.polling_id, new Date(element.start_date).toISOString().split('T')[0], new Date(element.end_date).toISOString().split('T')[0], this.accessToken).subscribe({
+        next: data => {
+          alert("Polling Updated!");
+          element.isEditing = false;
+        },
+        error: err => {
+          this.errorMessage = err.error.message;
+        }
+      });
+    }
+  }
 
   selectAll(): void {
     if (this.selectAllBox) {
       this.candidate.deselectAll();
       this.selectAllBox = false;
-      this.selectAllButtonText = 'Select All'; 
+      this.selectAllButtonText = 'Select All';
       this.selectPollingListBoxDisabled = false;
     } else {
       this.candidate.selectAll();
       this.selectAllBox = true;
-      this.selectAllButtonText = 'Unselect All'; 
+      this.selectAllButtonText = 'Unselect All';
       this.selectAllPollingButtonText = 'Select Polling Candidates';
       this.selectPollingListBoxDisabled = true;
 

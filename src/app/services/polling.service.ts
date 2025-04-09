@@ -85,6 +85,24 @@ export class PollingService {
     );
   }
 
+  editPolling(name: string, polling_order_id: string, polling_id: string, start_date: string, end_date: string, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({ 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+   });
+    return this.http.put(
+      API_URL + '/polling/edit',
+      {
+        "name": name,
+        "polling_order_id": polling_order_id,
+        "polling_id": polling_id,
+        "start_date": start_date,
+        "end_date": end_date,
+        "authToken": accessToken
+      }, { headers: reqHeader }
+    );
+  }
+
   createPollingCandidates(pollingCandidates: string[], accessToken: string): Observable<any> {
     var reqHeader = new HttpHeaders({ 
       'Content-Type': 'application/json',
