@@ -213,7 +213,7 @@ export class AdminComponent implements OnInit {
 
   addNewMember(): void {
     if (this.newOrderMemberEmail === '') {
-      this.newOrderMemberEmail = this.randomizer() + '@aepolling.org';
+      this.newOrderMemberEmail = this.randomizer() + '@polling.aethelmearc.org';
     }
     let password = this.randomizer();
 
