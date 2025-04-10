@@ -4,7 +4,7 @@
         <h2>Polling Report</h2>
     </div>
 
- <button type="submit" class="btn btn-success mt-3" (click)="toggleReport()" *ngIf="closedPollingAvailable">
+    <button type="submit" class="btn btn-success mt-3" (click)="toggleReport()" *ngIf="closedPollingAvailable">
         <span *ngIf="toggleReport && closedPollingAvailable">Show Most Recent Polling</span>
         <span *ngIf="!toggleReport">Show Current Polling</span>
     </button>
@@ -31,8 +31,9 @@
                                     resulting in a participation rate of {{participationRate}}%. The polling is thus
                                     <span class="fw-bold">{{certified}}</span> <br><br></span>
 
-                                A candidate must attain a rate of {{pollingOrderScore}}% to be recommended to join the
-                                order.
+                                <span *ngIf="pollingOrderParticipation > 0"> A candidate must attain a rate of
+                                    {{pollingOrderScore}}% to be recommended to join the
+                                    order.</span>
                             </div>
 
                             <div *ngIf="pollingOrderPollingType === 2" class="p-2">
@@ -49,26 +50,30 @@
                                     <span *ngFor="let cl of candidateList" class="p-2">
                                         <li> <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
                                             (
-                                                <span *ngFor="let pt of pollingTotal">
-                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
-                                                        {{pt.vote}}: {{pt.total}},
-                                                    </span>
+                                            <span *ngFor="let pt of pollingTotal">
+                                                <span
+                                                    *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
+                                                    {{pt.vote}}: {{pt.total}},
                                                 </span>
-                                                <span *ngFor="let pt of pollingTotal">
-                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Wait' && pt.vote !== 'Null'">
-                                                        {{pt.vote}}: {{pt.total}},
-                                                    </span>
+                                            </span>
+                                            <span *ngFor="let pt of pollingTotal">
+                                                <span
+                                                    *ngIf="cl.name === pt.name && pt.vote === 'Wait' && pt.vote !== 'Null'">
+                                                    {{pt.vote}}: {{pt.total}},
                                                 </span>
-                                                <span *ngFor="let pt of pollingTotal">
-                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'No' && pt.vote !== 'Null'">
-                                                        {{pt.vote}}: {{pt.total}},
-                                                    </span>
+                                            </span>
+                                            <span *ngFor="let pt of pollingTotal">
+                                                <span
+                                                    *ngIf="cl.name === pt.name && pt.vote === 'No' && pt.vote !== 'Null'">
+                                                    {{pt.vote}}: {{pt.total}},
                                                 </span>
-                                                <span *ngFor="let pt of pollingTotal">
-                                                    <span *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
-                                                        {{pt.vote}}: {{pt.total}}
-                                                    </span>
+                                            </span>
+                                            <span *ngFor="let pt of pollingTotal">
+                                                <span
+                                                    *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
+                                                    {{pt.vote}}: {{pt.total}}
                                                 </span>
+                                            </span>
                                             ) = {{cl.inProcessRating}}
                                             <span *ngIf="showNotes">
                                                 <mat-accordion>
@@ -82,7 +87,8 @@
                                                         <span *ngFor="let note of cl.notes">
                                                             <span *ngIf="note.note && note.note !== ''">
                                         <li>
-                                            <span *ngIf="note.private"><b>--PRIVATE RESPONSE--</b></span>  "{{note.note}}"
+                                            <span *ngIf="note.private"><b>--PRIVATE RESPONSE--</b></span>
+                                            "{{note.note}}"
                                             <span class="px-3 fst-italic">- {{note.member_name}}</span>
                                         </li>
                                     </span>
@@ -109,7 +115,8 @@
                                         The {{pollingTitle}} has a participation of {{participatingMembers}} of
                                         {{activeMembers}}
                                         active order members,
-                                        resulting in a participation rate of {{participationRate}}%. The polling is currently 
+                                        resulting in a participation rate of {{participationRate}}%. The polling is
+                                        currently
                                         <span class="fw-bold">{{certified}}</span> <br><br></span>
 
                                     A candidate must attain a rate of {{pollingOrderScore}}% to be recommended to join
@@ -129,22 +136,26 @@
                                         <li> <span class="fw-bold">{{cl.name}}</span>
                                             (
                                             <span *ngFor="let pt of pollingTotal">
-                                                <span *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
+                                                <span
+                                                    *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
                                                     {{pt.vote}}: {{pt.total}},
                                                 </span>
                                             </span>
                                             <span *ngFor="let pt of pollingTotal">
-                                                <span *ngIf="cl.name === pt.name && pt.vote === 'Wait' && pt.vote !== 'Null'">
+                                                <span
+                                                    *ngIf="cl.name === pt.name && pt.vote === 'Wait' && pt.vote !== 'Null'">
                                                     {{pt.vote}}: {{pt.total}},
                                                 </span>
                                             </span>
                                             <span *ngFor="let pt of pollingTotal">
-                                                <span *ngIf="cl.name === pt.name && pt.vote === 'No' && pt.vote !== 'Null'">
+                                                <span
+                                                    *ngIf="cl.name === pt.name && pt.vote === 'No' && pt.vote !== 'Null'">
                                                     {{pt.vote}}: {{pt.total}},
                                                 </span>
                                             </span>
                                             <span *ngFor="let pt of pollingTotal">
-                                                <span *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
+                                                <span
+                                                    *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
                                                     {{pt.vote}}: {{pt.total}}
                                                 </span>
                                             </span>
@@ -162,7 +173,8 @@
                                                         <span *ngFor="let note of cl.notes">
                                                             <span *ngIf="note.note && note.note !== ''">
                                         <li>
-                                            <span *ngIf="note.private"><b>--PRIVATE RESPONSE--</b></span> "{{note.note}}"
+                                            <span *ngIf="note.private"><b>--PRIVATE RESPONSE--</b></span>
+                                            "{{note.note}}"
                                             <span class="px-3 fst-italic">- {{note.member_name}}</span>
                                         </li>
                                     </span>
@@ -176,12 +188,9 @@
                                 </ul>
                             </div>
                         </div>
-
                         <div *ngIf="closedPollingAvailable === false && inProcessPollingAvailable === false">
                             No Polling Report Data Available
                         </div>
-
-
                     </div>
                 </div>
             </div>

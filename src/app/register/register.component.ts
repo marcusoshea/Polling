@@ -37,6 +37,7 @@ export class RegisterComponent implements OnInit {
     pollingOrder: null
   };
   isRegistered = false;
+  isRegisterFailed = false;
   errorMessage = '';
   pollingOrderList: PollingOrder[] = [];
   showError = false;
@@ -69,6 +70,13 @@ export class RegisterComponent implements OnInit {
           this.showError = false;
         }, 3000);  
         this.errorMessage = err.error.message;
+        if (err.error.message === 'Account exists already.') {
+          this.isRegisterFailed = true;
+          setTimeout(() => {
+            this.isRegisterFailed = false;
+          }, 4000);
+        }
+
       }
     }); 
   }

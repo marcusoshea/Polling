@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "https://api.aepolling.org"
+  apiUrl: "https://api-polling.aethelmearc.org"
 };
