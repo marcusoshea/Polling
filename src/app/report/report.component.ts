@@ -131,9 +131,9 @@ export class ReportComponent implements OnInit {
       this.certified = 'not certified.';
     }
 
-    this.subscript3 = this.notesService.getAllPollingNotesById(this.pollingReport[0]?.polling_id, this.accessToken).subscribe({
-      next: data => {    
-        this.subscript2 = this.notesService.getPollingReportTotals(this.pollingReport[0].polling_id, this.accessToken).subscribe({
+    this.subscript2 = this.notesService.getAllPollingNotesById(this.pollingReport[0]?.polling_id, this.accessToken).subscribe({
+      next: data => { 
+        this.subscript3 = this.notesService.getPollingReportTotals(this.pollingReport[0].polling_id, this.accessToken).subscribe({
         next: data => {
         this.pollingTotal = data;
         const key = 'name';
