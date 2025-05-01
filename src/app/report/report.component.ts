@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -27,9 +27,9 @@ const htmlToPdfmake = require("html-to-pdfmake");
   templateUrl: './report.component.html',
   styleUrls: ['./report.component.css'],
   imports: [
-    MatExpansionModule, 
-    MatTableModule, 
-    FormsModule, 
+    MatExpansionModule,
+    MatTableModule,
+    FormsModule,
     MatFormFieldModule,
     MatDatepickerModule,
     MatNativeDateModule,
@@ -132,77 +132,79 @@ export class ReportComponent implements OnInit {
     }
 
     this.subscript2 = this.notesService.getAllPollingNotesById(this.pollingReport[0]?.polling_id, this.accessToken).subscribe({
-      next: data => { 
+      next: data => {
         this.subscript3 = this.notesService.getPollingReportTotals(this.pollingReport[0].polling_id, this.accessToken).subscribe({
-        next: data => {
-        this.pollingTotal = data;
-        const key = 'name';
-        this.candidateList = [...new Map(data.map(item => [item[key], item])).values()];
-        let ticker = 0;
-        let positive = 0;
-        let negative = 0;
-        let abstain = 0;
-        let candidateNumber = 0;
-        let recommended = '';
-        this.candidateList = this.candidateList.sort((a, b) => b.name.localeCompare(a.name))
-        this.candidateList.forEach((x) => {
-          positive = 0;
-          negative = 0;
-          abstain = 0;
-          ticker = 0;
-          this.pollingTotal.forEach((element) => {
-            recommended = '';
-            if (x.name === element.name) {
-              if (element.vote === 'Yes') {
-                positive = positive + parseInt(element.total);
-              }
-              if (element.vote === 'No') {
-                negative = negative + parseInt(element.total);
-              }
-              if (element.vote === 'Wait') {
-                negative = negative + parseInt(element.total);
-              }
-              if (element.vote === 'Abstain' || element.vote === 'Null') {
-                abstain = abstain + parseInt(element.total);
-              }
-            }
+          next: data => {
+            this.pollingTotal = data;
+            const key = 'name';
+            this.candidateList = [...new Map(data.map(item => [item[key], item])).values()];
+            let ticker = 0;
+            let positive = 0;
+            let negative = 0;
+            let abstain = 0;
+            let candidateNumber = 0;
+            let recommended = '';
+            this.candidateList = this.candidateList.sort((a, b) => b.name.localeCompare(a.name))
+            this.candidateList.forEach((x) => {
+              positive = 0;
+              negative = 0;
+              abstain = 0;
+              ticker = 0;
+              this.pollingTotal.forEach((element) => {
+                recommended = '';
+                if (x.name === element.name) {
+                  if (element.vote === 'Yes') {
+                    positive = positive + parseInt(element.total);
+                  }
+                  if (element.vote === 'No') {
+                    negative = negative + parseInt(element.total);
+                  }
+                  if (element.vote === 'Wait') {
+                    negative = negative + parseInt(element.total);
+                  }
+                  if (element.vote === 'Abstain' || element.vote === 'Null') {
+                    abstain = abstain + parseInt(element.total);
+                  }
+                }
 
-            if (this.pollingTotal.length - 1 === ticker) {
-              let rating = parseFloat(((positive) / (this.participatingMembers - abstain) * 100).toFixed(2));
-              if (rating < 0 || isNaN(rating)) {
-                rating = 0;
-              }
-              if (rating >= this.pollingOrderScore) {
-                recommended = 'has been recommended to join the order with a rating of ' + rating + '%'
+                if (this.pollingTotal.length - 1 === ticker) {
+                  let rating = parseFloat(((positive) / (this.participatingMembers - abstain) * 100).toFixed(2));
+                  if (rating < 0 || isNaN(rating)) {
+                    rating = 0;
+                  }
+                  if (this.pollingOrderScore > 0) {
+                    if (rating >= this.pollingOrderScore) {
+                      recommended = 'has been recommended to join the order with a rating of ' + rating + '%'
+                    } else {
+                      recommended = 'has NOT been recommended to join the order with a rating of ' + rating + '%'
+                    }
+                  }
+                  this.candidateList[candidateNumber].rating = rating;
+                  this.candidateList[candidateNumber].recommended = recommended;
+                  this.candidateList[candidateNumber].inProcessRating = rating + '%';
+                } else {
+                  ticker++;
+                }
+              })
+
+
+              if (this.isOrderClerk) {
+                this.candidateList[candidateNumber].notes = this.allPollingNotes?.filter(e => e.candidate_id === this.candidateList[candidateNumber].candidate_id && e.note !== null)
               } else {
-                recommended = 'has NOT been recommended to join the order with a rating of ' + rating + '%'
+                this.candidateList[candidateNumber].notes = this.allPollingNotes?.filter(e => e.candidate_id === this.candidateList[candidateNumber].candidate_id && e.private === false && e.note !== null)
               }
-              this.candidateList[candidateNumber].rating = rating;
-              this.candidateList[candidateNumber].recommended = recommended;
-              this.candidateList[candidateNumber].inProcessRating = rating + '%';
-            } else {
-              ticker++;
-            }
-          })
+              candidateNumber++;
+            })
 
+            this.candidateList.sort(function (a, b) {
+              return (a.rating > b.rating ? -1 : 1);
+            });
 
-          if (this.isOrderClerk) {
-            this.candidateList[candidateNumber].notes = this.allPollingNotes?.filter(e => e.candidate_id === this.candidateList[candidateNumber].candidate_id && e.note !== null)
-          } else {
-            this.candidateList[candidateNumber].notes = this.allPollingNotes?.filter(e => e.candidate_id === this.candidateList[candidateNumber].candidate_id && e.private === false && e.note !== null)
+          },
+          error: err => {
+            this.errorMessage = err.error.message;
           }
-          candidateNumber++;
-        })
-
-        this.candidateList.sort(function (a, b) {
-          return (a.rating > b.rating ? -1 : 1);
         });
-
-      },
-      error: err => {
-        this.errorMessage = err.error.message;
-      }
-    });
         this.allPollingNotes = data.filter(e => e.completed === true);
       },
       error: err => {
