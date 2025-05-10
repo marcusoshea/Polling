@@ -240,7 +240,7 @@ export class PollingCandidate {
         //get unique polling names
         this.pollingNames = [...new Set(data.sort((a, b) => (a.end_date > b.end_date ? -1 : 1)).map(item => item.polling_name))];
         this.pollingNames.forEach((element, index) => {
-          this.pollingNotes.push(data.filter(e => e.polling_name === element && e.private === false));
+          this.pollingNotes.push(data.filter(e => e.polling_name === element));
         }
         )
       },
