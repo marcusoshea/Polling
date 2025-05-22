@@ -12,7 +12,7 @@ import { PollingsComponent } from './pollings/pollings.component';
 import { ReportComponent } from './report/report.component';
 import { CandidateImagesComponent } from './candidate-images/candidate-images.component';
 import { DeleteAccountComponent } from './delete-account/delete-account.component';
-
+import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy.component';
 
 export const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -27,6 +27,7 @@ export const routes: Routes = [
   { path: 'pollings', component: PollingsComponent },
   { path: 'report', component: ReportComponent },
   { path: 'delete-account', component: DeleteAccountComponent },
+  { path: 'privacy-policy', component: PrivacyPolicyComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ]; 
 
