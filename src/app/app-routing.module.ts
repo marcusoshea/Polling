@@ -11,6 +11,7 @@ import { CandidatesComponent } from './candidates/candidates.component';
 import { PollingsComponent } from './pollings/pollings.component';
 import { ReportComponent } from './report/report.component';
 import { CandidateImagesComponent } from './candidate-images/candidate-images.component';
+import { DeleteAccountComponent } from './delete-account/delete-account.component';
 
 
 export const routes: Routes = [
@@ -25,6 +26,7 @@ export const routes: Routes = [
   { path: 'candidate-images', component: CandidateImagesComponent },
   { path: 'pollings', component: PollingsComponent },
   { path: 'report', component: ReportComponent },
+  { path: 'delete-account', component: DeleteAccountComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ]; 
 
