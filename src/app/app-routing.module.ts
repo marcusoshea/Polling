@@ -13,6 +13,7 @@ import { ReportComponent } from './report/report.component';
 import { CandidateImagesComponent } from './candidate-images/candidate-images.component';
 import { DeleteAccountComponent } from './delete-account/delete-account.component';
 import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy.component';
+import { FeedbackComponent } from './feedback/feedback.component';
 
 export const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -28,6 +29,7 @@ export const routes: Routes = [
   { path: 'report', component: ReportComponent },
   { path: 'delete-account', component: DeleteAccountComponent },
   { path: 'privacy-policy', component: PrivacyPolicyComponent },
+  { path: 'feedback', component: FeedbackComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ]; 
 

@@ -5,6 +5,7 @@ import { PollingOrder } from './interfaces/polling-order';
 import { RouterModule, RouterOutlet, RouterLink, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';  
 import { provideRouter } from '@angular/router';
+import { environment } from '../environments/environment'
 
 @Component({
   selector: 'app-root',
@@ -25,6 +26,7 @@ export class AppComponent implements OnInit {
   email?: string;
   title = 'polling';
   pollingOrder = {} as PollingOrder;
+  feedbackEmail = environment.feedbackEmail;
   
   constructor(private storageService: StorageService, private authService: AuthService, private activatedRoute: ActivatedRoute) { }
 

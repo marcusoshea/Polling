@@ -10,6 +10,17 @@
                 <div class="col">
                     <div class="card card-container custom-card p-2">
 
+                        <div *ngIf="!showInProcessReport">
+                        <button type="input" (click)="toggleReport()"
+                        class="btn btn-success m-2">Show In Process Report</button>  
+                        </div>
+
+                        <div *ngIf="showInProcessReport">  
+                            <button type="input" (click)="toggleReport()"
+                            class="btn btn-success m-2">Show Most Recent Closed Polling Report</button>  
+                        </div>
+
+
                         <div *ngIf="closedPollingAvailable">
                             <h4>The most recent closed {{pollingOrder.polling_order_name}} polling was the
                                 {{pollingTitle}}

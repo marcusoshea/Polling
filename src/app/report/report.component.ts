@@ -62,7 +62,7 @@ export class ReportComponent implements OnInit {
   public isOrderClerk = false;
   public showNotes = true;
   public inProcessPollingAvailable = false;
-  public reportShown = false;
+  public showInProcessReport = false;
 
   public subscript1?: Subscription;
   public subscript2?: Subscription;
@@ -80,7 +80,7 @@ export class ReportComponent implements OnInit {
   }
 
   public toggleReport() {
-    this.reportShown = !this.reportShown;
+    this.showInProcessReport = !this.showInProcessReport;
     this.initialReportBuilder();
   }
 
@@ -89,7 +89,7 @@ export class ReportComponent implements OnInit {
   public initialReportBuilder() {
     this.subscript1 = this.pollingService.getPollingReport(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
-        if (data[0]?.end_date === undefined || this.reportShown === true) {
+        if (data[0]?.end_date === undefined || this.showInProcessReport === true) {
           this.closedPollingAvailable = false;
           this.subscript4 = this.pollingService.getInProcessPollingReport(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
             next: data => {
