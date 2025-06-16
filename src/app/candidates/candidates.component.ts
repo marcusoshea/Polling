@@ -54,6 +54,7 @@ export class CandidatesComponent implements OnInit {
   newExternalNote = '';
   candidate_id = 0;
   watch_list = false;
+  filterValue = '';
   public subscript1?: Subscription;
   public subscript2?: Subscription;
   public subscript3?: Subscription;
@@ -88,6 +89,11 @@ export class CandidatesComponent implements OnInit {
         this.errorMessage = err.error.message;
       }
     });
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSourceCandidates.filter = filterValue.trim().toLowerCase();
   }
 
   resetCandidates(): void {

@@ -18,6 +18,9 @@
     <div class="row">
       <div class="col">
         <div class="card card-container custom-card">
+          <div class="p-4">
+            <input type="text" class="form-control" id="filter" [(ngModel)]="filterValue" (keyup)="applyFilter($event)" placeholder="Search candidates...">
+          </div>
           <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef class="p-4 h6"> Candidate List </th>
