@@ -22,6 +22,7 @@
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <div *ngFor="let pollNote of polls;">
+                    <span *ngIf="pollNote.private"><b>--PRIVATE RESPONSE--</b></span>
                     <span [ngSwitch]="pollNote.vote">
                       Vote: <span *ngSwitchCase=1>Yes</span>
                       <span *ngSwitchCase=2>Wait</span>
