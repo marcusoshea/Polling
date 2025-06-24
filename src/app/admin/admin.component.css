@@ -3,3 +3,7 @@
     text-decoration: underline;
     cursor: pointer;
 }
+
+.admin-page-padding-bottom {
+  padding-bottom: 3rem;
+}

@@ -25,6 +25,8 @@ import { MatListModule } from '@angular/material/list';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
+import { OrderByNamePipe } from './order-by-name.pipe';
+import { OrderByMemberNamePipe } from './order-by-member-name.pipe';
 
 
 @Component({
@@ -40,7 +42,9 @@ import { MatInputModule } from '@angular/material/input';
     MatNativeDateModule,
     MatListModule,
     MatInputModule,
-    CommonModule
+    CommonModule,
+    OrderByNamePipe,
+    OrderByMemberNamePipe
   ],
   styleUrls: ['./admin.component.css'],
   animations: [
@@ -103,6 +107,7 @@ export class AdminComponent implements OnInit {
   public panelOpenStateML = false;
   public panelOpenStateCA = false;
   public panelOpenStatePO = false;
+  public panelOpenStateReports = false;
   public selectedPollingCandidates: any[];
   public newPollingName = '';
   public selectAllBox = false;
@@ -111,6 +116,10 @@ export class AdminComponent implements OnInit {
   public selectAllButtonText = 'Select All';
   public selectAllPollingButtonText = 'Select Polling Candidates';
   public selectPollingListBoxDisabled = false;
+  public missingVotesNumber: number = 1;
+  public missingVotesReport: any = null;
+  public memberListFilter: string = '';
+  public candidateListFilter: string = '';
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -165,7 +174,11 @@ export class AdminComponent implements OnInit {
     this.subscript3 = this.memberService.getAllOrderMembers(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.orderMemberList = data.filter(e => e.approved === true && e.removed === false).sort(function (a, b) {
-          return (a.name < b.name ? -1 : 1);
+          const nameA = (a.name || '').toLowerCase();
+          const nameB = (b.name || '').toLowerCase();
+          if (nameA < nameB) return -1;
+          if (nameA > nameB) return 1;
+          return 0;
         });
 
         this.UnapprovedOrderMemberList = data.filter(e => e.approved === false);
@@ -321,7 +334,7 @@ export class AdminComponent implements OnInit {
     const today = new Date();
     const created = today.toISOString().split('T')[0];
 
-    this.subscript6 = this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true, true).subscribe({
+    this.subscript6 = this.memberService.updateMember(memberInQuestion.polling_order_member_id, memberInQuestion.name, memberInQuestion.email, true, this.pollingOrder.polling_order_id, created, this.accessToken, true, false).subscribe({
       next: data => {
         let index = this.orderMemberList.findIndex(e => e.polling_order_member_id === memberInQuestion.polling_order_member_id)
         this.orderMemberList.splice(index, 1);
@@ -532,6 +545,40 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  getMissingVotesReport() {
+    if (!this.pollingOrder.polling_order_id || !this.missingVotesNumber) return;
+    this.pollingService.getMissingVotesReport(Number(this.pollingOrder.polling_order_id), this.missingVotesNumber, this.accessToken)
+      .subscribe({
+        next: (data) => {
+          this.missingVotesReport = data;
+        },
+        error: (err) => {
+          this.missingVotesReport = null;
+          this.errorMessage = err.error?.message || 'Failed to fetch report';
+        }
+      });
+  }
+
+  applyMemberListFilter() {
+    const filterValue = this.memberListFilter.trim().toLowerCase();
+    this.dataSourceMemberList.filter = filterValue;
+    this.dataSourceMemberList.filterPredicate = (data: any, filter: string) => {
+      return (
+        (data.name && data.name.toLowerCase().includes(filter)) ||
+        (data.email && data.email.toLowerCase().includes(filter))
+      );
+    };
+  }
+
+  applyCandidateListFilter() {
+    const filterValue = this.candidateListFilter.trim().toLowerCase();
+    this.dataSourceCandidates.filter = filterValue;
+    this.dataSourceCandidates.filterPredicate = (data: any, filter: string) => {
+      return (
+        (data.name && data.name.toLowerCase().includes(filter))
+      );
+    };
+  }
 
   ngOnDestroy(): void {
     if (this.subscript1) {

@@ -148,4 +148,12 @@ export class PollingService {
     return this.http.get(API_URL + '/polling/inprocesspollingreport/' + orderId, { headers: reqHeader });
   }
 
+  getMissingVotesReport(pollingOrderId: number, number: number, accessToken: string): Observable<any> {
+    var reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+    return this.http.get(`${API_URL}/polling/missingvotes/${pollingOrderId}/${number}`, { headers: reqHeader });
+  }
+
 }
