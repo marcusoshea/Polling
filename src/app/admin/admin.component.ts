@@ -27,6 +27,9 @@ import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { OrderByNamePipe } from './order-by-name.pipe';
 import { OrderByMemberNamePipe } from './order-by-member-name.pipe';
+import { PollingReportService } from '../services/polling-report.service';
+import { forkJoin } from 'rxjs';
+import { NotesService } from '../services/notes.service';
 
 
 @Component({
@@ -85,7 +88,8 @@ export class AdminComponent implements OnInit {
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
-    private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService) { }
+    private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService,
+    private pollingReportService: PollingReportService, private notesService: NotesService) { }
   private showAdmin = false;
   public changeAdminOccurred = false;
   public changeAsstOccurred = false;
@@ -120,6 +124,10 @@ export class AdminComponent implements OnInit {
   public missingVotesReport: any = null;
   public memberListFilter: string = '';
   public candidateListFilter: string = '';
+  public closedPollingReport: any = null;
+  public showAdminNotes: boolean = true;
+  public showAdminPrivateNotes: boolean = true;
+  public showAdminVotes: boolean = true;
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -559,6 +567,22 @@ export class AdminComponent implements OnInit {
       });
   }
 
+  getClosedPollingReport() {
+    if (!this.pollingOrder.polling_order_id) return;
+    const member = this.storageService.getMember();
+    const isOrderClerk = member.isOrderAdmin;
+    this.pollingReportService.getClosedPollingReport(Number(this.pollingOrder.polling_order_id), this.accessToken, isOrderClerk, false)
+      .subscribe({
+        next: (data) => {
+          this.closedPollingReport = data;
+        },
+        error: (err) => {
+          this.closedPollingReport = null;
+          this.errorMessage = err.error?.message || 'Failed to fetch closed polling report';
+        }
+      });
+  }
+
   applyMemberListFilter() {
     const filterValue = this.memberListFilter.trim().toLowerCase();
     this.dataSourceMemberList.filter = filterValue;
@@ -620,6 +644,17 @@ export class AdminComponent implements OnInit {
     if (this.subscript13) {
       this.subscript13.unsubscribe();
     }
+  }
+
+  sortNotes(notes: any[]): any[] {
+    if (!Array.isArray(notes)) return [];
+    return notes
+      .filter(n => n.completed !== false)
+      .slice().sort((a, b) => {
+        const aHasNote = a.note && a.note.trim() !== '';
+        const bHasNote = b.note && b.note.trim() !== '';
+        return (bHasNote ? 1 : 0) - (aHasNote ? 1 : 0);
+      });
   }
 
 }

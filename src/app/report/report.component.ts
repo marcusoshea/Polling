@@ -14,6 +14,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { PollingReportService } from '../services/polling-report.service';
 
 declare var require: any;
 
@@ -69,7 +70,7 @@ export class ReportComponent implements OnInit {
   public subscript3?: Subscription;
   public subscript4?: Subscription;
 
-  constructor(private pollingService: PollingService, private storageService: StorageService, private notesService: NotesService) { }
+  constructor(private pollingService: PollingService, private storageService: StorageService, private notesService: NotesService, private pollingReportService: PollingReportService) { }
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -84,34 +85,58 @@ export class ReportComponent implements OnInit {
     this.initialReportBuilder();
   }
 
-
-
   public initialReportBuilder() {
-    this.subscript1 = this.pollingService.getPollingReport(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
-      next: data => {
-        if (data[0]?.end_date === undefined || this.showInProcessReport === true) {
-          this.closedPollingAvailable = false;
-          this.subscript4 = this.pollingService.getInProcessPollingReport(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
-            next: data => {
-              if (data[0]?.end_date !== undefined) {
-                this.reportBuilder(data);
-                this.inProcessPollingAvailable = true;
-              }
-            },
-            error: err => {
-              this.errorMessage = err.error.message;
-            }
-          })
-        } else {
-          this.closedPollingAvailable = true;
-          this.reportBuilder(data);
-        }
-      },
-      error: err => {
-        this.errorMessage = err.error.message;
-      }
+    const member = this.storageService.getMember();
+    const isOrderClerk = member.isOrderAdmin;
 
-    })
+    if (this.showInProcessReport) {
+      // Always fetch in-process polling report
+      this.subscript1 = this.pollingService.getInProcessPollingReport(this.pollingOrder.polling_order_id, this.accessToken)
+        .subscribe({
+          next: data => {
+            if (data[0]?.end_date !== undefined) {
+              this.reportBuilder(data);
+              this.closedPollingAvailable = false;
+              this.inProcessPollingAvailable = true;
+            } else {
+              this.inProcessPollingAvailable = false;
+              this.closedPollingAvailable = false;
+            }
+          },
+          error: err => {
+            this.errorMessage = err.error?.message || 'Failed to fetch in-process polling report';
+          }
+        });
+    } else {
+      // Fetch closed polling report
+      this.subscript1 = this.pollingReportService.getClosedPollingReport(Number(this.pollingOrder.polling_order_id), this.accessToken, isOrderClerk, true)
+        .subscribe({
+          next: data => {
+            if (!data) {
+              this.closedPollingAvailable = false;
+              this.inProcessPollingAvailable = false;
+            } else {
+              this.closedPollingAvailable = true;
+              this.inProcessPollingAvailable = false;
+              this.pollingTitle = data.pollingTitle;
+              this.pollingOrderPollingType = data.pollingOrderPollingType;
+              this.pollingOrderParticipation = data.pollingOrderParticipation;
+              this.pollingOrderScore = data.pollingOrderScore;
+              this.endDate = data.endDate;
+              this.startDate = data.startDate;
+              this.activeMembers = data.activeMembers;
+              this.participatingMembers = data.participatingMembers;
+              this.participationRate = data.participationRate;
+              this.certified = data.certified;
+              this.candidateList = data.candidateList;
+              this.pollingTotal = data.pollingTotal;
+            }
+          },
+          error: err => {
+            this.errorMessage = err.error?.message || 'Failed to fetch closed polling report';
+          }
+        });
+    }
   }
 
   public reportBuilder(data) {

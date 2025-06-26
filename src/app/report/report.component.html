@@ -38,9 +38,9 @@
                                     resulting in a participation rate of {{participationRate}}%. The polling is thus
                                     <span class="fw-bold">{{certified}}</span> <br><br></span>
 
-                                <span *ngIf="pollingOrderParticipation > 0"> A candidate must attain a rate of
-                                    {{pollingOrderScore}}% to be recommended to join the
-                                    order.</span>
+                                <span *ngIf="pollingOrderParticipation > 0"> 
+                                    <span *ngIf="pollingOrderScore > 0">A candidate must attain a rate of {{pollingOrderScore}}% to be recommended to join
+                                    the order.</span></span>
                             </div>
 
                             <div *ngIf="pollingOrderPollingType === 2" class="p-2">
@@ -126,9 +126,9 @@
                                         currently
                                         <span class="fw-bold">{{certified}}</span> <br><br></span>
 
-                                    A candidate must attain a rate of {{pollingOrderScore}}% to be recommended to join
-                                    the
-                                    order.
+                                    <span *ngIf="pollingOrderScore > 0">A candidate must attain a rate of {{pollingOrderScore}}% to be recommended to join the
+                                    order.</span>
+                                   
                                 </div>
 
                                 <div *ngIf="pollingOrderPollingType === 2" class="p-2">

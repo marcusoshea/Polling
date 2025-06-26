@@ -206,54 +206,56 @@
                   </div>
                 </div>
                 <div class="ps-4">
-                <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card col-md-12">
-                  <ng-container matColumnDef="buttons">
-                    <th mat-header-cell *matHeaderCellDef></th>
-                    <td mat-cell *matCellDef="let element">
-                      <div class="d-flex flex-wrap">
-                        <div class="m-2">
-                          <button type="input" *ngIf="!element.watch_list" (click)="updateCandidate(element, true)"
-                            class="btn btn-success">Move to Watchlist</button>
-                          <button type="input" *ngIf="element.watch_list" (click)="updateCandidate(element, false)"
-                            class="btn btn-danger">Move to Polling List</button>
+                  <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card col-md-12">
+                    <ng-container matColumnDef="buttons">
+                      <th mat-header-cell *matHeaderCellDef></th>
+                      <td mat-cell *matCellDef="let element">
+                        <div class="d-flex flex-wrap">
+                          <div class="m-2">
+                            <button type="input" *ngIf="!element.watch_list" (click)="updateCandidate(element, true)"
+                              class="btn btn-success">Move to Watchlist</button>
+                            <button type="input" *ngIf="element.watch_list" (click)="updateCandidate(element, false)"
+                              class="btn btn-danger">Move to Polling List</button>
+                          </div>
+                          <div class="m-2">
+                            <button class="btn btn-success" (click)="goToCandidateImages(element)">Manage Candidate
+                              Images</button>
+                          </div>
+                          <div class="m-2">
+                            <button type="input" (click)="openCandidateDialog('500ms', '1500ms', element)"
+                              class="btn btn-danger">Remove</button>
+                          </div>
                         </div>
-                        <div class="m-2">
-                          <button class="btn btn-success" (click)="goToCandidateImages(element)">Manage Candidate
-                            Images</button>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef> <span class="fw-bold">Name</span>
+                        <div class="row mt-3">
+                          <div class="col-md-12">
+                            <label for="candidateFilter">Filter Candidates</label>
+                            <input type="text" class="form-control mb-2" id="candidateFilter"
+                              [(ngModel)]="candidateListFilter" (input)="applyCandidateListFilter()"
+                              placeholder="Search by name...">
+                          </div>
                         </div>
-                        <div class="m-2">
-                          <button type="input" (click)="openCandidateDialog('500ms', '1500ms', element)"
-                            class="btn btn-danger">Remove</button>
+                      </th>
+                      <td mat-cell *matCellDef="let element" class="ps-1">
+                        <span *ngIf="!element.isEditingName" (click)="element.isEditingName = true"
+                          class="editable-text">
+                          {{ element.name }}
+                        </span>
+                        <div *ngIf="element.isEditingName" class="d-flex align-items-center">
+                          <input [(ngModel)]="element.name" class="form-control me-2" />
+                          <button class="btn btn-success btn-sm me-2"
+                            (click)="updateCandidate(element, element.watch_list, true)">Save</button>
+                          <button class="btn btn-secondary btn-sm" (click)="reset()">Reset</button>
                         </div>
-                      </div>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef> <span class="fw-bold">Name</span>
-                      <div class="row mt-3">
-                        <div class="col-md-12">
-                          <label for="candidateFilter">Filter Candidates</label>
-                          <input type="text" class="form-control mb-2" id="candidateFilter"
-                            [(ngModel)]="candidateListFilter" (input)="applyCandidateListFilter()"
-                            placeholder="Search by name...">
-                        </div>
-                      </div>
-                    </th>
-                    <td mat-cell *matCellDef="let element" class="ps-1">
-                      <span *ngIf="!element.isEditingName" (click)="element.isEditingName = true" class="editable-text">
-                        {{ element.name }}
-                      </span>
-                      <div *ngIf="element.isEditingName" class="d-flex align-items-center">
-                        <input [(ngModel)]="element.name" class="form-control me-2" />
-                        <button class="btn btn-success btn-sm me-2"
-                          (click)="updateCandidate(element, element.watch_list, true)">Save</button>
-                        <button class="btn btn-secondary btn-sm" (click)="reset()">Reset</button>
-                      </div>
-                    </td>
-                  </ng-container>
-                  <tr mat-header-row *matHeaderRowDef="displayedColumnsCandidates"></tr>
-                  <tr mat-row *matRowDef="let row; columns: displayedColumnsCandidates;"></tr>
-                </table></div>
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsCandidates"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsCandidates;"></tr>
+                  </table>
+                </div>
               </mat-expansion-panel>
             </mat-accordion>
           </div>
@@ -405,7 +407,7 @@
                     <h2>Member Polling Non Participation Report</h2>
                     <div class="row align-items-end">
                       <div class="col-md-3">
-                        <label for="missingVotesNumber">Select Number (1-4)</label>
+                        <label for="missingVotesNumber">Select number of polls (starting with most recent in process or closed) to check for non-participation</label>
                         <select id="missingVotesNumber" class="form-select" [(ngModel)]="missingVotesNumber">
                           <option *ngFor="let n of [1,2,3,4]" [value]="n">{{n}}</option>
                         </select>
@@ -414,9 +416,10 @@
                         <button class="btn btn-primary mt-3" (click)="getMissingVotesReport()">Generate Report</button>
                       </div>
                     </div>
-                    <div *ngIf="missingVotesReport">
-                      <div *ngFor="let report of missingVotesReport">
-                        <h6>Pollings</h6>
+                    <div *ngIf="missingVotesReport"><br>
+                      <div *ngFor="let report of missingVotesReport" class="card card-container custom-card p-2">
+                        <br>
+                        <h2>Pollings</h2>
                         <ul>
                           <li *ngFor="let poll of report.pollings">{{ poll.polling_name }}</li>
                         </ul>
@@ -435,6 +438,102 @@
                         </table>
                       </div>
                     </div>
+                    <br>
+                    <hr>
+                  </div>
+
+                  <div class="col-md-12 ps-4 mt-4">
+                    <h2>Most Recent Closed Polling Report <button class="btn btn-primary mb-3"
+                        (click)="getClosedPollingReport()">Generate Report</button></h2>
+                    <div *ngIf="closedPollingReport">
+                      <div class="card card-container custom-card p-2">
+                        <h4>The most recent closed {{closedPollingReport.pollingOrderName}} polling was the
+                          {{closedPollingReport.pollingTitle}}
+                          which ran from
+                          {{closedPollingReport.startDate | date}} to {{closedPollingReport.endDate | date}}.
+                        </h4>
+                        <div *ngIf="closedPollingReport.pollingOrderPollingType === 1" class="p-2">
+                          <span *ngIf="closedPollingReport.pollingOrderParticipation > 0">
+                            The {{closedPollingReport.pollingOrderName}} order requires an active member participation
+                            rate
+                            of {{closedPollingReport.pollingOrderParticipation}}% to certify a polling.
+                            The {{closedPollingReport.pollingTitle}} had participation of
+                            {{closedPollingReport.participatingMembers}} of
+                            {{closedPollingReport.activeMembers}} active order members,
+                            resulting in a participation rate of {{closedPollingReport.participationRate}}%. The polling
+                            is thus
+                            <span class="fw-bold">{{closedPollingReport.certified}}</span> <br><br>
+                          </span>
+                          <span *ngIf="closedPollingReport.pollingOrderParticipation > 0">
+                            A candidate must attain a rate of {{closedPollingReport.pollingOrderScore}}% to be
+                            recommended to join the order.
+                          </span>
+                        </div>
+                        <div *ngIf="closedPollingReport.pollingOrderPollingType === 2" class="p-2">
+                          The {{closedPollingReport.pollingOrderName}} order recommends the top candidates within a
+                          polling exceeding a specific rating.
+                        </div>
+                        <div class="p-2">
+                          <span class="fw-bold">Polling Candidate List: <br></span>
+                          <input type="checkbox" [checked]="showAdminNotes"
+                            (change)="showAdminNotes = $event.target.checked" class="m-2" /> Show Notes
+                          <input type="checkbox" [checked]="showAdminPrivateNotes"
+                            (change)="showAdminPrivateNotes = $event.target.checked" class="m-2" /> Show Private Responses
+                          <input type="checkbox" [checked]="showAdminVotes"
+                            (change)="showAdminVotes = $event.target.checked" class="m-2" /> Show Votes
+                          <ul>
+                            <span *ngFor="let cl of closedPollingReport.candidateList" class="p-2">
+                              <li> <span class="fw-bold">{{cl.name}}</span> {{cl.recommended}}
+                                (
+                                <span *ngFor="let pt of closedPollingReport.pollingTotal">
+                                  <span *ngIf="cl.name === pt.name && pt.vote === 'Yes' && pt.vote !== 'Null'">
+                                    {{pt.vote}}: {{pt.total}},
+                                  </span>
+                                </span>
+                                <span *ngFor="let pt of closedPollingReport.pollingTotal">
+                                  <span *ngIf="cl.name === pt.name && pt.vote === 'Wait' && pt.vote !== 'Null'">
+                                    {{pt.vote}}: {{pt.total}},
+                                  </span>
+                                </span>
+                                <span *ngFor="let pt of closedPollingReport.pollingTotal">
+                                  <span *ngIf="cl.name === pt.name && pt.vote === 'No' && pt.vote !== 'Null'">
+                                    {{pt.vote}}: {{pt.total}},
+                                  </span>
+                                </span>
+                                <span *ngFor="let pt of closedPollingReport.pollingTotal">
+                                  <span *ngIf="cl.name === pt.name && pt.vote === 'Abstain' && pt.vote !== 'Null'">
+                                    {{pt.vote}}: {{pt.total}}
+                                  </span>
+                                </span>
+                                ) = {{cl.inProcessRating}}
+
+                                <span *ngIf="showAdminNotes">
+                                  <ul>
+                                    <span *ngFor="let note of sortNotes(cl.notes)">
+                                      <ng-container *ngIf="showAdminPrivateNotes || !note.private">
+                                        <!-- Only show notes with content if votes are hidden -->
+                                        <ng-container *ngIf="showAdminVotes || note.note">
+                                          <li>
+                                            <span *ngIf="note.private"><b>--PRIVATE RESPONSE-- </b></span>
+                                            <span *ngIf="showAdminVotes">
+                                              <span *ngIf="note.vote === 1">Yes</span><span *ngIf="note.vote === 2">Wait</span><span *ngIf="note.vote === 3">No</span><span *ngIf="note.vote === 4">Abstain</span>
+                                            </span>
+                                            <span *ngIf="note.note"> --- {{note.note}}</span>
+                                            <span class="px-1 fst-italic">- {{note.member_name}}</span>
+                                          </li>
+                                        </ng-container>
+                                      </ng-container>
+                                    </span>
+                                  </ul>
+                                </span>
+                              </li>
+                            </span>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <br>
+                    <hr>
                   </div>
                 </div>
               </mat-expansion-panel>
