@@ -25,7 +25,6 @@ import { MatListModule } from '@angular/material/list';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
-import { OrderByNamePipe } from './order-by-name.pipe';
 import { OrderByMemberNamePipe } from './order-by-member-name.pipe';
 import { PollingReportService } from '../services/polling-report.service';
 import { forkJoin } from 'rxjs';
@@ -46,7 +45,6 @@ import { NotesService } from '../services/notes.service';
     MatListModule,
     MatInputModule,
     CommonModule,
-    OrderByNamePipe,
     OrderByMemberNamePipe
   ],
   styleUrls: ['./admin.component.css'],
@@ -128,6 +126,8 @@ export class AdminComponent implements OnInit {
   public showAdminNotes: boolean = true;
   public showAdminPrivateNotes: boolean = true;
   public showAdminVotes: boolean = true;
+  public closedPollings: Polling[] = [];
+  public selectedClosedPollingId: number = 0;
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -166,6 +166,13 @@ export class AdminComponent implements OnInit {
       next: data => {
         this.pollingList = data;
         this.dataSourcePollings.data = data.sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+        
+        // Filter closed pollings (end date is in the past)
+        const today = new Date();
+        this.closedPollings = data.filter(polling => {
+          const endDate = new Date(polling.end_date);
+          return endDate < today;
+        }).sort((a, b) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime());
       },
       error: err => {
         this.errorMessage = err.error.message;
@@ -579,6 +586,22 @@ export class AdminComponent implements OnInit {
         error: (err) => {
           this.closedPollingReport = null;
           this.errorMessage = err.error?.message || 'Failed to fetch closed polling report';
+        }
+      });
+  }
+
+  getSpecificClosedPollingReport() {
+    if (!this.selectedClosedPollingId) return;
+    const member = this.storageService.getMember();
+    const isOrderClerk = member.isOrderAdmin;
+    this.pollingReportService.getSpecificPollingReport(this.selectedClosedPollingId, Number(this.pollingOrder.polling_order_id), this.accessToken, isOrderClerk, false)
+      .subscribe({
+        next: (data) => {
+          this.closedPollingReport = data;
+        },
+        error: (err) => {
+          this.closedPollingReport = null;
+          this.errorMessage = err.error?.message || 'Failed to fetch specific polling report';
         }
       });
   }

@@ -443,8 +443,24 @@
                   </div>
 
                   <div class="col-md-12 ps-4 mt-4">
-                    <h2>Most Recent Closed Polling Report <button class="btn btn-primary mb-3"
-                        (click)="getClosedPollingReport()">Generate Report</button></h2>
+                    <h2>Closed Polling Reports</h2>
+                    <div class="row align-items-end mb-3">
+                      <div class="col-md-4">
+                        <label for="closedPollingSelect">Select a closed polling to generate report</label>
+                        <select id="closedPollingSelect" class="form-select" [(ngModel)]="selectedClosedPollingId">
+                          <option [value]="0">Most Recent Closed Polling</option>
+                          <option *ngFor="let polling of closedPollings" [value]="polling.polling_id">
+                            {{polling.polling_name}} ({{polling.end_date | date:'MM/dd/yyyy'}})
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <button class="btn btn-primary" 
+                          (click)="selectedClosedPollingId === 0 ? getClosedPollingReport() : getSpecificClosedPollingReport()">
+                          Generate Report
+                        </button>
+                      </div>
+                    </div>
                     <div *ngIf="closedPollingReport">
                       <div class="card card-container custom-card p-2">
                         <h4>The most recent closed {{closedPollingReport.pollingOrderName}} polling was the
