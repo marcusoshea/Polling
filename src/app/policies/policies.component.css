@@ -1,0 +1,65 @@
+.policy-content {
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.policy-content h1,
+.policy-content h2,
+.policy-content h3,
+.policy-content h4,
+.policy-content h5,
+.policy-content h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.policy-content h1:first-child,
+.policy-content h2:first-child,
+.policy-content h3:first-child,
+.policy-content h4:first-child,
+.policy-content h5:first-child,
+.policy-content h6:first-child {
+  margin-top: 0;
+}
+
+.policy-content p {
+  margin-bottom: 1rem;
+}
+
+.policy-content ul,
+.policy-content ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+}
+
+.policy-content li {
+  margin-bottom: 0.25rem;
+}
+
+.policy-content blockquote {
+  border-left: 4px solid #dee2e6;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #6c757d;
+}
+
+.policy-content a {
+  color: #0d6efd;
+  text-decoration: underline;
+}
+
+.policy-content a:hover {
+  color: #0a58ca;
+}
+
+.policy-content strong {
+  font-weight: 600;
+}
+
+.policy-content em {
+  font-style: italic;
+}
+
+

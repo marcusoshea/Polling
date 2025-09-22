@@ -29,6 +29,10 @@ import { OrderByMemberNamePipe } from './order-by-member-name.pipe';
 import { PollingReportService } from '../services/polling-report.service';
 import { forkJoin } from 'rxjs';
 import { NotesService } from '../services/notes.service';
+import { OrderPoliciesService } from '../services/order-policies.service';
+import { OrderPolicies } from '../interfaces/order-policies';
+import { AngularEditorModule } from '@kolkov/angular-editor';
+import { AngularEditorConfig } from '@kolkov/angular-editor';
 
 
 @Component({
@@ -45,7 +49,8 @@ import { NotesService } from '../services/notes.service';
     MatListModule,
     MatInputModule,
     CommonModule,
-    OrderByMemberNamePipe
+    OrderByMemberNamePipe,
+    AngularEditorModule
   ],
   styleUrls: ['./admin.component.css'],
   animations: [
@@ -87,7 +92,7 @@ export class AdminComponent implements OnInit {
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
     private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService,
-    private pollingReportService: PollingReportService, private notesService: NotesService) { }
+    private pollingReportService: PollingReportService, private notesService: NotesService, private orderPoliciesService: OrderPoliciesService) { }
   private showAdmin = false;
   public changeAdminOccurred = false;
   public changeAsstOccurred = false;
@@ -128,6 +133,25 @@ export class AdminComponent implements OnInit {
   public showAdminVotes: boolean = true;
   public closedPollings: Polling[] = [];
   public selectedClosedPollingId: number = 0;
+  
+  // OrderPolicies properties
+  public panelOpenStateOP = false;
+  public orderPolicy: OrderPolicies | null = null;
+  public orderPolicyContent: string = '';
+  public isEditingPolicy: boolean = false;
+  public policyConfig: AngularEditorConfig = {
+    editable: true,
+    spellcheck: true,
+    height: '10rem',
+    minHeight: '10rem',
+    placeholder: 'Enter order policy content here...',
+    translate: 'no',
+    defaultParagraphSeparator: 'p',
+    defaultFontName: 'Arial',
+    toolbarHiddenButtons: [
+      ['insertImage', 'insertVideo', 'toggleEditorMode', 'superscript', 'subscript', 'strikeThrough']
+    ]
+  };
 
   async ngOnInit(): Promise<void> {
     const member = await this.storageService.getMember();
@@ -178,6 +202,9 @@ export class AdminComponent implements OnInit {
         this.errorMessage = err.error.message;
       }
     });
+
+    // Load OrderPolicies
+    this.loadOrderPolicy();
 
   }
 
@@ -678,6 +705,137 @@ export class AdminComponent implements OnInit {
         const bHasNote = b.note && b.note.trim() !== '';
         return (bHasNote ? 1 : 0) - (aHasNote ? 1 : 0);
       });
+  }
+
+  // OrderPolicies methods
+  loadOrderPolicy(): void {
+    console.log('Loading order policy for polling order ID:', this.pollingOrder.polling_order_id);
+    console.log('Access token:', this.accessToken ? 'Present' : 'Missing');
+    console.log('User is admin:', this.showAdmin);
+    
+    // Only try to load if user is admin
+    if (!this.showAdmin) {
+      console.log('User is not admin, skipping order policy load');
+      this.errorMessage = 'Only order administrators can view order policies';
+      return;
+    }
+    
+    this.orderPoliciesService.getOrderPolicyByPollingOrderId(Number(this.pollingOrder.polling_order_id), this.accessToken)
+      .subscribe({
+        next: (data) => {
+          console.log('Order policy response:', data);
+          this.orderPolicy = data;
+          this.orderPolicyContent = data ? data.polling_order_policy : '';
+          if (!data) {
+            console.log('No policy found for this polling order');
+          }
+        },
+        error: (err) => {
+          console.error('Error loading order policy:', err);
+          console.error('Error details:', err.error);
+          console.error('Error status:', err.status);
+          
+          if (err.status === 401) {
+            this.errorMessage = 'Unauthorized: You may not have permission to view order policies';
+          } else if (err.status === 500) {
+            this.errorMessage = 'Server error occurred while loading order policy. Please check the backend logs.';
+            console.error('Server error - this might be a backend issue');
+          } else {
+            this.errorMessage = err.error?.message || 'Failed to load order policy';
+          }
+        }
+      });
+  }
+
+  createOrderPolicy(): void {
+    if (!this.orderPolicyContent.trim()) {
+      alert('Please enter policy content before saving.');
+      return;
+    }
+
+    const request = {
+      polling_order_id: Number(this.pollingOrder.polling_order_id),
+      polling_order_policy: this.orderPolicyContent,
+      authToken: this.accessToken
+    };
+
+    this.orderPoliciesService.createOrderPolicy(request)
+      .subscribe({
+        next: (data) => {
+          this.orderPolicy = data;
+          this.isEditingPolicy = false;
+          alert('Order policy created successfully!');
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Failed to create order policy';
+          alert(this.errorMessage);
+        }
+      });
+  }
+
+  updateOrderPolicy(): void {
+    if (!this.orderPolicy || !this.orderPolicyContent.trim()) {
+      alert('Please enter policy content before saving.');
+      return;
+    }
+
+    const request = {
+      polling_order_policy: this.orderPolicyContent,
+      authToken: this.accessToken
+    };
+
+    this.orderPoliciesService.updateOrderPolicy(this.orderPolicy.order_policy_id, request)
+      .subscribe({
+        next: (data) => {
+          this.orderPolicy = data;
+          this.isEditingPolicy = false;
+          alert('Order policy updated successfully!');
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Failed to update order policy';
+          alert(this.errorMessage);
+        }
+      });
+  }
+
+  deleteOrderPolicy(): void {
+    if (!this.orderPolicy) {
+      alert('No policy to delete.');
+      return;
+    }
+
+    if (confirm('Are you sure you want to delete this order policy? This action cannot be undone.')) {
+      this.orderPoliciesService.deleteOrderPolicy(this.orderPolicy.order_policy_id, this.accessToken)
+        .subscribe({
+          next: () => {
+            this.orderPolicy = null;
+            this.orderPolicyContent = '';
+            this.isEditingPolicy = false;
+            alert('Order policy deleted successfully!');
+          },
+          error: (err) => {
+            this.errorMessage = err.error?.message || 'Failed to delete order policy';
+            alert(this.errorMessage);
+          }
+        });
+    }
+  }
+
+  startEditingPolicy(): void {
+    this.isEditingPolicy = true;
+  }
+
+  cancelEditingPolicy(): void {
+    this.isEditingPolicy = false;
+    this.orderPolicyContent = this.orderPolicy ? this.orderPolicy.polling_order_policy : '';
+  }
+
+  saveOrderPolicy(): void {
+    if (this.orderPolicy) {
+      this.updateOrderPolicy();
+    } else {
+      this.createOrderPolicy();
+    }
   }
 
 }

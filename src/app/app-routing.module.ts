@@ -14,6 +14,7 @@ import { CandidateImagesComponent } from './candidate-images/candidate-images.co
 import { DeleteAccountComponent } from './delete-account/delete-account.component';
 import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy.component';
 import { FeedbackComponent } from './feedback/feedback.component';
+import { PoliciesComponent } from './policies/policies.component';
 
 export const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -30,6 +31,7 @@ export const routes: Routes = [
   { path: 'delete-account', component: DeleteAccountComponent },
   { path: 'privacy-policy', component: PrivacyPolicyComponent },
   { path: 'feedback', component: FeedbackComponent },
+  { path: 'policies', component: PoliciesComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ]; 
 

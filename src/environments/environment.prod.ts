@@ -1,5 +1,7 @@
+
 export const environment = {
   production: true,
-  apiUrl: "https://api-polling-dev.aethelmearc.org",
+  apiUrl: "https://api-polling.aethelmearc.org",
   feedbackEmail: "marcusoshea100@protonmail.com"
 };
+

@@ -559,4 +559,60 @@
       </div>
     </div>
   </div>
+
+  <!-- Order Policies Section -->
+  <div class="col-md-12 mt-5 pb-4">
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div class="card card-container custom-card">
+            <mat-accordion>
+              <mat-expansion-panel (opened)="panelOpenStateOP = true" (closed)="panelOpenStateOP = false"
+                class="card card-container custom-card">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Order Policies
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                
+                <div class="row">
+                  <div class="col-md-12 ps-4">
+                    <div *ngIf="!isEditingPolicy && orderPolicy" class="mb-3">
+                      <div class="card card-container custom-card p-3">
+                        <div [innerHTML]="orderPolicy.polling_order_policy"></div>
+                      </div>
+                      <div class="d-flex justify-content-end mt-3">
+                        <button class="btn btn-primary me-2" (click)="startEditingPolicy()">Edit Policy</button>
+                        <button class="btn btn-danger" (click)="deleteOrderPolicy()">Delete Policy</button>
+                      </div>
+                    </div>
+                    
+                    <div *ngIf="!isEditingPolicy && !orderPolicy" class="mb-3">
+                      <div class="alert alert-info">
+                        <h5>No Order Policy Found</h5>
+                        <p>There is currently no order policy set for this polling order. Click "Create Policy" to add one.</p>
+                        <button class="btn btn-success" (click)="startEditingPolicy()">Create Policy</button>
+                      </div>
+                    </div>
+                    
+                    <div *ngIf="isEditingPolicy" class="mb-3">
+                      <h5>{{ orderPolicy ? 'Edit Order Policy' : 'Create Order Policy' }}</h5>
+                      <angular-editor 
+                        [(ngModel)]="orderPolicyContent" 
+                        [config]="policyConfig">
+                      </angular-editor>
+                      <div class="d-flex justify-content-end mt-3">
+                        <button class="btn btn-success me-2" (click)="saveOrderPolicy()">Save Policy</button>
+                        <button class="btn btn-secondary" (click)="cancelEditingPolicy()">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

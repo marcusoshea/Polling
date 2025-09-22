@@ -1,0 +1,40 @@
+<div class="col-md-12 m-2 title">
+  <h2>Policies</h2>
+</div>
+
+<div class="col-md-10 col-xs-12 mt-5 pb-4">
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div class="card card-container custom-card">
+          <div class="p-4">
+            <h4>{{ pollingOrder.polling_order_name }} Policies</h4>
+          </div>
+          
+          <div class="p-4" *ngIf="orderPolicy">
+            <div class="card card-container custom-card p-4">
+              <div class="policy-content" [innerHTML]="orderPolicy.polling_order_policy"></div>
+            </div>
+          </div>
+          
+          <div class="p-4" *ngIf="!orderPolicy">
+            <div class="alert alert-info">
+              <h5>No Policy Available</h5>
+              <p>There is currently no order policy set for the {{ pollingOrder.polling_order_name }} order.</p>
+              <p class="mb-0">Please contact your order administrator if you believe this is an error.</p>
+            </div>
+          </div>
+          
+          <div class="p-4" *ngIf="errorMessage">
+            <div class="alert alert-danger">
+              <h5>Error Loading Policy</h5>
+              <p>{{ errorMessage }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

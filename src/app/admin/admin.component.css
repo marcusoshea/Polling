@@ -7,3 +7,16 @@
 .admin-page-padding-bottom {
   padding-bottom: 3rem;
 }
+
+/* Angular Editor styling for white background */
+::ng-deep .angular-editor-toolbar {
+  background-color: white !important;
+}
+
+::ng-deep .angular-editor-wrapper {
+  background-color: white !important;
+}
+
+::ng-deep .angular-editor-textarea {
+  background-color: white !important;
+}
