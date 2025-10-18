@@ -78,6 +78,7 @@ export class PollingsComponent implements OnInit {
   polling_order_member_id: Number;
   isAdmin: boolean = false;
   public completed: boolean = true;
+  public isSubmitting: boolean = false;
   orderMemberList: OrderMember[] = [];
 
   async ngOnInit(): Promise<void> {
@@ -135,6 +136,11 @@ export class PollingsComponent implements OnInit {
   }
 
   submitPolling(draft: boolean) {
+    if (this.isSubmitting) {
+      return; // Prevent multiple submissions
+    }
+    
+    this.isSubmitting = true;
     let finished = 0;
     this.dataSourcePS.data.forEach(x => {
       x.completed = draft;
@@ -142,6 +148,7 @@ export class PollingsComponent implements OnInit {
       if (finished === this.dataSourcePS.data.length) {
         this.subscript3 = this.pollingService.createPollingNotes(this.dataSourcePS.data, this.accessToken, this.votingMember).subscribe({
           next: data => {
+            this.isSubmitting = false;
             if (draft) {
               alert("Polling Submitted");
               setTimeout(() => {
@@ -155,6 +162,7 @@ export class PollingsComponent implements OnInit {
             }
           },
           error: err => {
+            this.isSubmitting = false;
             this.errorMessage = err.error.message;
           }
         });
