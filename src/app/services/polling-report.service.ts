@@ -130,8 +130,11 @@ export class PollingReportService {
             const pollingOrderScore = pollingReport[0].polling_order_polling_score;
             const endDate = polling.end_date.split('T')[0];
             const startDate = polling.start_date.split('T')[0];
-            const activeMembers = pollingReport[1].active_members;
-            const participatingMembers = pollingReport[2].member_participation;
+            
+            // Calculate participation data for the specific polling from notes
+            const activeMembers = pollingReport[1].active_members; // This should be consistent across pollings
+            const uniqueParticipatingMembers = new Set((notes as any[])?.map(note => note.polling_order_member_id) || []);
+            const participatingMembers = uniqueParticipatingMembers.size;
             const participationRate = ((participatingMembers / activeMembers) * 100).toFixed(2);
             const certified = ((participatingMembers / activeMembers) * 100) >= pollingOrderParticipation ? 'certified.' : 'not certified.';
             
