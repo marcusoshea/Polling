@@ -137,7 +137,7 @@ export class PollingsComponent implements OnInit {
 
   submitPolling(draft: boolean) {
     if (this.isSubmitting) {
-      return; // Prevent multiple submissions
+      return; // Prevent double submission
     }
     
     this.isSubmitting = true;
@@ -148,7 +148,6 @@ export class PollingsComponent implements OnInit {
       if (finished === this.dataSourcePS.data.length) {
         this.subscript3 = this.pollingService.createPollingNotes(this.dataSourcePS.data, this.accessToken, this.votingMember).subscribe({
           next: data => {
-            this.isSubmitting = false;
             if (draft) {
               alert("Polling Submitted");
               setTimeout(() => {
@@ -162,8 +161,8 @@ export class PollingsComponent implements OnInit {
             }
           },
           error: err => {
-            this.isSubmitting = false;
             this.errorMessage = err.error.message;
+            this.isSubmitting = false; // Re-enable buttons on error
           }
         });
       }

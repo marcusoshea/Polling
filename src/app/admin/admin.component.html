@@ -463,8 +463,9 @@
                     </div>
                     <div *ngIf="closedPollingReport">
                       <div class="card card-container custom-card p-2">
-                        <h4>The {{closedPollingReport.pollingOrderName}} polling "{{closedPollingReport.pollingTitle}}"
-                          ran from
+                        <h4>The most recent closed {{closedPollingReport.pollingOrderName}} polling was the
+                          {{closedPollingReport.pollingTitle}}
+                          which ran from
                           {{closedPollingReport.startDate | date}} to {{closedPollingReport.endDate | date}}.
                         </h4>
                         <div *ngIf="closedPollingReport.pollingOrderPollingType === 1" class="p-2">

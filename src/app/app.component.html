@@ -15,6 +15,14 @@
 
       <div class="collapse navbar-collapse" id="n_bar">
         <ul class="navbar-nav mr-auto" routerLinkActive="active">
+          <ul class="navbar-nav ml-auto" *ngIf="!isLoggedIn">
+            <li class="nav-item">
+              <a href="/register" class="nav-link" routerLink="register">Register</a>
+            </li>
+            <li class="nav-item">
+              <a href="/login" class="nav-link" routerLink="login">Login</a>
+            </li>
+          </ul>
           <li class="nav-item" *ngIf="showAdmin">
             <a href="/admin" class="nav-link" routerLink="admin">Admin</a>
           </li>
@@ -30,23 +38,11 @@
           <li class="nav-item">
             <a href="/report" class="nav-link" *ngIf="isLoggedIn" routerLink="report">Report</a>
           </li>
+          <li class="nav-item" *ngIf="hasPolicies">
+            <a href="/policies" class="nav-link" routerLink="policies">Policies</a>
+          </li>
           <li class="nav-item">
             <a href="/feedback" class="nav-link" *ngIf="isLoggedIn" routerLink="feedback">Feedback</a>
-          </li>
-        </ul>
-
-        <ul class="navbar-nav ml-auto" *ngIf="!isLoggedIn">
-          <li class="nav-item">
-            <a href="/register" class="nav-link" routerLink="register">Register</a>
-          </li>
-          <li class="nav-item">
-            <a href="/login" class="nav-link" routerLink="login">Login</a>
-          </li>
-        </ul>
-
-        <ul class="navbar-nav ml-auto" *ngIf="isLoggedIn">
-          <li class="nav-item">
-            <a href="/profile" class="nav-link" routerLink="profile">{{ email }}</a>
           </li>
           <li class="nav-item">
             <a href class="nav-link" (click)="logout()">LogOut</a>
