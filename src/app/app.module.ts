@@ -1,7 +1,8 @@
 import { ApplicationConfig, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
+import { TheInterceptor } from './helpers/http.interceptor';
 
 import { AppRoutingModule, routes } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -68,8 +69,10 @@ import { provideRouter, RouterModule, RouterOutlet, withComponentInputBinding } 
 export class AppModule { }
 
 export const appConfig: ApplicationConfig = {
-  providers: [RouterModule,
-    provideHttpClient(withFetch())
+  providers: [
+    RouterModule,
+    provideHttpClient(withFetch(), withInterceptorsFromDi()),
+    { provide: HTTP_INTERCEPTORS, useClass: TheInterceptor, multi: true }
   ]
 };
 
