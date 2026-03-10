@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HTTP_INTERCEPTORS, HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { DOCUMENT } from '@angular/common';
 import { TheInterceptor } from './http.interceptor';
 import { StorageService } from '../services/storage.service';
 
@@ -8,8 +9,12 @@ describe('TheInterceptor', () => {
   let httpMock: HttpTestingController;
   let http: HttpClient;
   let storageService: jasmine.SpyObj<StorageService>;
+  let replaceSpy: jasmine.Spy;
+  let mockDocument: { defaultView: { location: { replace: jasmine.Spy } } };
 
   beforeEach(() => {
+    replaceSpy = jasmine.createSpy('replace');
+    mockDocument = { defaultView: { location: { replace: replaceSpy } } };
     storageService = jasmine.createSpyObj('StorageService', ['clean', 'isLoggedIn']);
 
     TestBed.configureTestingModule({
@@ -17,6 +22,7 @@ describe('TheInterceptor', () => {
       providers: [
         TheInterceptor,
         { provide: StorageService, useValue: storageService },
+        { provide: DOCUMENT, useValue: mockDocument },
         { provide: HTTP_INTERCEPTORS, useClass: TheInterceptor, multi: true }
       ]
     });
@@ -90,8 +96,6 @@ describe('TheInterceptor', () => {
   });
 
   it('should call storageService.clean() on 401', (done) => {
-    spyOn(location, 'replace');
-
     http.get('/api/test').subscribe({
       error: () => {
         expect(storageService.clean).toHaveBeenCalled();
@@ -104,8 +108,6 @@ describe('TheInterceptor', () => {
   });
 
   it('should redirect to /login on 401', (done) => {
-    const replaceSpy = spyOn(location, 'replace');
-
     http.get('/api/test').subscribe({
       error: () => {
         expect(replaceSpy).toHaveBeenCalledWith('/login');

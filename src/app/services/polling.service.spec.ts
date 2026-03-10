@@ -73,26 +73,26 @@ describe('PollingService', () => {
 
   describe('removePolling', () => {
     it('should DELETE /polling/delete with polling_id and authToken in body', () => {
-      service.removePolling('99', TOKEN).subscribe();
+      service.removePolling(99, TOKEN).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/polling/delete`);
       expect(req.request.method).toBe('DELETE');
       expect(req.request.headers.get('Authorization')).toBe('Bearer ' + TOKEN);
-      expect(req.request.body).toEqual({ polling_id: '99', authToken: TOKEN });
+      expect(req.request.body).toEqual({ polling_id: 99, authToken: TOKEN });
       req.flush({});
     });
   });
 
   describe('createPolling', () => {
     it('should POST to /polling/create with polling data and auth header', () => {
-      service.createPolling('Test Polling', '1', '2024-01-01', '2024-12-31', TOKEN).subscribe();
+      service.createPolling('Test Polling', 1, '2024-01-01', '2024-12-31', TOKEN).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/polling/create`);
       expect(req.request.method).toBe('POST');
       expect(req.request.headers.get('Authorization')).toBe('Bearer ' + TOKEN);
       expect(req.request.body).toEqual({
         name: 'Test Polling',
-        polling_order_id: '1',
+        polling_order_id: 1,
         start_date: '2024-01-01',
         end_date: '2024-12-31',
         authToken: TOKEN
@@ -103,15 +103,15 @@ describe('PollingService', () => {
 
   describe('editPolling', () => {
     it('should PUT to /polling/edit with updated polling data and auth header', () => {
-      service.editPolling('Updated Polling', '1', '5', '2024-01-01', '2024-12-31', TOKEN).subscribe();
+      service.editPolling('Updated Polling', 1, 5, '2024-01-01', '2024-12-31', TOKEN).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/polling/edit`);
       expect(req.request.method).toBe('PUT');
       expect(req.request.headers.get('Authorization')).toBe('Bearer ' + TOKEN);
       expect(req.request.body).toEqual({
         name: 'Updated Polling',
-        polling_order_id: '1',
-        polling_id: '5',
+        polling_order_id: 1,
+        polling_id: 5,
         start_date: '2024-01-01',
         end_date: '2024-12-31',
         authToken: TOKEN
@@ -122,7 +122,10 @@ describe('PollingService', () => {
 
   describe('createPollingCandidates', () => {
     it('should POST to /polling/candidates with candidates array', () => {
-      const candidates = ['candidate1', 'candidate2'];
+      const candidates = [
+        { polling_id: 1, candidate_id: 1, authToken: TOKEN },
+        { polling_id: 1, candidate_id: 2, authToken: TOKEN }
+      ];
       service.createPollingCandidates(candidates, TOKEN).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/polling/candidates`);
@@ -135,7 +138,7 @@ describe('PollingService', () => {
 
   describe('createPollingNotes', () => {
     it('should POST to /pollingnote/create and inject authToken and memberId into body[0]', () => {
-      const body = [{ note: 'Test note' }];
+      const body = [{ polling_id: 1, candidate_id: 1, polling_candidate_id: 1, note: 'Test note', vote: 1 }];
       service.createPollingNotes(body, TOKEN, 42).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/pollingnote/create`);

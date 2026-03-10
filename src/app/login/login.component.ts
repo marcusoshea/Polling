@@ -4,6 +4,7 @@ import { PollingOrderService } from '../services/polling-order.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrder } from '../interfaces/polling-order'
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -45,7 +46,7 @@ export class LoginComponent implements OnInit {
   public subscript1?: Subscription;
   public subscript2?: Subscription;
 
-  constructor(private authService: AuthService, private storageService: StorageService, private pollingOrderService: PollingOrderService) { }
+  constructor(private authService: AuthService, private storageService: StorageService, private pollingOrderService: PollingOrderService, private router: Router) { }
 
   ngOnInit(): void {
     this.subscript1 = this.pollingOrderService.getAllOrders().subscribe({
@@ -75,7 +76,7 @@ export class LoginComponent implements OnInit {
 
         this.isLoginFailed = false;
         this.isLoggedIn = true;
-        location.replace('/home');
+        this.router.navigate(['/home']);
       },
       error: err => {
         this.errorMessage = err.error.message;

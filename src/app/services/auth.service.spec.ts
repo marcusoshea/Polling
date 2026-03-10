@@ -41,8 +41,8 @@ describe('AuthService', () => {
     it('should POST to /member/login with credentials', () => {
       const mockResponse = { access_token: 'jwt-token' };
 
-      service.login('user@test.com', 'password123', '1').subscribe(res => {
-        expect(res).toEqual(mockResponse);
+      service.login('user@test.com', 'password123', 1).subscribe(res => {
+        expect(res).toEqual(mockResponse as any);
       });
 
       const req = httpMock.expectOne(`${API_URL}/member/login`);
@@ -50,13 +50,13 @@ describe('AuthService', () => {
       expect(req.request.body).toEqual({
         email: 'user@test.com',
         password: 'password123',
-        polling_order_id: '1'
+        polling_order_id: 1
       });
       req.flush(mockResponse);
     });
 
     it('should include Content-Type application/json header', () => {
-      service.login('user@test.com', 'pass', '1').subscribe();
+      service.login('user@test.com', 'pass', 1).subscribe();
       const req = httpMock.expectOne(`${API_URL}/member/login`);
       expect(req.request.headers.get('Content-Type')).toBe('application/json');
       req.flush({});
@@ -67,21 +67,21 @@ describe('AuthService', () => {
     it('should POST to /member/create with member data', () => {
       const mockResponse = { polling_order_member_id: 1 };
 
-      service.register('Test User', 'user@test.com', 'password123', '1').subscribe(res => {
-        expect(res).toEqual(mockResponse);
+      service.register('Test User', 'user@test.com', 'password123', 1).subscribe(res => {
+        expect(res).toEqual(mockResponse as any);
       });
 
       const req = httpMock.expectOne(`${API_URL}/member/create`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body.name).toBe('Test User');
       expect(req.request.body.email).toBe('user@test.com');
-      expect(req.request.body.polling_order_id).toBe('1');
+      expect(req.request.body.polling_order_id).toBe(1);
       req.flush(mockResponse);
     });
 
     it('should include today\'s date in ISO format for pom_created_at', () => {
       const today = new Date().toISOString().split('T')[0];
-      service.register('Test User', 'user@test.com', 'password123', '1').subscribe();
+      service.register('Test User', 'user@test.com', 'password123', 1).subscribe();
       const req = httpMock.expectOne(`${API_URL}/member/create`);
       expect(req.request.body.pom_created_at).toBe(today);
       req.flush({});
@@ -91,7 +91,7 @@ describe('AuthService', () => {
   describe('forceRegister', () => {
     it('should POST to /member/forcecreate with Bearer auth header', () => {
       const accessToken = 'my-access-token';
-      service.forceRegister('Admin User', 'admin@test.com', 'password123', '1', accessToken).subscribe();
+      service.forceRegister('Admin User', 'admin@test.com', 'password123', 1, accessToken).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/member/forcecreate`);
       expect(req.request.method).toBe('POST');
@@ -101,7 +101,7 @@ describe('AuthService', () => {
 
     it('should set approved to true and include authToken in body', () => {
       const accessToken = 'my-access-token';
-      service.forceRegister('Admin User', 'admin@test.com', 'password123', '1', accessToken).subscribe();
+      service.forceRegister('Admin User', 'admin@test.com', 'password123', 1, accessToken).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/member/forcecreate`);
       expect(req.request.body.authToken).toBe(accessToken);
@@ -112,13 +112,13 @@ describe('AuthService', () => {
 
   describe('getPasswordToken', () => {
     it('should POST to /member/passwordToken with email and polling_order_id', () => {
-      service.getPasswordToken('user@test.com', '1').subscribe();
+      service.getPasswordToken('user@test.com', 1).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/member/passwordToken`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({
         email: 'user@test.com',
-        polling_order_id: '1'
+        polling_order_id: 1
       });
       req.flush({});
     });
@@ -142,7 +142,7 @@ describe('AuthService', () => {
   describe('updatePassword', () => {
     it('should PUT to /member/changePassword with Bearer auth header', () => {
       const accessToken = 'my-access-token';
-      service.updatePassword('user@test.com', 'oldPass', 'newPass', '1', accessToken).subscribe();
+      service.updatePassword('user@test.com', 'oldPass', 'newPass', 1, accessToken).subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/member/changePassword`);
       expect(req.request.method).toBe('PUT');
@@ -151,14 +151,14 @@ describe('AuthService', () => {
     });
 
     it('should send email, old password, new password, and pollingOrderId in body', () => {
-      service.updatePassword('user@test.com', 'oldPass', 'newPass', '1', 'token').subscribe();
+      service.updatePassword('user@test.com', 'oldPass', 'newPass', 1, 'token').subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/member/changePassword`);
       expect(req.request.body).toEqual({
         email: 'user@test.com',
         password: 'oldPass',
         newPassword: 'newPass',
-        pollingOrderId: '1'
+        pollingOrderId: 1
       });
       req.flush({});
     });

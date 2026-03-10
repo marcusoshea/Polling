@@ -1,6 +1,6 @@
 export interface CandidateImages {
-    candidate_id: Number;
-    image_description: String;
-    image_id: Number;
+    candidate_id: number;
+    image_description: string;
+    image_id: number;
     aws_key: string;
 }

@@ -56,7 +56,7 @@ export class ProfileComponent implements OnInit {
   }
 
   async getMemberInfo(): Promise<void> { 
-    this.member = await this.storageService.getMember();
+    this.member = this.storageService.getMember()!;
     this.form.name = this.member.name;
     this.form.email = this.member.email;
     this.form.pollingOrder = this.member.pollingOrder;

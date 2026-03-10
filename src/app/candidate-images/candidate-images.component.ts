@@ -63,7 +63,7 @@ export class CandidateImagesComponent implements OnInit {
   public subscript1?: Subscription;
   public subscript2?: Subscription;
   public subscript3?: Subscription;
-  public candidateId: string;
+  public candidateId: number = 0;
   selectedFiles: FileList;
   private showAdmin = false;
   private errorMessage = '';
@@ -83,15 +83,15 @@ export class CandidateImagesComponent implements OnInit {
     const navigation = this.router.getCurrentNavigation();
     const state = navigation.extras.state as {
       candidateName: string,
-      candidateId: string
+      candidateId: number
     };
 
     this.candidateName = state.candidateName;
     this.candidateId = state.candidateId;
   }
 
-  async ngOnInit(): Promise<void> {
-    const member = await this.storageService.getMember();
+  ngOnInit(): void {
+    const member = this.storageService.getMember()!;
     this.showAdmin = member.isOrderAdmin;
     this.accessToken = member.access_token;
 

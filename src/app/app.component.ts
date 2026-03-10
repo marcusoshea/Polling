@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { StorageService } from './services/storage.service';
-import { AuthService } from './services/auth.service';
 import { OrderPoliciesService } from './services/order-policies.service';
 import { PollingOrder } from './interfaces/polling-order';
-import { RouterModule, RouterOutlet, RouterLink, RouterLinkActive, ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';  
-import { provideRouter } from '@angular/router';
-import { environment } from '../environments/environment'
+import { RouterModule, RouterOutlet, RouterLink, ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { environment } from '../environments/environment';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +18,7 @@ import { environment } from '../environments/environment'
     RouterLink,
   ],
   styleUrls: ['./app.component.css']
-}) 
+})
 export class AppComponent implements OnInit {
   isLoggedIn = false;
   showAdmin = false;
@@ -29,50 +28,58 @@ export class AppComponent implements OnInit {
   pollingOrder = {} as PollingOrder;
   feedbackEmail = environment.feedbackEmail;
   hasPolicies = false;
-  
+
   constructor(
-    private storageService: StorageService, 
-    private authService: AuthService, 
+    private storageService: StorageService,
     private activatedRoute: ActivatedRoute,
-    private orderPoliciesService: OrderPoliciesService
+    private orderPoliciesService: OrderPoliciesService,
+    private router: Router
   ) { }
 
   ngOnInit() {
+    this.checkAuthState();
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.checkAuthState();
+    });
+
+    this.activatedRoute.params.subscribe(params => {
+      console.log(params);
+    });
+  }
+
+  checkAuthState(): void {
     this.isLoggedIn = this.storageService.isLoggedIn();
 
     if (this.isLoggedIn) {
-      const user = this.storageService.getMember();
-      this.pollingOrder = this.storageService.getPollingOrder();
+      const user = this.storageService.getMember()!;
+      this.pollingOrder = this.storageService.getPollingOrder()!;
       this.showAdmin = user.isOrderAdmin;
       this.email = user.email;
-      
-      // Check if policies exist for this order
+
       if (this.pollingOrder?.polling_order_id) {
         this.checkPoliciesExist(user.access_token);
       }
     } else {
-      if(window.location.pathname.includes('profile') || window.location.pathname.includes('admin')
+      if (window.location.pathname.includes('profile') || window.location.pathname.includes('admin')
       || window.location.pathname.includes('candidates') || window.location.pathname.includes('pollings')
-      || window.location.pathname.includes('report') ) {
+      || window.location.pathname.includes('report')) {
         location.replace('/login');
       }
     }
-    this.activatedRoute.params.subscribe(params => {
-      this.authService.handleRouteInfo(params);
-      console.log(params)
-    });
   }
 
   checkPoliciesExist(accessToken: string): void {
     this.orderPoliciesService.getOrderPolicyByPollingOrderId(
-      Number(this.pollingOrder.polling_order_id), 
+      Number(this.pollingOrder.polling_order_id),
       accessToken
     ).subscribe({
       next: (data) => {
         this.hasPolicies = data !== null && data !== undefined;
       },
-      error: (err) => {
-        // If there's an error, assume no policies exist
+      error: () => {
         this.hasPolicies = false;
       }
     });

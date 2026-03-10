@@ -1,7 +1,7 @@
 export interface Candidate {
-    candidate_id: Number;
-    name: String;
-    pollingOrderId: Number;
-    authToken: string;
+    candidate_id: number;
+    name: string;
+    link?: string | null;
+    polling_order_id: number;
     watch_list?: boolean;
-    }
+}

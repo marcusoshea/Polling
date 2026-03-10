@@ -1,27 +1,55 @@
 # Polling
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.2.5.
+Angular 19 frontend for the Polling application.
+
+## Pre-requisites
+
+- Node.js 18+
+- Firefox (used as the test browser)
+- The [Polling-API](../Polling-API) backend running locally or accessible via the configured `apiUrl`
+
+## Installation
+
+```bash
+npm install
+```
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+```bash
+ng serve
+```
 
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Navigate to `http://localhost:4200/`. The app reloads automatically on file changes.
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```bash
+ng build
+```
 
-## Running unit tests
+Build artifacts are output to the `dist/` directory.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Running tests
 
-## Running end-to-end tests
+Tests use **Karma + Jasmine** with **Firefox** (headless by default).
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```bash
+# Run all tests once (no watch)
+npx ng test --watch=false
+
+# Run tests in watch mode (reruns on file changes)
+npx ng test
+```
+
+### Test setup notes
+
+- The test browser is **FirefoxHeadless** (configured in `karma.conf.js`). Firefox must be installed.
+- Components are Angular 19 standalone — specs use `imports: [ComponentName]` (not `declarations`).
+- HTTP services use `HttpClientTestingModule`; standalone component specs use `provideHttpClient()` + `provideHttpClientTesting()`.
+- `StorageService` tests mock `sessionStorage` via `Object.defineProperty` for Firefox compatibility.
+- Navigation in production code uses Angular `Router` (not `window.location`) to keep tests framework-friendly.
 
 ## Further help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Run `ng help` or see the [Angular CLI documentation](https://angular.io/cli).

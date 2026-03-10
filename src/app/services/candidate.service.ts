@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpRequest, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment'
+import { environment } from '../../environments/environment';
+
+import { Candidate } from '../interfaces/candidate';
+import { CandidateImages } from '../interfaces/candidateImages';
 
 const API_URL = environment.apiUrl;
-
-const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-};
 
 @Injectable({
   providedIn: 'root',
@@ -15,93 +14,88 @@ const httpOptions = {
 export class CandidateService {
   constructor(private http: HttpClient) { }
 
-  getAllCandidates(orderID: Number, accessToken: string): Observable<any> {
-    var reqHeader = new HttpHeaders({
+  getAllCandidates(orderID: number, accessToken: string): Observable<Candidate[]> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + '/candidate/all/' + orderID, { headers: reqHeader });
+    return this.http.get<Candidate[]>(API_URL + '/candidate/all/' + orderID, { headers: reqHeader });
   }
 
-  getCandidate(candidateId: Number, accessToken: string): Observable<any> {
-    var reqHeader = new HttpHeaders({
+  getCandidate(candidateId: number, accessToken: string): Observable<Candidate> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + '/candidate/' + candidateId, { headers: reqHeader });
+    return this.http.get<Candidate>(API_URL + '/candidate/' + candidateId, { headers: reqHeader });
   }
 
-  removeCandidate(candidateId: string, accessToken: string): Observable<any> {
+  removeCandidate(candidateId: number, accessToken: string): Observable<void> {
     const options = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + accessToken
       }),
       body: {
-        "candidate_id": candidateId,
-        "authToken": accessToken
+        candidate_id: candidateId,
+        authToken: accessToken
       },
     };
-    return this.http.delete(
-      API_URL + '/candidate/delete', options
-    );
+    return this.http.delete<void>(API_URL + '/candidate/delete', options);
   }
 
-  editCandidate(candidateInfo: any, accessToken: string): Observable<any> {
-    var reqHeader = new HttpHeaders({
+  editCandidate(candidateInfo: Candidate, accessToken: string): Observable<Candidate> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.put(
+    return this.http.put<Candidate>(
       API_URL + '/candidate/edit',
       {
-        "candidate_id": candidateInfo.candidate_id,
-        "watch_list": candidateInfo.watch_list,
-        "link": candidateInfo.link,
-        "name": candidateInfo.name,
-        "polling_order_id": candidateInfo.polling_order_id,
-        "authToken": accessToken
-      }, { headers: reqHeader }
+        candidate_id: candidateInfo.candidate_id,
+        watch_list: candidateInfo.watch_list,
+        name: candidateInfo.name,
+        polling_order_id: candidateInfo.polling_order_id,
+        authToken: accessToken
+      },
+      { headers: reqHeader }
     );
-
   }
 
-  createCandidate(name: string, link: string, polling_order_id: string, accessToken: string): Observable<any> {
+  createCandidate(name: string, link: string, polling_order_id: number, accessToken: string): Observable<Candidate> {
     const today = new Date();
     const created = today.toISOString().split('T')[0];
-    var reqHeader = new HttpHeaders({
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
-    return this.http.post(
+    return this.http.post<Candidate>(
       API_URL + '/candidate/create',
       {
-        "name": name,
-        "link": link,
-        "polling_order_id": polling_order_id,
-        "pom_created_at": created,
-        "authToken": accessToken
-      }, { headers: reqHeader }
+        name,
+        link,
+        polling_order_id,
+        pom_created_at: created,
+        authToken: accessToken
+      },
+      { headers: reqHeader }
     );
   }
 
-
-  createCandidateImage(file: File, candidateId: string, imageDesc: string, accessToken: string): Observable<any> {
-    const today = new Date();
-    const created = today.toISOString().split('T')[0];
-    var reqHeader = new HttpHeaders({
+  createCandidateImage(file: File, candidateId: number, imageDesc: string, accessToken: string): Observable<HttpEvent<unknown>> {
+    const reqHeader = new HttpHeaders({
       'Authorization': 'Bearer ' + accessToken
     });
 
-    let re = /(?:\.([^.]+))?$/;
-    let fileType = re.exec(file.name)[1];
+    const re = /(?:\.([^.]+))?$/;
+    const fileType = re.exec(file.name)?.[1] ?? '';
 
-    let formData: FormData = new FormData();
+    const formData: FormData = new FormData();
     formData.append('file', file, candidateId + '_' + Math.floor(Date.now() * Math.random()) + '.' + fileType);
-    formData.append('candidate_id', candidateId);
+    formData.append('candidate_id', String(candidateId));
     formData.append('authToken', accessToken);
     formData.append('imageDesc', imageDesc);
     const req = new HttpRequest('POST', API_URL + '/candidate/createImage', formData, {
@@ -109,36 +103,31 @@ export class CandidateService {
       responseType: 'json'
     });
     return this.http.request(req);
-
   }
 
-  getAllCandidateImages(candidate_id: string, accessToken: string): Observable<any> {
-    var reqHeader = new HttpHeaders({
+  getAllCandidateImages(candidate_id: number, accessToken: string): Observable<CandidateImages[]> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + '/candidate/candidateImages/' + candidate_id, { headers: reqHeader });
+    return this.http.get<CandidateImages[]>(API_URL + '/candidate/candidateImages/' + candidate_id, { headers: reqHeader });
   }
 
-  deleteCandidateImage(imageId: string, accessToken: string, candidate_id: string, key: string): Observable<any> {
+  deleteCandidateImage(imageId: number, accessToken: string, candidate_id: number, key: string): Observable<void> {
     const options = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + accessToken
       }),
       body: {
-        "image_id": imageId,
-        "authToken": accessToken,
-        "all": false,
-        "candidate_id": candidate_id,
-        "keys": [{ "Key": key }],
+        image_id: imageId,
+        authToken: accessToken,
+        all: false,
+        candidate_id,
+        keys: [{ Key: key }],
       },
     };
-    return this.http.delete(
-      API_URL + '/candidate/deleteImage', options
-    );
+    return this.http.delete<void>(API_URL + '/candidate/deleteImage', options);
   }
-
-
 }

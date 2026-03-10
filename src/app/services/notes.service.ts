@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment'
+import { environment } from '../../environments/environment';
+
+import { Note } from '../interfaces/note';
+import { PollingNote } from '../interfaces/polling-note';
+import { Candidate } from '../interfaces/candidate';
 
 const API_URL = environment.apiUrl;
-
-const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-};
 
 @Injectable({
   providedIn: 'root',
@@ -15,108 +15,106 @@ const httpOptions = {
 export class NotesService {
   constructor(private http: HttpClient) { }
 
-  getExternalNoteByCandidateId(id: Number, accessToken: string): Observable<any> {
-    var reqHeader = new HttpHeaders({
+  getExternalNoteByCandidateId(id: number, accessToken: string): Observable<Note[]> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + '/externalnote/candidate/' + id, { headers: reqHeader });
+    return this.http.get<Note[]>(API_URL + '/externalnote/candidate/' + id, { headers: reqHeader });
   }
 
-  
-  getPollingNoteByCandidateId(id: Number, accessToken: string): Observable<any> {
-    var reqHeader = new HttpHeaders({
+  getPollingNoteByCandidateId(id: number, accessToken: string): Observable<PollingNote[]> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + '/polling/allpn/' + id, { headers: reqHeader });
+    return this.http.get<PollingNote[]>(API_URL + '/polling/allpn/' + id, { headers: reqHeader });
   }
-    
-    getAllPollingNotesById(id: Number, accessToken: string): Observable<any> {
-      var reqHeader = new HttpHeaders({ 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + accessToken
+
+  getAllPollingNotesById(id: number, accessToken: string): Observable<PollingNote[]> {
+    const reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
     });
-      
-    return this.http.post(
+
+    return this.http.post<PollingNote[]>(
       API_URL + '/pollingnote/all',
       {
-        "polling_notes_id": id,
-        "authToken": accessToken
-      }, { headers: reqHeader }
+        polling_notes_id: id,
+        authToken: accessToken
+      },
+      { headers: reqHeader }
     );
-  } 
+  }
 
-  getCandidate(candidateId: Number, accessToken: string): Observable<any> {
-    var reqHeader = new HttpHeaders({
+  getCandidate(candidateId: number, accessToken: string): Observable<Candidate> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + '/candidate/' + candidateId, { headers: reqHeader });
+    return this.http.get<Candidate>(API_URL + '/candidate/' + candidateId, { headers: reqHeader });
   }
 
-  removeCandidate(candidateId: string, accessToken: string): Observable<any> {
+  removeCandidate(candidateId: number, accessToken: string): Observable<void> {
     const options = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + accessToken
       }),
       body: {
-        "candidate_id": candidateId,
-        "authToken": accessToken
+        candidate_id: candidateId,
+        authToken: accessToken
       },
     };
-    return this.http.delete(
-      API_URL + '/candidate/delete', options
-    );
+    return this.http.delete<void>(API_URL + '/candidate/delete', options);
   }
 
-  createExternalNote(external_note: string, candidate_id: string, polling_order_member_id: string, accessToken: string): Observable<any> {
+  createExternalNote(external_note: string, candidate_id: number, polling_order_member_id: number, accessToken: string): Observable<Note> {
     const today = new Date();
     today.setDate(today.getDate() + 1);
     const created = today.toISOString().split('T')[0];
-    var reqHeader = new HttpHeaders({ 
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
-   });
-    return this.http.post(
+    });
+    return this.http.post<Note>(
       API_URL + '/externalnote/create',
       {
-        "external_note": external_note,
-        "candidate_id": candidate_id,
-        "polling_order_member_id": polling_order_member_id,
-        "en_created_at": created,
-        "authToken": accessToken
-      }, { headers: reqHeader }
+        external_note,
+        candidate_id,
+        polling_order_member_id,
+        en_created_at: created,
+        authToken: accessToken
+      },
+      { headers: reqHeader }
     );
   }
 
-  removeExternalNote(note_id: string, polling_order_member_id: string, accessToken: string): Observable<any> {
-       var reqHeader = new HttpHeaders({ 
+  removeExternalNote(note_id: number, polling_order_member_id: number, accessToken: string): Observable<void> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
-   });
-    return this.http.post(
+    });
+    return this.http.post<void>(
       API_URL + '/externalnote/delete',
       {
-        "external_notes_id": note_id,
-        "polling_order_member_id": polling_order_member_id,
-        "authToken": accessToken
-      }, { headers: reqHeader }
+        external_notes_id: note_id,
+        polling_order_member_id,
+        authToken: accessToken
+      },
+      { headers: reqHeader }
     );
   }
 
-  getPollingReportTotals(pollingId: Number, accessToken: string): Observable<any> {
-    var reqHeader = new HttpHeaders({
+  getPollingReportTotals(pollingId: number, accessToken: string): Observable<PollingNote[]> {
+    const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken
     });
 
-    return this.http.get(API_URL + '/pollingnote/totals/' + pollingId, { headers: reqHeader });
+    return this.http.get<PollingNote[]>(API_URL + '/pollingnote/totals/' + pollingId, { headers: reqHeader });
   }
-
-
 }

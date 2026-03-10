@@ -1,8 +1,7 @@
 export interface Polling {
-    polling_id: Number;
+    polling_id: number;
     polling_name: string;
-    pollingOrderId: Number;
+    polling_order_id: number;
     start_date: string;
     end_date: string;
-    access_token: string;
-    }
+}

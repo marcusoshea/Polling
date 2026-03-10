@@ -1,12 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { LoginComponent } from './login.component';
 import { AuthService } from '../services/auth.service';
 import { StorageService } from '../services/storage.service';
 import { PollingOrderService } from '../services/polling-order.service';
+import { PollingOrder } from '../interfaces/polling-order';
+import { AuthUser } from '../interfaces/auth-user';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -14,16 +16,18 @@ describe('LoginComponent', () => {
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let storageServiceSpy: jasmine.SpyObj<StorageService>;
   let pollingOrderServiceSpy: jasmine.SpyObj<PollingOrderService>;
+  let routerSpy: jasmine.SpyObj<Router>;
 
-  const mockOrders = [
-    { polling_order_id: 2, polling_order_name: 'Order B' },
-    { polling_order_id: 1, polling_order_name: 'Order A' }
+  const mockOrders: PollingOrder[] = [
+    { polling_order_id: 2, polling_order_name: 'Order B', polling_order_admin: 0, polling_order_admin_assistant: 0 },
+    { polling_order_id: 1, polling_order_name: 'Order A', polling_order_admin: 0, polling_order_admin_assistant: 0 }
   ];
 
   beforeEach(async () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['login']);
     storageServiceSpy = jasmine.createSpyObj('StorageService', ['isLoggedIn', 'saveMember', 'savePollingOrder']);
     pollingOrderServiceSpy = jasmine.createSpyObj('PollingOrderService', ['getAllOrders']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     storageServiceSpy.isLoggedIn.and.returnValue(false);
     pollingOrderServiceSpy.getAllOrders.and.returnValue(of(mockOrders));
@@ -37,7 +41,8 @@ describe('LoginComponent', () => {
       providers: [
         { provide: AuthService, useValue: authServiceSpy },
         { provide: StorageService, useValue: storageServiceSpy },
-        { provide: PollingOrderService, useValue: pollingOrderServiceSpy }
+        { provide: PollingOrderService, useValue: pollingOrderServiceSpy },
+        { provide: Router, useValue: routerSpy }
       ]
     }).compileComponents();
 
@@ -79,7 +84,7 @@ describe('LoginComponent', () => {
   });
 
   describe('onSubmit', () => {
-    const mockPollingOrder = { polling_order_id: 1, polling_order_name: 'Test Order' };
+    const mockPollingOrder: PollingOrder = { polling_order_id: 1, polling_order_name: 'Test Order', polling_order_admin: 0, polling_order_admin_assistant: 0 };
 
     beforeEach(() => {
       component.form = {
@@ -90,8 +95,7 @@ describe('LoginComponent', () => {
     });
 
     it('should call authService.login with form credentials', () => {
-      authServiceSpy.login.and.returnValue(of({}));
-      spyOn(location, 'replace');
+      authServiceSpy.login.and.returnValue(of({} as AuthUser));
 
       component.onSubmit();
 
@@ -99,9 +103,8 @@ describe('LoginComponent', () => {
     });
 
     it('should save member and polling order to storage on successful login', () => {
-      const mockResponse = { access_token: 'jwt-token', name: 'Test User' };
+      const mockResponse = { access_token: 'jwt-token', name: 'Test User' } as AuthUser;
       authServiceSpy.login.and.returnValue(of(mockResponse));
-      spyOn(location, 'replace');
 
       component.onSubmit();
 
@@ -110,8 +113,7 @@ describe('LoginComponent', () => {
     });
 
     it('should set isLoggedIn to true and isLoginFailed to false on success', () => {
-      authServiceSpy.login.and.returnValue(of({ access_token: 'jwt-token' }));
-      spyOn(location, 'replace');
+      authServiceSpy.login.and.returnValue(of({ access_token: 'jwt-token' } as AuthUser));
 
       component.onSubmit();
 

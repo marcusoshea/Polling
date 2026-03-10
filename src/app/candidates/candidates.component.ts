@@ -64,7 +64,7 @@ export class CandidatesComponent implements OnInit {
 
   constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService: NotesService) { }
   private accessToken = '';
-  private memberId = '';
+  private memberId = 0;
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public displayedColumnsCandidates = ['name', 'watch_list'];
   public displayedColumnsNotes = ['external_note'];
@@ -75,9 +75,9 @@ export class CandidatesComponent implements OnInit {
   public dataSourceCandidateImages = new MatTableDataSource<CandidateImages>();
   candidateImageList: CandidateImages[] = [];
 
-  async ngOnInit(): Promise<void> {
-    const member = await this.storageService.getMember();
-    this.pollingOrder = await this.storageService.getPollingOrder();
+  ngOnInit(): void {
+    const member = this.storageService.getMember()!;
+    this.pollingOrder = this.storageService.getPollingOrder()!;
     this.accessToken = member.access_token;
     this.memberId = member.memberId;
     this.subscript1 = this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
@@ -152,7 +152,7 @@ export class CandidatesComponent implements OnInit {
       "name": this.candidateName,
       "candidate_id": this.candidate_id
     }
-    this.subscript4 = this.notesService.createExternalNote(this.newExternalNote, this.candidate_id.toString(),
+    this.subscript4 = this.notesService.createExternalNote(this.newExternalNote, this.candidate_id,
       this.memberId, this.accessToken).subscribe({
         next: () => {
           this.viewCandidate(element);

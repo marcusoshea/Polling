@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import {
   HttpInterceptor,
   HttpEvent,
@@ -12,7 +13,7 @@ import { StorageService } from '../services/storage.service';
 
 @Injectable()
 export class TheInterceptor implements HttpInterceptor {
-  constructor(private storageService: StorageService) {}
+  constructor(private storageService: StorageService, @Inject(DOCUMENT) private document: Document) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
@@ -26,7 +27,7 @@ export class TheInterceptor implements HttpInterceptor {
 
           case error.status === 401:
             this.storageService.clean();
-            location.replace('/login');
+            this.document.defaultView?.location.replace('/login');
             message = 'Your session has expired. Please log in again.';
             break;
 

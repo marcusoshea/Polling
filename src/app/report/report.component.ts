@@ -73,8 +73,8 @@ export class ReportComponent implements OnInit {
   constructor(private pollingService: PollingService, private storageService: StorageService, private notesService: NotesService, private pollingReportService: PollingReportService) { }
 
   async ngOnInit(): Promise<void> {
-    const member = await this.storageService.getMember();
-    this.pollingOrder = await this.storageService.getPollingOrder();
+    const member = this.storageService.getMember()!;
+    this.pollingOrder = this.storageService.getPollingOrder()!;
     this.accessToken = member.access_token;
     this.isOrderClerk = member.isOrderAdmin;
     this.initialReportBuilder();

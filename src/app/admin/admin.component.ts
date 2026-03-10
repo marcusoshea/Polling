@@ -154,8 +154,8 @@ export class AdminComponent implements OnInit {
   };
 
   async ngOnInit(): Promise<void> {
-    const member = await this.storageService.getMember();
-    this.pollingOrder = await this.storageService.getPollingOrder();
+    const member = this.storageService.getMember()!;
+    this.pollingOrder = this.storageService.getPollingOrder()!;
     this.showAdmin = member.isOrderAdmin;
     this.accessToken = member.access_token;
 
@@ -175,9 +175,6 @@ export class AdminComponent implements OnInit {
     this.subscript1 = this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList = data;
-        for (var i = 0; i < this.candidateList.length; i++) {
-          this.candidateList[i].authToken = this.accessToken;
-        }
 
         this.dataSourceCandidates.data = this.candidateList;
       },
@@ -279,7 +276,7 @@ export class AdminComponent implements OnInit {
     }
     let password = this.randomizer();
 
-    this.authService.forceRegister(this.newOrderMemberName, this.newOrderMemberEmail, password, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
+    this.authService.forceRegister(this.newOrderMemberName, this.newOrderMemberEmail, password, this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         alert("New Member Created");
         setTimeout(() => {
@@ -309,7 +306,7 @@ export class AdminComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       this.pollingOrder = result.data;
-      this.pollingOrderService.updatePollingOrder(this.pollingOrder.polling_order_id, this.pollingOrder.polling_order_name.toString(), this.pollingOrder.polling_order_admin.toString(), this.pollingOrder.polling_order_admin_assistant.toString(), this.accessToken).subscribe({
+      this.pollingOrderService.updatePollingOrder(this.pollingOrder.polling_order_id, this.pollingOrder.polling_order_name, this.pollingOrder.polling_order_admin, this.pollingOrder.polling_order_admin_assistant, this.accessToken).subscribe({
         next: data => {
           this.storageService.clean();
           this.router.navigate(['/login']);
@@ -468,7 +465,7 @@ export class AdminComponent implements OnInit {
   };
 
   addNewCandidate(): void {
-    this.subscript9 = this.candidateService.createCandidate(this.newCandidateName, this.newCandidateLink, this.pollingOrder.polling_order_id.toString(), this.accessToken).subscribe({
+    this.subscript9 = this.candidateService.createCandidate(this.newCandidateName, this.newCandidateLink, this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList.push(data);
         this.dataSourceCandidates.data = this.candidateList;
@@ -486,13 +483,14 @@ export class AdminComponent implements OnInit {
       && this.range.value.end !== null && this.selectedPollingCandidates.length > 0) {
 
       this.selectedPollingCandidates = this.selectedPollingCandidates.filter(item => item);
-      this.subscript10 = this.pollingService.createPolling(this.newPollingName, this.pollingOrder.polling_order_id.toString(), this.range.value.start.toISOString().split('T')[0], this.range.value.end.toISOString().split('T')[0], this.accessToken).subscribe({
+      this.subscript10 = this.pollingService.createPolling(this.newPollingName, this.pollingOrder.polling_order_id, this.range.value.start.toISOString().split('T')[0], this.range.value.end.toISOString().split('T')[0], this.accessToken).subscribe({
         next: data => {
           this.pollingList.push(data);
           this.dataSourcePollings.data = this.pollingList;
           this.newPollingName = '';
           for (var i = 0; i < this.selectedPollingCandidates.length; i++) {
             this.selectedPollingCandidates[i].polling_id = data.polling_id;
+            this.selectedPollingCandidates[i].authToken = this.accessToken;
           }
           this.pollingService.createPollingCandidates(this.selectedPollingCandidates, this.accessToken).subscribe({
             next: () => {
@@ -516,7 +514,7 @@ export class AdminComponent implements OnInit {
     if (element.polling_name && element.start_date !== null
       && element.end_date !== null) {
 
-      this.subscript10 = this.pollingService.editPolling(element.polling_name, this.pollingOrder.polling_order_id.toString(), element.polling_id, new Date(element.start_date).toISOString().split('T')[0], new Date(element.end_date).toISOString().split('T')[0], this.accessToken).subscribe({
+      this.subscript10 = this.pollingService.editPolling(element.polling_name, this.pollingOrder.polling_order_id, element.polling_id, new Date(element.start_date).toISOString().split('T')[0], new Date(element.end_date).toISOString().split('T')[0], this.accessToken).subscribe({
         next: data => {
           alert("Polling Updated!");
           element.isEditing = false;

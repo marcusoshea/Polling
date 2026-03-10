@@ -82,8 +82,8 @@ export class PollingsComponent implements OnInit {
   orderMemberList: OrderMember[] = [];
 
   async ngOnInit(): Promise<void> {
-    const member = await this.storageService.getMember();
-    this.pollingOrder = await this.storageService.getPollingOrder();
+    const member = this.storageService.getMember()!;
+    this.pollingOrder = this.storageService.getPollingOrder()!;
     this.accessToken = member.access_token;
     this.isAdmin = member.isOrderAdmin;
     this.votingMember = member.memberId,

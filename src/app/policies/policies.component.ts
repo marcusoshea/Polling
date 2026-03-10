@@ -29,8 +29,8 @@ export class PoliciesComponent implements OnInit {
   ) { }
 
   async ngOnInit(): Promise<void> {
-    this.member = await this.storageService.getMember();
-    this.pollingOrder = await this.storageService.getPollingOrder();
+    this.member = this.storageService.getMember()!;
+    this.pollingOrder = this.storageService.getPollingOrder()!;
     this.accessToken = this.member.access_token;
 
     // Load the order policy for this polling order

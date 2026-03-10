@@ -1,14 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DeleteAccountComponent } from './delete-account.component';
+import { AuthService } from '../services/auth.service';
+import { StorageService } from '../services/storage.service';
+import { PollingOrderService } from '../services/polling-order.service';
 
 describe('DeleteAccountComponent', () => {
   let component: DeleteAccountComponent;
   let fixture: ComponentFixture<DeleteAccountComponent>;
 
   beforeEach(async () => {
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['login', 'register']);
+    const storageServiceSpy = jasmine.createSpyObj('StorageService', ['getMember', 'getPollingOrder', 'isLoggedIn']);
+    const pollingOrderServiceSpy = jasmine.createSpyObj('PollingOrderService', ['getAllOrders']);
+
     await TestBed.configureTestingModule({
-      declarations: [ DeleteAccountComponent ]
+      imports: [DeleteAccountComponent],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: StorageService, useValue: storageServiceSpy },
+        { provide: PollingOrderService, useValue: pollingOrderServiceSpy }
+      ]
     })
     .compileComponents();
 
