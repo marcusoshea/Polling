@@ -44,3 +44,6 @@ Thumbs.db
 src/environments/environment.prod.ts
 
 src/environments/environment.ts
+
+# Claude Code (local/editor settings)
+.claude/
