@@ -42,7 +42,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
   styleUrls: ['./candidate-images.component.css']
 })
 export class CandidateImagesComponent implements OnInit {
-  @ViewChild(MatSelectionList) candidate: MatSelectionList;
+  @ViewChild(MatSelectionList) candidate!: MatSelectionList;
 
   config: AngularEditorConfig = {
     editable: true,
@@ -64,7 +64,7 @@ export class CandidateImagesComponent implements OnInit {
   public subscript2?: Subscription;
   public subscript3?: Subscription;
   public candidateId: number = 0;
-  selectedFiles: FileList;
+  selectedFiles!: FileList;
   private showAdmin = false;
   private errorMessage = '';
   private accessToken = '';
@@ -158,8 +158,8 @@ export class CandidateImagesComponent implements OnInit {
     });
   }
 
-  selectFile(event) {
-    this.selectedFiles = event.target.files;
+  selectFile(event: Event) {
+    this.selectedFiles = (event.target as HTMLInputElement).files!;
   }
 
   ngOnDestroy(): void {

@@ -49,8 +49,8 @@ export class CandidatesComponent implements OnInit {
   candidateName = '';
   candidateLink = '';
   private errorMessage = '';
-  noteList: any[];
-  noteListPolling: any[];
+  noteList!: any[];
+  noteListPolling!: any[];
   newExternalNote = '';
   candidate_id = 0;
   watch_list = false;

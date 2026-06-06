@@ -64,7 +64,7 @@ import { AngularEditorConfig } from '@kolkov/angular-editor';
   ]
 })
 export class AdminComponent implements OnInit {
-  @ViewChild(MatSelectionList) candidate: MatSelectionList;
+  @ViewChild(MatSelectionList) candidate!: MatSelectionList;
 
   pollingOrder = {} as PollingOrder;
   orderMemberList: OrderMember[] = [];
@@ -115,7 +115,7 @@ export class AdminComponent implements OnInit {
   public panelOpenStateCA = false;
   public panelOpenStatePO = false;
   public panelOpenStateReports = false;
-  public selectedPollingCandidates: any[];
+  public selectedPollingCandidates!: any[];
   public newPollingName = '';
   public selectAllBox = false;
   public selectPollingListBox = false;
@@ -241,9 +241,9 @@ export class AdminComponent implements OnInit {
     return this.orderAdminForm.get('orderAdmin');
   }
 
-  changeOrderAdmin(e) {
+  changeOrderAdmin(e: Event) {
     this.changeAdminOccurred = true;
-    this.selectOrderAdmin.setValue(e.target.value, {
+    this.selectOrderAdmin?.setValue((e.target as HTMLInputElement).value, {
       onlySelf: true
     })
   }
@@ -252,9 +252,9 @@ export class AdminComponent implements OnInit {
     return this.orderAdminAsstForm.get('orderAdminAsst');
   }
 
-  changeOrderAdminAsst(e) {
+  changeOrderAdminAsst(e: Event) {
     this.changeAsstOccurred = true;
-    this.selectOrderAdminAsst.setValue(e.target.value, {
+    this.selectOrderAdminAsst?.setValue((e.target as HTMLInputElement).value, {
       onlySelf: true
     })
   }
@@ -414,7 +414,7 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  goToCandidateImages(element): void {
+  goToCandidateImages(element: Candidate): void {
     const navigationExtras: NavigationExtras = {
       state: {
         candidateName: element.name,
@@ -508,7 +508,7 @@ export class AdminComponent implements OnInit {
     }
   }
 
-  editPolling(element): void {
+  editPolling(element: Polling & { isEditing: boolean }): void {
 
     console.log(element.polling_id)
     if (element.polling_name && element.start_date !== null

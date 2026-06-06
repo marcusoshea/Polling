@@ -48,8 +48,8 @@ export class PollingsComponent implements OnInit {
   private errorMessage = '';
   private accessToken = '';
   public currentPolling: any;
-  public startDate: Date;
-  public endDate: Date;
+  public startDate!: Date;
+  public endDate!: Date;
   public pollingSummary: any;
   public dataSourcePS = new MatTableDataSource<PollingSummary>();
   public dataSourceNotes = new MatTableDataSource<Note>();
@@ -59,23 +59,23 @@ export class PollingsComponent implements OnInit {
   public subscript3?: Subscription;
   public subscript4?: Subscription;
   public votingMember = 0;
-  @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatSort) sort!: MatSort;
   
   constructor(private pollingService: PollingService, private memberService: MemberService, private storageService: StorageService, public dialog: MatDialog) { }
   public displayedColumnsPS = ['name', 'note', 'vote', 'private'];
-  polling_id: Number;
-  polling_name: string;
-  start_date: string;
-  end_date: string;
-  polling_order_id: Number;
-  candidate_id: Number;
-  polling_candidate_id: Number;
-  name: string;
-  polling_notes_id: Number;
-  note: string;
-  vote: Number;
-  pn_created_at: string;
-  polling_order_member_id: Number;
+  polling_id!: Number;
+  polling_name!: string;
+  start_date!: string;
+  end_date!: string;
+  polling_order_id!: Number;
+  candidate_id!: Number;
+  polling_candidate_id!: Number;
+  name!: string;
+  polling_notes_id!: Number;
+  note!: string;
+  vote!: Number;
+  pn_created_at!: string;
+  polling_order_member_id!: Number;
   isAdmin: boolean = false;
   public completed: boolean = true;
   public isSubmitting: boolean = false;
@@ -130,8 +130,8 @@ export class PollingsComponent implements OnInit {
     });
   }
 
-  changeVoter(info) {
-    this.votingMember = info.target.value;
+  changeVoter(info: Event) {
+    this.votingMember = parseInt((info.target as HTMLInputElement).value);
     this.getVotes();
   }
 
@@ -217,8 +217,8 @@ export class PollingsComponent implements OnInit {
   ],
 })
 export class PollingCandidate {
-  public polling: Polling;
-  public polling_id: number;
+  public polling!: Polling;
+  public polling_id!: number;
   public displayedColumnsNotes = ['external_note'];
   public dataSourceNotes = new MatTableDataSource<Note>();
   private errorMessage = '';

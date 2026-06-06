@@ -139,7 +139,7 @@ export class ReportComponent implements OnInit {
     }
   }
 
-  public reportBuilder(data) {
+  public reportBuilder(data: unknown) {
     this.pollingReport = data;
     this.pollingTitle = this.pollingReport[0].polling_name;
     this.pollingOrderPollingType = this.pollingReport[0].polling_order_polling_type;
@@ -175,7 +175,7 @@ export class ReportComponent implements OnInit {
               negative = 0;
               abstain = 0;
               ticker = 0;
-              this.pollingTotal.forEach((element) => {
+              this.pollingTotal.forEach((element: any) => {
                 recommended = '';
                 if (x.name === element.name) {
                   if (element.vote === 'Yes') {
