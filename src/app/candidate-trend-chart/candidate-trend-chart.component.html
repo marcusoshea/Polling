@@ -1,0 +1,26 @@
+<div class="col-md-10 col-xs-12 mt-5 pb-1">
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div class="card card-container custom-card">
+          <div class="card card-container custom-card p-4">
+            <h4 class="mb-3">Readiness Trend</h4>
+
+            <div *ngIf="!loading && trendPoints.length === 0" class="text-muted fst-italic">
+              No polling history yet.
+            </div>
+
+            <div *ngIf="trendPoints.length > 0" style="position: relative; min-height: 300px;">
+              <canvas
+                baseChart
+                [type]="chartType"
+                [data]="chartData"
+                [options]="chartOptions">
+              </canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

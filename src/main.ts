@@ -9,6 +9,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app/app-routing.module';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 if (environment.production) {
   enableProdMode();
@@ -18,6 +19,7 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
     provideHttpClient(),
-    provideAnimations() 
+    provideAnimations(),
+    provideCharts(withDefaultRegisterables())
   ]
 }).catch(err => console.error(err));

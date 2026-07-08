@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 
 import { Polling } from '../interfaces/polling';
 import { PollingSummary } from '../interfaces/polling-summary';
+import { CandidateTrendPoint } from '../interfaces/candidate-trend';
 
 const API_URL = environment.apiUrl;
 
@@ -148,5 +149,14 @@ export class PollingService {
       'Authorization': 'Bearer ' + accessToken
     });
     return this.http.get(`${API_URL}/polling/missingvotes/${pollingOrderId}/${number}`, { headers: reqHeader });
+  }
+
+  getCandidateTrend(candidateId: number, accessToken: string): Observable<CandidateTrendPoint[]> {
+    const reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get<CandidateTrendPoint[]>(API_URL + '/polling/candidatetrend/' + candidateId, { headers: reqHeader });
   }
 }

@@ -21,6 +21,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { AngularEditorModule } from '@kolkov/angular-editor';
+import { CandidateTrendChartComponent } from '../candidate-trend-chart/candidate-trend-chart.component';
 
 
 @Component({
@@ -38,6 +39,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
     AngularEditorModule,
     RouterModule,
     CommonModule,
+    CandidateTrendChartComponent,
   ],
 })
 export class CandidatesComponent implements OnInit {
@@ -48,6 +50,7 @@ export class CandidatesComponent implements OnInit {
   candidateSelected = false;
   candidateName = '';
   candidateLink = '';
+  selectedCandidateId = 0;
   private errorMessage = '';
   noteList!: any[];
   noteListPolling!: any[];
@@ -63,7 +66,7 @@ export class CandidatesComponent implements OnInit {
   public subscript6?: Subscription;
 
   constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService: NotesService) { }
-  private accessToken = '';
+  public accessToken = '';
   private memberId = 0;
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
   public displayedColumnsCandidates = ['name', 'watch_list'];
@@ -100,6 +103,7 @@ export class CandidatesComponent implements OnInit {
     this.candidateSelected = false;
     this.candidateName = '';
     this.candidate_id = 0;
+    this.selectedCandidateId = 0;
     this.pollingNames = [];
     this.pollingNotes = [];
   }
@@ -108,6 +112,7 @@ export class CandidatesComponent implements OnInit {
     this.candidateName = element.name;
     this.candidateLink = element.link;
     this.candidate_id = element.candidate_id;
+    this.selectedCandidateId = element.candidate_id;
     this.watch_list = element.watch_list;
     this.pollingNames = [];
     this.pollingNotes = [];

@@ -5,5 +5,5 @@ import { routes } from './app-routing.module';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
-  providers: [     provideHttpClient(withFetch()),provideRouter(routes)]
+  providers: [provideHttpClient(withFetch()), provideRouter(routes)]
 };

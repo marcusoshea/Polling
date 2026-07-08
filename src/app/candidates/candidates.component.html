@@ -61,6 +61,8 @@
   </div>
 </div>
 
+<app-candidate-trend-chart *ngIf="candidateSelected" [candidateId]="selectedCandidateId" [accessToken]="accessToken"></app-candidate-trend-chart>
+
 <div class="col-md-10 col-xs-12 mt-5 pb-1" *ngIf="candidateSelected">
   <div class="container">
     <div class="row">
