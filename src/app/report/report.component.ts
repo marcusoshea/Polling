@@ -160,9 +160,9 @@ export class ReportComponent implements OnInit {
       next: data => {
         this.subscript3 = this.notesService.getPollingReportTotals(this.pollingReport[0].polling_id, this.accessToken).subscribe({
           next: data => {
-            this.pollingTotal = data;
+            this.pollingTotal = data ?? [];
             const key = 'name';
-            this.candidateList = [...new Map(data.map(item => [item[key], item])).values()];
+            this.candidateList = [...new Map(this.pollingTotal.map(item => [item[key], item])).values()];
             let ticker = 0;
             let positive = 0;
             let negative = 0;
@@ -230,7 +230,7 @@ export class ReportComponent implements OnInit {
             this.errorMessage = err.error.message;
           }
         });
-        this.allPollingNotes = data.filter(e => e.completed === true);
+        this.allPollingNotes = (data ?? []).filter(e => e.completed === true);
       },
       error: err => {
         this.errorMessage = err.error.message;
