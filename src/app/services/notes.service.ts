@@ -33,6 +33,15 @@ export class NotesService {
     return this.http.get<PollingNote[]>(API_URL + '/polling/allpn/' + id, { headers: reqHeader });
   }
 
+  getMyPollingNotesByCandidateId(candidateId: number, accessToken: string): Observable<PollingNote[]> {
+    const reqHeader = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + accessToken
+    });
+
+    return this.http.get<PollingNote[]>(API_URL + '/polling/mynotes/' + candidateId, { headers: reqHeader });
+  }
+
   getAllPollingNotesById(id: number, accessToken: string): Observable<PollingNote[]> {
     const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',

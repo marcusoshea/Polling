@@ -308,6 +308,8 @@ export class PollingCandidate {
   public candidateLink = '';
   public pollingNames = [];
   public pollingNotes = [];
+  public myPollingNames: any[] = [];
+  public myPollingNotes: any[] = [];
   public displayedColumnsCandidateImage = ['image','description'];
   public dataSourceCandidateImages = new MatTableDataSource<CandidateImages>();
   candidateImageList: CandidateImages[] = [];
@@ -330,6 +332,21 @@ export class PollingCandidate {
         this.pollingNames = [...new Set(data.sort((a, b) => (a.end_date > b.end_date ? -1 : 1)).map(item => item.polling_name))];
         this.pollingNames.forEach((element, index) => {
           this.pollingNotes.push(data.filter(e => e.polling_name === element));
+        }
+        )
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+      }
+    });
+
+    this.notesService.getMyPollingNotesByCandidateId(data.candidate.candidate_id, data.accessToken).subscribe({
+      next: data => {
+        const notes = data ?? [];
+        //get unique polling names
+        this.myPollingNames = [...new Set(notes.sort((a, b) => (a.end_date > b.end_date ? -1 : 1)).map(item => item.polling_name))];
+        this.myPollingNames.forEach((element, index) => {
+          this.myPollingNotes.push(notes.filter(e => e.polling_name === element));
         }
         )
       },

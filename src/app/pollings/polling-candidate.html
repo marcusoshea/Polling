@@ -13,6 +13,41 @@
       <div class="row">
         <div class="col">
             <div class="card card-container custom-card">
+              <div *ngIf="this.myPollingNames.length === 0" class="p-3 text-muted">
+                You have no previous notes on this candidate.
+              </div>
+              <mat-accordion *ngIf="this.myPollingNames.length > 0">
+                <mat-expansion-panel *ngFor="let polls of this.myPollingNotes; let i = index"
+                  class="card card-container custom-card">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      Your Previous Notes - {{this.myPollingNames[i]}}
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div *ngFor="let pollNote of polls;">
+                    <span *ngIf="pollNote.private"><b>--PRIVATE RESPONSE--</b></span>
+                    <span [ngSwitch]="pollNote.vote">
+                      Vote: <span *ngSwitchCase=1>Yes</span>
+                      <span *ngSwitchCase=2>Wait</span>
+                      <span *ngSwitchCase=3>No</span>
+                      <span *ngSwitchCase=4>Abstain</span>
+                    </span>
+                    <div *ngIf="pollNote.note?.length > 0">Note: "{{pollNote?.note}}"</div>
+                    <hr>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12 col-xs-12 mt-5 pb-1">
+    <div class="container">
+      <div class="row">
+        <div class="col">
+            <div class="card card-container custom-card">
               <mat-accordion>
                 <mat-expansion-panel *ngFor="let polls of this.pollingNotes; let i = index"
                   class="card card-container custom-card">

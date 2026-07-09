@@ -1,12 +1,14 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 
-import { PollingsComponent } from './pollings.component';
+import { PollingsComponent, PollingCandidate } from './pollings.component';
 import { PollingService } from '../services/polling.service';
 import { MemberService } from '../services/member.service';
 import { StorageService } from '../services/storage.service';
+import { NotesService } from '../services/notes.service';
+import { CandidateService } from '../services/candidate.service';
 import { PollingSummary } from '../interfaces/polling-summary';
 
 function makeRow(overrides: Partial<PollingSummary> = {}): PollingSummary {
@@ -170,5 +172,77 @@ describe('PollingsComponent', () => {
       tick(1500);
       expect(pollingServiceSpy.createPollingNotes).not.toHaveBeenCalled();
     }));
+  });
+});
+
+describe('PollingCandidate dialog', () => {
+  let notesServiceSpy: jasmine.SpyObj<NotesService>;
+  let candidateServiceSpy: jasmine.SpyObj<CandidateService>;
+
+  const dialogData = {
+    candidate: { candidate_id: 100, name: 'Cand', link: '' },
+    accessToken: 'token'
+  };
+
+  async function setup(myNotes: any): Promise<PollingCandidate> {
+    notesServiceSpy = jasmine.createSpyObj('NotesService', [
+      'getExternalNoteByCandidateId',
+      'getPollingNoteByCandidateId',
+      'getMyPollingNotesByCandidateId'
+    ]);
+    candidateServiceSpy = jasmine.createSpyObj('CandidateService', ['getAllCandidateImages']);
+
+    notesServiceSpy.getExternalNoteByCandidateId.and.returnValue(of([]));
+    notesServiceSpy.getPollingNoteByCandidateId.and.returnValue(of([]));
+    notesServiceSpy.getMyPollingNotesByCandidateId.and.returnValue(of(myNotes));
+    candidateServiceSpy.getAllCandidateImages.and.returnValue(of([]));
+
+    await TestBed.configureTestingModule({
+      imports: [PollingCandidate, NoopAnimationsModule, MatDialogModule],
+      providers: [
+        { provide: NotesService, useValue: notesServiceSpy },
+        { provide: CandidateService, useValue: candidateServiceSpy },
+        { provide: MatDialogRef, useValue: { close: () => {} } },
+        { provide: MAT_DIALOG_DATA, useValue: dialogData }
+      ]
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(PollingCandidate);
+    return fixture.componentInstance;
+  }
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
+  it('calls getMyPollingNotesByCandidateId with the candidate id and token', async () => {
+    await setup([]);
+    expect(notesServiceSpy.getMyPollingNotesByCandidateId).toHaveBeenCalledWith(100, 'token');
+  });
+
+  it('groups the response into myPollingNames (unique, end_date DESC) and myPollingNotes (array of arrays)', async () => {
+    const notes = [
+      { polling_name: 'Older', end_date: '2025-01-01T00:00:00.000Z', vote: 1, note: 'a', private: false },
+      { polling_name: 'Newer', end_date: '2026-01-01T00:00:00.000Z', vote: 2, note: 'b', private: true },
+      { polling_name: 'Newer', end_date: '2026-01-01T00:00:00.000Z', vote: 3, note: 'c', private: false }
+    ];
+    const dialog = await setup(notes);
+
+    expect(dialog.myPollingNames).toEqual(['Newer', 'Older']);
+    expect(dialog.myPollingNotes.length).toBe(2);
+    expect(dialog.myPollingNotes[0].length).toBe(2); // Newer has two notes
+    expect(dialog.myPollingNotes[1].length).toBe(1); // Older has one note
+  });
+
+  it('empty response yields empty state (myPollingNames empty)', async () => {
+    const dialog = await setup([]);
+    expect(dialog.myPollingNames.length).toBe(0);
+    expect(dialog.myPollingNotes.length).toBe(0);
+  });
+
+  it('null response is handled gracefully (guarded to empty)', async () => {
+    const dialog = await setup(null);
+    expect(dialog.myPollingNames.length).toBe(0);
+    expect(dialog.myPollingNotes.length).toBe(0);
   });
 });
