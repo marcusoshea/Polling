@@ -8,7 +8,7 @@
 
   <div class="form-group m-3" *ngIf="isAdmin" >
     <label for="pollingOrder">Order Clerk Proxy Vote As:</label>
-    <select class="form-select col-md-6" (change)="changeVoter($event)">
+    <select id="pollingOrder" class="form-select col-md-6" (change)="changeVoter($event)">
       <option disabled selected>Voting as Self</option>
       <option *ngFor="let option of orderMemberList" [value]="option.polling_order_member_id">
         {{option.name}}
@@ -21,23 +21,25 @@
       <div class="row">
         <div class="col">
           <div class="card card-container custom-card">
+            <div class="table-responsive" style="overflow-x:auto">
             <table mat-table [dataSource]="dataSourcePS" class="mat-table custom-card" matSort matSortActive="name" matSortDirection="asc">
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef class="h6 col-md-3"> Polling Candidate </th>
+                <th mat-header-cell scope="col" *matHeaderCellDef class="h6 col-md-3"> Polling Candidate </th>
                 <td mat-cell *matCellDef="let element"> <a (click)="viewCandidate('500ms', '1500ms', element)"
                     class="link-primary mt-2 mb-2">{{element.name}} </a></td>
               </ng-container>
               <ng-container matColumnDef="note">
-                <th mat-header-cell *matHeaderCellDef class="p-4 h6"> Your Note </th>
+                <th mat-header-cell scope="col" *matHeaderCellDef class="p-4 h6"> Your Note </th>
                 <td mat-cell *matCellDef="let element">
-                  <textarea class="form-control mt-2 mb-2 mx-2" name="note" [(ngModel)]="element.note"
+                  <textarea class="form-control mt-2 mb-2 mx-2" name="note" [id]="'note-' + element.candidate_id"
+                    [attr.aria-label]="'Note for ' + element.name" [(ngModel)]="element.note"
                     (ngModelChange)="onRowChange(element)" required></textarea>
                 </td>
               </ng-container>
               <ng-container matColumnDef="vote">
-                <th mat-header-cell *matHeaderCellDef class="p-4 h6 col-md-2"> Your Vote </th>
+                <th mat-header-cell scope="col" *matHeaderCellDef class="p-4 h6 col-md-2"> Your Vote </th>
                 <td mat-cell *matCellDef="let element" class="p-4 h6 mt-2 mb-2 mx-2">
-                  <mat-select [(ngModel)]="element.vote" (ngModelChange)="onRowChange(element)" placeholder="Select Your Vote">
+                  <mat-select [(ngModel)]="element.vote" (ngModelChange)="onRowChange(element)" [aria-label]="'Your vote for ' + element.name" placeholder="Select Your Vote">
                     <mat-option [value]="1">Yes</mat-option>
                     <mat-option *ngIf="pollingOrder.polling_order_id !==1 && pollingOrder.polling_order_id !==8" [value]="2">Wait</mat-option>
                     <mat-option [value]="3">No</mat-option>
@@ -46,14 +48,15 @@
                 </td>
               </ng-container>
               <ng-container matColumnDef="private">
-                <th mat-header-cell *matHeaderCellDef class="p-4 h6 col-md-2"> Private Response </th>
+                <th mat-header-cell scope="col" *matHeaderCellDef class="p-4 h6 col-md-2"> Private Response </th>
                 <td mat-cell *matCellDef="let element" class="p-4 h6 mt-2 mb-2 mx-2">
-                    <input type="checkbox" [value]="element.private" name="private" checked="element.private" [(ngModel)]="element.private" (ngModelChange)="onRowChange(element)" #active="ngModel" class="m-2"/>
+                    <mat-checkbox [(ngModel)]="element.private" (ngModelChange)="onRowChange(element)" [aria-label]="'Mark note private for ' + element.name" class="m-2">Private</mat-checkbox>
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="displayedColumnsPS"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumnsPS;"></tr>
             </table>
+            </div>
             <div class="alert alert-warning m-3" role="alert" *ngIf="!completed">
               <strong>Draft — not yet submitted.</strong> Click Submit to cast your vote.
             </div>

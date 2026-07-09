@@ -67,6 +67,30 @@ describe('PollingsComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('accessibility labels on voting controls', () => {
+    it('renders a per-row aria-label on the note textarea and vote select', () => {
+      component.currentPolling = { polling_id: 10, polling_name: 'P' };
+      component.dataSourcePS.data = [makeRow({ name: 'Alice', candidate_id: 100 })];
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const textarea = el.querySelector('textarea[name="note"]');
+      expect(textarea?.getAttribute('aria-label')).toBe('Note for Alice');
+      expect(textarea?.getAttribute('id')).toBe('note-100');
+
+      // mat-select / mat-checkbox render the aria-label onto an internal element
+      // that varies by Material version, so assert the accessible name appears
+      // in the control's rendered markup rather than pinning an exact host attr.
+      const voteSelect = el.querySelector('mat-select');
+      expect(voteSelect).toBeTruthy();
+      expect(voteSelect?.outerHTML).toContain('Your vote for Alice');
+
+      const checkbox = el.querySelector('mat-checkbox');
+      expect(checkbox).toBeTruthy();
+      expect(checkbox?.outerHTML).toContain('Mark note private for Alice');
+    });
+  });
+
   describe('auto-save drafts', () => {
     it('onRowChange skips entirely-empty rows (no createPollingNotes)', fakeAsync(() => {
       const row = makeRow({ note: '   ', vote: null as unknown as number });

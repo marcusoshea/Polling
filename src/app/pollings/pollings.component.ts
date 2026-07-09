@@ -24,6 +24,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-pollings',
@@ -37,7 +38,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatNativeDateModule,
     MatListModule,
     CommonModule,
-    MatSelectModule
+    MatSelectModule,
+    MatCheckboxModule
   ],
   styleUrls: ['./pollings.component.css']
 })

@@ -66,6 +66,25 @@ option:checked  {
     font-size: medium;
 }
 
+/* Let expansion-panel headers grow and long titles wrap instead of scrunching
+   into the fixed 48px header height (candidate dialog, candidates, report, admin). */
+.mat-expansion-panel-header {
+    height: auto !important;
+    min-height: 48px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+.mat-expansion-panel-header.mat-expanded {
+    height: auto !important;
+}
+.mat-expansion-panel-header-title,
+mat-panel-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+    margin-right: 8px;
+}
+
 .text-centered {
     text-align: center;
 }
@@ -81,4 +100,10 @@ option:checked  {
 .font-italic {
     font-style: italic;
     background-color: var(--grey) !important;
+}
+
+/* Visible keyboard focus indicator (a11y) */
+:focus-visible {
+    outline: 2px solid var(--Red-Highlight);
+    outline-offset: 2px;
 }
