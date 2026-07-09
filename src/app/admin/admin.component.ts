@@ -33,6 +33,7 @@ import { OrderPoliciesService } from '../services/order-policies.service';
 import { OrderPolicies } from '../interfaces/order-policies';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
+import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
 
 // pdfmake v0.2.15: build/pdfmake exports the pdfMake object as default;
 // build/vfs_fonts exports the vfs map directly via module.exports (no .pdfMake.vfs wrapper).
@@ -60,7 +61,8 @@ pdfMake.vfs = pdfFonts?.vfs ?? pdfFonts?.pdfMake?.vfs ?? pdfFonts;
     MatInputModule,
     CommonModule,
     OrderByMemberNamePipe,
-    AngularEditorModule
+    AngularEditorModule,
+    AdminDashboardComponent
   ],
   styleUrls: ['./admin.component.css'],
   animations: [
