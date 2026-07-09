@@ -34,6 +34,16 @@ import { OrderPolicies } from '../interfaces/order-policies';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
 
+// pdfmake v0.2.15: build/pdfmake exports the pdfMake object as default;
+// build/vfs_fonts exports the vfs map directly via module.exports (no .pdfMake.vfs wrapper).
+import pdfMakeImport from 'pdfmake/build/pdfmake';
+import pdfFontsImport from 'pdfmake/build/vfs_fonts';
+
+const pdfMake: any = (pdfMakeImport as any)?.default ?? pdfMakeImport;
+const pdfFonts: any = (pdfFontsImport as any)?.default ?? pdfFontsImport;
+// Cover all known export shapes: object-with-vfs, .pdfMake.vfs wrapper, or the vfs map itself.
+pdfMake.vfs = pdfFonts?.vfs ?? pdfFonts?.pdfMake?.vfs ?? pdfFonts;
+
 
 @Component({
   selector: 'app-admin',
@@ -629,6 +639,191 @@ export class AdminComponent implements OnInit {
           this.errorMessage = err.error?.message || 'Failed to fetch specific polling report';
         }
       });
+  }
+
+  /**
+   * Pure: tally the votes for a single candidate name from closedPollingReport.pollingTotal.
+   * 'Yes'->yes, 'Wait'->wait, 'No'->no, 'Abstain'/'Null'->abstain.
+   */
+  public voteTotalsFor(name: string): { yes: number; wait: number; no: number; abstain: number } {
+    const rows: any[] = this.closedPollingReport?.pollingTotal || [];
+    return rows.reduce(
+      (acc, row: any) => {
+        if (row?.name !== name) {
+          return acc;
+        }
+        const total = parseInt(row.total, 10) || 0;
+        switch (row.vote) {
+          case 'Yes':
+            acc.yes += total;
+            break;
+          case 'Wait':
+            acc.wait += total;
+            break;
+          case 'No':
+            acc.no += total;
+            break;
+          case 'Abstain':
+          case 'Null':
+            acc.abstain += total;
+            break;
+        }
+        return acc;
+      },
+      { yes: 0, wait: 0, no: 0, abstain: 0 }
+    );
+  }
+
+  /**
+   * Pure: assemble a pdfmake document definition from this.closedPollingReport,
+   * mirroring the on-screen admin closed report given the three checkbox flags.
+   * No I/O; safe to unit-test directly.
+   */
+  public buildClosedReportDocDefinition(): any {
+    const report: any = this.closedPollingReport || {};
+    const orderName = report.pollingOrderName ?? '';
+    const title = `${orderName} — ${report.pollingTitle ?? ''}`;
+
+    const content: any[] = [];
+    content.push({ text: title, style: 'title', margin: [0, 0, 0, 8] });
+
+    // Header block
+    content.push({ text: `Polling ran from ${report.startDate} to ${report.endDate}.`, margin: [0, 0, 0, 4] });
+
+    if (report.pollingOrderPollingType === 1) {
+      if (report.pollingOrderParticipation > 0) {
+        content.push({
+          text:
+            `Participation: ${report.participatingMembers} of ${report.activeMembers} active members ` +
+            `= ${report.participationRate}%. The polling is ${report.certified}`,
+          margin: [0, 0, 0, 4],
+        });
+      }
+      if (report.pollingOrderScore > 0) {
+        content.push({
+          text: `A candidate must attain a rate of ${report.pollingOrderScore}% to be recommended.`,
+          margin: [0, 0, 0, 4],
+        });
+      }
+    } else if (report.pollingOrderPollingType === 2) {
+      content.push({
+        text: `The ${orderName} order recommends the top candidates within a polling exceeding a specific rating.`,
+        margin: [0, 0, 0, 4],
+      });
+    }
+
+    // Candidate summary table
+    const showRecommended = report.pollingOrderScore > 0;
+    const header: any[] = [
+      { text: 'Candidate', bold: true },
+      { text: 'Yes', bold: true },
+      { text: 'Wait', bold: true },
+      { text: 'No', bold: true },
+      { text: 'Abstain', bold: true },
+      { text: 'Rating %', bold: true },
+    ];
+    if (showRecommended) {
+      header.push({ text: 'Recommended?', bold: true });
+    }
+
+    const body: any[][] = [header];
+    const list: any[] = report.candidateList || [];
+    list.forEach((cl: any) => {
+      const tallies = this.voteTotalsFor(cl.name);
+      const rating = Number(cl.rating) || 0;
+      const row: any[] = [
+        String(cl.name ?? ''),
+        String(tallies.yes),
+        String(tallies.wait),
+        String(tallies.no),
+        String(tallies.abstain),
+        `${rating}%`,
+      ];
+      if (showRecommended) {
+        row.push(rating >= report.pollingOrderScore ? 'Yes' : 'No');
+      }
+      body.push(row);
+    });
+
+    const widths = showRecommended
+      ? ['*', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto']
+      : ['*', 'auto', 'auto', 'auto', 'auto', 'auto'];
+
+    content.push({
+      table: { headerRows: 1, widths, body },
+      layout: 'lightHorizontalLines',
+      margin: [0, 8, 0, 8],
+    });
+
+    // Notes section: only when Show Notes is on. Mirror the on-screen *ngIf chain.
+    if (this.showAdminNotes) {
+      const voteWord = (vote: any): string => {
+        switch (vote) {
+          case 1: return 'Yes';
+          case 2: return 'Wait';
+          case 3: return 'No';
+          case 4: return 'Abstain';
+          default: return '';
+        }
+      };
+      list.forEach((cl: any) => {
+        const sorted = this.sortNotes(cl?.notes);
+        const lines: string[] = [];
+        sorted.forEach((note: any) => {
+          if (note.private && !this.showAdminPrivateNotes) {
+            return;
+          }
+          if (!this.showAdminVotes && !note.note) {
+            return;
+          }
+          let line = '';
+          if (note.private) {
+            line += 'PRIVATE RESPONSE: ';
+          }
+          if (this.showAdminVotes) {
+            line += voteWord(note.vote);
+          }
+          if (note.note) {
+            line += ` --- ${note.note}`;
+          }
+          line += ` - ${note.member_name ?? ''}`;
+          lines.push(line);
+        });
+        if (lines.length === 0) {
+          return;
+        }
+        content.push({ text: String(cl.name ?? ''), style: 'candidateHeading', margin: [0, 8, 0, 2] });
+        content.push({ ul: lines, margin: [0, 0, 0, 6] });
+      });
+    }
+
+    content.push({ text: `Generated ${new Date().toString()}`, style: 'footer', margin: [0, 8, 0, 0] });
+
+    return {
+      content,
+      styles: {
+        title: { fontSize: 16, bold: true },
+        candidateHeading: { fontSize: 12, bold: true, color: '#003366' },
+        footer: { fontSize: 9, italics: true, color: '#666666' },
+      },
+      defaultStyle: { fontSize: 10 },
+    };
+  }
+
+  /**
+   * Side-effect wrapper: build the doc and trigger a browser download.
+   * Inherently clerk-only (admin redirects non-clerks); defensive guard kept.
+   */
+  public exportClosedReportPdf(): void {
+    if (!this.showAdmin || !this.closedPollingReport) {
+      return;
+    }
+    const dateStr = new Date().toISOString().split('T')[0];
+    const safeTitle = (this.closedPollingReport.pollingTitle || 'polling')
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9\-_]/g, '');
+    const filename = `${safeTitle}-report-${dateStr}.pdf`;
+    pdfMake.createPdf(this.buildClosedReportDocDefinition()).download(filename);
   }
 
   applyMemberListFilter() {
