@@ -81,6 +81,14 @@ export class PollingsComponent implements OnInit {
   public isSubmitting: boolean = false;
   orderMemberList: OrderMember[] = [];
 
+  public autoSaveStatus: '' | 'saving' | 'saved' | 'error' = '';
+  private autoSaveTimers = new Map<number, any>();
+  private autoSaveInFlight = new Set<number>();
+  private autoSaveSubs = new Map<number, Subscription>();
+  private autoSaveClearStatusTimer: any;
+  private readonly AUTO_SAVE_DEBOUNCE_MS = 1000;
+  private readonly AUTO_SAVE_STATUS_CLEAR_MS = 3000;
+
   async ngOnInit(): Promise<void> {
     const member = this.storageService.getMember()!;
     this.pollingOrder = this.storageService.getPollingOrder()!;
@@ -131,8 +139,74 @@ export class PollingsComponent implements OnInit {
   }
 
   changeVoter(info: Event) {
+    // Clear any pending auto-save timers so stale timers don't fire against the newly selected voter.
+    this.clearAllAutoSaveTimers();
     this.votingMember = parseInt((info.target as HTMLInputElement).value);
     this.getVotes();
+  }
+
+  onRowChange(element: PollingSummary): void {
+    if (this.isSubmitting) {
+      return;
+    }
+    // Skip entirely-empty rows.
+    if (!(element.vote != null || (element.note && element.note.trim().length > 0))) {
+      return;
+    }
+    // Any auto-saved edit is unsubmitted work, so honestly flip the banner to the draft state immediately.
+    // The row will be written as completed:false, so "Submitted ✓" would otherwise be misleading. Only Submit re-sets completed=true.
+    this.completed = false;
+    const candidateId = element.candidate_id;
+    const existing = this.autoSaveTimers.get(candidateId);
+    if (existing) {
+      clearTimeout(existing);
+    }
+    const timer = setTimeout(() => {
+      this.autoSaveTimers.delete(candidateId);
+      this.autoSaveRow(element);
+    }, this.AUTO_SAVE_DEBOUNCE_MS);
+    this.autoSaveTimers.set(candidateId, timer);
+  }
+
+  autoSaveRow(element: PollingSummary): void {
+    const candidateId = element.candidate_id;
+    // Coalesce: if a save for this candidate is already in flight, re-arm the debounce and return.
+    if (this.autoSaveInFlight.has(candidateId)) {
+      this.onRowChange(element);
+      return;
+    }
+    // Send the same payload shape as Save Draft, as a 1-element array, with completed:false.
+    const row = { ...element, completed: false };
+    this.autoSaveInFlight.add(candidateId);
+    this.autoSaveStatus = 'saving';
+    if (this.autoSaveClearStatusTimer) {
+      clearTimeout(this.autoSaveClearStatusTimer);
+      this.autoSaveClearStatusTimer = null;
+    }
+    const sub = this.pollingService.createPollingNotes([row], this.accessToken, this.votingMember).subscribe({
+      next: () => {
+        this.autoSaveInFlight.delete(candidateId);
+        this.autoSaveSubs.delete(candidateId);
+        this.autoSaveStatus = 'saved';
+        this.autoSaveClearStatusTimer = setTimeout(() => {
+          if (this.autoSaveStatus === 'saved') {
+            this.autoSaveStatus = '';
+          }
+          this.autoSaveClearStatusTimer = null;
+        }, this.AUTO_SAVE_STATUS_CLEAR_MS);
+      },
+      error: () => {
+        this.autoSaveInFlight.delete(candidateId);
+        this.autoSaveSubs.delete(candidateId);
+        this.autoSaveStatus = 'error';
+      }
+    });
+    this.autoSaveSubs.set(candidateId, sub);
+  }
+
+  private clearAllAutoSaveTimers(): void {
+    this.autoSaveTimers.forEach(timer => clearTimeout(timer));
+    this.autoSaveTimers.clear();
   }
 
   submitPolling(draft: boolean) {
@@ -195,6 +269,14 @@ export class PollingsComponent implements OnInit {
     if (this.subscript4) {
       this.subscript4.unsubscribe();
     }
+    this.clearAllAutoSaveTimers();
+    if (this.autoSaveClearStatusTimer) {
+      clearTimeout(this.autoSaveClearStatusTimer);
+      this.autoSaveClearStatusTimer = null;
+    }
+    this.autoSaveSubs.forEach(sub => sub.unsubscribe());
+    this.autoSaveSubs.clear();
+    this.autoSaveInFlight.clear();
   }
 
 }
