@@ -25,6 +25,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-pollings',
@@ -63,7 +64,7 @@ export class PollingsComponent implements OnInit {
   public votingMember = 0;
   @ViewChild(MatSort) sort!: MatSort;
   
-  constructor(private pollingService: PollingService, private memberService: MemberService, private storageService: StorageService, public dialog: MatDialog) { }
+  constructor(private pollingService: PollingService, private memberService: MemberService, private storageService: StorageService, public dialog: MatDialog, private toastService: ToastService) { }
   public displayedColumnsPS = ['name', 'note', 'vote', 'private'];
   polling_id!: Number;
   polling_name!: string;
@@ -107,6 +108,7 @@ export class PollingsComponent implements OnInit {
           }
         },
         error: err => {
+          this.toastService.show(err.error?.message ?? 'The current polling could not be loaded. Please try again.');
           this.errorMessage = err.error.message;
         }
       });
@@ -116,6 +118,7 @@ export class PollingsComponent implements OnInit {
         this.orderMemberList = data.filter(e => e.approved === true && e.removed === false);
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The order member list could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -133,8 +136,9 @@ export class PollingsComponent implements OnInit {
           this.completed = true;
         };    
         this.dataSourcePS.sort = this.sort;
-      },      
+      },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'Your votes could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -237,7 +241,8 @@ export class PollingsComponent implements OnInit {
             }
           },
           error: err => {
-            this.errorMessage = err.error.message;
+            this.toastService.show(err.error?.message ?? 'Your vote could not be submitted. Please try again.');
+            this.errorMessage = err.error?.message;
             this.isSubmitting = false; // Re-enable buttons on error
           }
         });

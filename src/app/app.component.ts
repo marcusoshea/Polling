@@ -6,6 +6,7 @@ import { RouterModule, RouterOutlet, RouterLink, ActivatedRoute, Router, Navigat
 import { CommonModule } from '@angular/common';
 import { environment } from '../environments/environment';
 import { filter } from 'rxjs/operators';
+import { ToastComponent } from './toast/toast.component';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,7 @@ import { filter } from 'rxjs/operators';
     RouterModule,
     CommonModule,
     RouterLink,
+    ToastComponent,
   ],
   styleUrls: ['./app.component.css']
 })

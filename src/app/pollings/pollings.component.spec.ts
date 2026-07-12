@@ -9,6 +9,7 @@ import { MemberService } from '../services/member.service';
 import { StorageService } from '../services/storage.service';
 import { NotesService } from '../services/notes.service';
 import { CandidateService } from '../services/candidate.service';
+import { ToastService } from '../services/toast.service';
 import { PollingSummary } from '../interfaces/polling-summary';
 
 function makeRow(overrides: Partial<PollingSummary> = {}): PollingSummary {
@@ -35,11 +36,13 @@ describe('PollingsComponent', () => {
   let component: PollingsComponent;
   let fixture: ComponentFixture<PollingsComponent>;
   let pollingServiceSpy: jasmine.SpyObj<PollingService>;
+  let toastServiceSpy: jasmine.SpyObj<ToastService>;
 
   beforeEach(async () => {
     pollingServiceSpy = jasmine.createSpyObj('PollingService', ['getCurrentPolling', 'getPollingSummary', 'createPollingNotes']);
     const memberServiceSpy = jasmine.createSpyObj('MemberService', ['getAllOrderMembers']);
     const storageServiceSpy = jasmine.createSpyObj('StorageService', ['getMember', 'getPollingOrder', 'isLoggedIn']);
+    toastServiceSpy = jasmine.createSpyObj('ToastService', ['show', 'dismiss']);
 
     pollingServiceSpy.getCurrentPolling.and.returnValue(of(null as any));
     pollingServiceSpy.getPollingSummary.and.returnValue(of([]));
@@ -53,7 +56,8 @@ describe('PollingsComponent', () => {
       providers: [
         { provide: PollingService, useValue: pollingServiceSpy },
         { provide: MemberService, useValue: memberServiceSpy },
-        { provide: StorageService, useValue: storageServiceSpy }
+        { provide: StorageService, useValue: storageServiceSpy },
+        { provide: ToastService, useValue: toastServiceSpy }
       ]
     })
     .compileComponents();
@@ -196,6 +200,36 @@ describe('PollingsComponent', () => {
       tick(1500);
       expect(pollingServiceSpy.createPollingNotes).not.toHaveBeenCalled();
     }));
+
+    it('auto-save errors do NOT raise a toast (inline status line only)', fakeAsync(() => {
+      pollingServiceSpy.createPollingNotes.and.returnValue(throwError(() => ({ error: { message: 'boom' } })));
+      const row = makeRow({ vote: 1 });
+      component.onRowChange(row);
+      tick(1001);
+      expect(component.autoSaveStatus).toBe('error');
+      expect(toastServiceSpy.show).not.toHaveBeenCalled();
+    }));
+  });
+
+  describe('error surfacing via toasts', () => {
+    it('submitPolling error path calls ToastService.show with the server message', () => {
+      pollingServiceSpy.createPollingNotes.and.returnValue(throwError(() => ({ error: { message: 'Vote failed on the server' } })));
+      component.dataSourcePS.data = [makeRow({ vote: 1 })];
+
+      component.submitPolling(true);
+
+      expect(toastServiceSpy.show).toHaveBeenCalledWith('Vote failed on the server');
+      expect(component.isSubmitting).toBeFalse();
+    });
+
+    it('submitPolling error path falls back to a friendly message when the error has no message', () => {
+      pollingServiceSpy.createPollingNotes.and.returnValue(throwError(() => ({ error: {} })));
+      component.dataSourcePS.data = [makeRow({ vote: 1 })];
+
+      component.submitPolling(true);
+
+      expect(toastServiceSpy.show).toHaveBeenCalledWith('Your vote could not be submitted. Please try again.');
+    });
   });
 });
 

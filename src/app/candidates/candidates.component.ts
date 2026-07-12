@@ -22,6 +22,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { CandidateTrendChartComponent } from '../candidate-trend-chart/candidate-trend-chart.component';
+import { ToastService } from '../services/toast.service';
 
 
 @Component({
@@ -65,7 +66,7 @@ export class CandidatesComponent implements OnInit {
   public subscript5?: Subscription;
   public subscript6?: Subscription;
 
-  constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService: NotesService) { }
+  constructor(private candidateService: CandidateService, private storageService: StorageService, private notesService: NotesService, private toastService: ToastService) { }
   public accessToken = '';
   private memberId = 0;
   public dataSourceCandidates = new MatTableDataSource<Candidate>();
@@ -89,6 +90,7 @@ export class CandidatesComponent implements OnInit {
         this.dataSourceCandidates.data = data;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate list could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -122,6 +124,7 @@ export class CandidatesComponent implements OnInit {
         this.dataSourceNotes.data = data;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate\'s external notes could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -136,6 +139,7 @@ export class CandidatesComponent implements OnInit {
         )
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate\'s polling notes could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -146,6 +150,7 @@ export class CandidatesComponent implements OnInit {
         this.dataSourceCandidateImages.data = data;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate\'s images could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -163,6 +168,7 @@ export class CandidatesComponent implements OnInit {
           this.viewCandidate(element);
         },
         error: err => {
+          this.toastService.show(err.error?.message ?? 'The note could not be added. Please try again.');
           this.errorMessage = err.error.message;
         }
 
@@ -175,6 +181,7 @@ export class CandidatesComponent implements OnInit {
         this.viewCandidate(element);
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The note could not be removed. Please try again.');
         this.errorMessage = err.error.message;
       }
     });

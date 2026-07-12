@@ -7,17 +7,34 @@ import {
   HttpHandler,
   HttpErrorResponse
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, TimeoutError } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 import { StorageService } from '../services/storage.service';
+
+// HttpClient has NO default timeout: a hung server leaves requests pending forever,
+// so error handlers (and their UI feedback / button re-enabling) never run.
+const DEFAULT_TIMEOUT_MS = 10000;
+// File uploads (multipart) get longer; progress events also reset the timer.
+const UPLOAD_TIMEOUT_MS = 90000;
 
 @Injectable()
 export class TheInterceptor implements HttpInterceptor {
   constructor(private storageService: StorageService, @Inject(DOCUMENT) private document: Document) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const timeoutMs = request.body instanceof FormData ? UPLOAD_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
     return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
+      timeout(timeoutMs),
+      catchError((caught: unknown) => {
+        if (caught instanceof TimeoutError) {
+          return throwError(() => new HttpErrorResponse({
+            error: { message: 'The server is not responding. Please check your connection and try again.' },
+            status: 0,
+            statusText: 'Timeout',
+            url: request.url ?? undefined
+          }));
+        }
+        const error = caught as HttpErrorResponse;
         let message: string;
 
         switch (true) {

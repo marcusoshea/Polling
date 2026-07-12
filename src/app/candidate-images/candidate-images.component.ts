@@ -24,6 +24,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { AngularEditorModule } from '@kolkov/angular-editor';
+import { ToastService } from '../services/toast.service';
 
 
 @Component({
@@ -78,7 +79,8 @@ export class CandidateImagesComponent implements OnInit {
 
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
-    private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService) {
+    private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService,
+    private toastService: ToastService) {
      
     const navigation = this.router.getCurrentNavigation();
     const state = navigation.extras.state as {
@@ -104,6 +106,7 @@ export class CandidateImagesComponent implements OnInit {
         this.dataSourceCandidateImages.data = data;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate images could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -125,8 +128,8 @@ export class CandidateImagesComponent implements OnInit {
 
      this.subscript2 = this.candidateService.createCandidateImage(file, this.candidateId, this.imageDesc, this.accessToken).subscribe({
        error: err => {
-         this.errorMessage = err.error.message;
-         alert('Error Saving Info!' + this.errorMessage.toString());
+         this.errorMessage = err.error?.message;
+         this.toastService.show(err.error?.message ?? 'The image could not be saved. Please try again.');
        },
        complete: () => { 
         this.goToCandidateImages(); 
@@ -153,6 +156,7 @@ export class CandidateImagesComponent implements OnInit {
         this.dataSourceCandidateImages.data = this.candidateImageList;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The image could not be deleted. Please try again.');
         this.errorMessage = err.error.message;
       }
     });

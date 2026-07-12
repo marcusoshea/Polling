@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HTTP_INTERCEPTORS, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DOCUMENT } from '@angular/common';
@@ -144,6 +144,38 @@ describe('TheInterceptor', () => {
     const req = httpMock.expectOne('/api/test');
     req.flush({ message: 'Not found' }, { status: 404, statusText: 'Not Found' });
   });
+
+  it('should error with a not-responding message when a request hangs past the timeout', fakeAsync(() => {
+    let received: HttpErrorResponse | undefined;
+    http.post('/pollingnote/create', [{}]).subscribe({
+      error: (err: HttpErrorResponse) => { received = err; }
+    });
+
+    httpMock.expectOne('/pollingnote/create'); // never flushed: the server hangs
+    tick(9999);
+    expect(received).toBeUndefined(); // still pending just under the limit
+    tick(2);
+    expect(received).toBeDefined();
+    expect(received!.error.message).toBe('The server is not responding. Please check your connection and try again.');
+    expect(received!.status).toBe(0);
+    // A hang is not a session problem: no logout, no redirect.
+    expect(storageService.clean).not.toHaveBeenCalled();
+    expect(replaceSpy).not.toHaveBeenCalled();
+  }));
+
+  it('should allow FormData uploads longer before timing out', fakeAsync(() => {
+    let received: HttpErrorResponse | undefined;
+    http.post('/candidate/createImage', new FormData()).subscribe({
+      error: (err: HttpErrorResponse) => { received = err; }
+    });
+
+    httpMock.expectOne('/candidate/createImage');
+    tick(10001);
+    expect(received).toBeUndefined(); // default limit passed, upload still allowed
+    tick(80001);
+    expect(received).toBeDefined();
+    expect(received!.error.message).toBe('The server is not responding. Please check your connection and try again.');
+  }));
 
   it('should fall back to statusText when API provides no message', (done) => {
     http.get('/api/test').subscribe({

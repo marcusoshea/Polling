@@ -15,6 +15,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PollingReportService } from '../services/polling-report.service';
+import { ToastService } from '../services/toast.service';
 
 declare var require: any;
 
@@ -70,7 +71,7 @@ export class ReportComponent implements OnInit {
   public subscript3?: Subscription;
   public subscript4?: Subscription;
 
-  constructor(private pollingService: PollingService, private storageService: StorageService, private notesService: NotesService, private pollingReportService: PollingReportService) { }
+  constructor(private pollingService: PollingService, private storageService: StorageService, private notesService: NotesService, private pollingReportService: PollingReportService, private toastService: ToastService) { }
 
   async ngOnInit(): Promise<void> {
     const member = this.storageService.getMember()!;
@@ -105,6 +106,7 @@ export class ReportComponent implements OnInit {
           },
           error: err => {
             this.errorMessage = err.error?.message || 'Failed to fetch in-process polling report';
+            this.toastService.show(err.error?.message ?? 'The in-process polling report could not be loaded. Please try again.');
           }
         });
     } else {
@@ -134,6 +136,7 @@ export class ReportComponent implements OnInit {
           },
           error: err => {
             this.errorMessage = err.error?.message || 'Failed to fetch closed polling report';
+            this.toastService.show(err.error?.message ?? 'The closed polling report could not be loaded. Please try again.');
           }
         });
     }

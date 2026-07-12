@@ -31,6 +31,7 @@ import { forkJoin } from 'rxjs';
 import { NotesService } from '../services/notes.service';
 import { OrderPoliciesService } from '../services/order-policies.service';
 import { OrderPolicies } from '../interfaces/order-policies';
+import { ToastService } from '../services/toast.service';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
 import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
@@ -104,7 +105,8 @@ export class AdminComponent implements OnInit {
   constructor(public fb: FormBuilder, private pollingOrderService: PollingOrderService,
     private candidateService: CandidateService, private memberService: MemberService, private pollingService: PollingService,
     private storageService: StorageService, private router: Router, public dialog: MatDialog, private authService: AuthService,
-    private pollingReportService: PollingReportService, private notesService: NotesService, private orderPoliciesService: OrderPoliciesService) { }
+    private pollingReportService: PollingReportService, private notesService: NotesService, private orderPoliciesService: OrderPoliciesService,
+    private toastService: ToastService) { }
   private showAdmin = false;
   public changeAdminOccurred = false;
   public changeAsstOccurred = false;
@@ -191,6 +193,7 @@ export class AdminComponent implements OnInit {
         this.dataSourceCandidates.data = this.candidateList;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate list could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -208,6 +211,7 @@ export class AdminComponent implements OnInit {
         }).sort((a, b) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime());
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The polling list could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -237,6 +241,7 @@ export class AdminComponent implements OnInit {
         this.dataSource.data = this.UnapprovedOrderMemberList;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The order member list could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -294,6 +299,10 @@ export class AdminComponent implements OnInit {
         setTimeout(() => {
           this.reset();
         }, 1000);
+      },
+      error: err => {
+        this.toastService.show(err.error?.message ?? 'The new member could not be created. Please try again.');
+        this.errorMessage = err.error?.message;
       }
     });
   }
@@ -324,6 +333,7 @@ export class AdminComponent implements OnInit {
           this.router.navigate(['/login']);
         },
         error: err => {
+          this.toastService.show(err.error?.message ?? 'The clerk update could not be saved. Please try again.');
           this.errorMessage = err.error.message;
         }
       });
@@ -344,6 +354,7 @@ export class AdminComponent implements OnInit {
           this.dataSource.data = this.UnapprovedOrderMemberList;
         },
         error: err => {
+          this.toastService.show(err.error?.message ?? 'The member could not be approved. Please try again.');
           this.errorMessage = err.error.message;
         }
       });
@@ -360,6 +371,7 @@ export class AdminComponent implements OnInit {
           this.dataSource.data = this.UnapprovedOrderMemberList;
         },
         error: err => {
+          this.toastService.show(err.error?.message ?? 'The member could not be denied. Please try again.');
           this.errorMessage = err.error.message;
         }
       });
@@ -392,6 +404,7 @@ export class AdminComponent implements OnInit {
         this.dataSourceMemberList.data = this.orderMemberList;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The member could not be removed. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -421,6 +434,7 @@ export class AdminComponent implements OnInit {
         this.dataSourceCandidates.data = this.candidateList;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate could not be removed. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -446,6 +460,7 @@ export class AdminComponent implements OnInit {
         this.getAllOrderMembers();
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The member could not be updated. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -470,6 +485,7 @@ export class AdminComponent implements OnInit {
         }
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate could not be updated. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -485,6 +501,7 @@ export class AdminComponent implements OnInit {
         this.newCandidateLink = '';
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The candidate could not be added. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -509,11 +526,13 @@ export class AdminComponent implements OnInit {
               alert("New Polling Created!");
             },
             error: err => {
+              this.toastService.show(err.error?.message ?? 'The polling candidates could not be added. Please try again.');
               this.errorMessage = err.error.message;
             }
           });
         },
         error: err => {
+          this.toastService.show(err.error?.message ?? 'The polling could not be created. Please try again.');
           this.errorMessage = err.error.message;
         }
       });
@@ -532,6 +551,7 @@ export class AdminComponent implements OnInit {
           element.isEditing = false;
         },
         error: err => {
+          this.toastService.show(err.error?.message ?? 'The polling could not be updated. Please try again.');
           this.errorMessage = err.error.message;
         }
       });
@@ -592,6 +612,7 @@ export class AdminComponent implements OnInit {
         this.dataSourcePollings.data = this.pollingList;
       },
       error: err => {
+        this.toastService.show(err.error?.message ?? 'The polling could not be removed. Please try again.');
         this.errorMessage = err.error.message;
       }
     });
@@ -607,6 +628,7 @@ export class AdminComponent implements OnInit {
         error: (err) => {
           this.missingVotesReport = null;
           this.errorMessage = err.error?.message || 'Failed to fetch report';
+          this.toastService.show(err.error?.message ?? 'The missing votes report could not be loaded. Please try again.');
         }
       });
   }
@@ -623,6 +645,7 @@ export class AdminComponent implements OnInit {
         error: (err) => {
           this.closedPollingReport = null;
           this.errorMessage = err.error?.message || 'Failed to fetch closed polling report';
+          this.toastService.show(err.error?.message ?? 'The closed polling report could not be loaded. Please try again.');
         }
       });
   }
@@ -639,6 +662,7 @@ export class AdminComponent implements OnInit {
         error: (err) => {
           this.closedPollingReport = null;
           this.errorMessage = err.error?.message || 'Failed to fetch specific polling report';
+          this.toastService.show(err.error?.message ?? 'The selected polling report could not be loaded. Please try again.');
         }
       });
   }
@@ -963,7 +987,7 @@ export class AdminComponent implements OnInit {
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Failed to create order policy';
-          alert(this.errorMessage);
+          this.toastService.show(this.errorMessage);
         }
       });
   }
@@ -988,7 +1012,7 @@ export class AdminComponent implements OnInit {
         },
         error: (err) => {
           this.errorMessage = err.error?.message || 'Failed to update order policy';
-          alert(this.errorMessage);
+          this.toastService.show(this.errorMessage);
         }
       });
   }
@@ -1010,7 +1034,7 @@ export class AdminComponent implements OnInit {
           },
           error: (err) => {
             this.errorMessage = err.error?.message || 'Failed to delete order policy';
-            alert(this.errorMessage);
+            this.toastService.show(this.errorMessage);
           }
         });
     }
