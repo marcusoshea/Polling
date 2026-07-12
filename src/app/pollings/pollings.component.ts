@@ -85,9 +85,10 @@ export class PollingsComponent implements OnInit {
   orderMemberList: OrderMember[] = [];
 
   public autoSaveStatus: '' | 'saving' | 'saved' | 'error' = '';
-  private autoSaveTimers = new Map<number, any>();
-  private autoSaveInFlight = new Set<number>();
-  private autoSaveSubs = new Map<number, Subscription>();
+  private autoSaveDirty = new Map<number, PollingSummary>();
+  private autoSaveTimer: any;
+  private autoSaveFlushInFlight = false;
+  private autoSaveFlushSub?: Subscription;
   private autoSaveClearStatusTimer: any;
   private readonly AUTO_SAVE_DEBOUNCE_MS = 1000;
   private readonly AUTO_SAVE_STATUS_CLEAR_MS = 3000;
@@ -145,8 +146,8 @@ export class PollingsComponent implements OnInit {
   }
 
   changeVoter(info: Event) {
-    // Clear any pending auto-save timers so stale timers don't fire against the newly selected voter.
-    this.clearAllAutoSaveTimers();
+    // Clear all pending auto-save work so nothing stale fires against the newly selected voter.
+    this.clearAutoSaveState();
     this.votingMember = parseInt((info.target as HTMLInputElement).value);
     this.getVotes();
   }
@@ -162,37 +163,48 @@ export class PollingsComponent implements OnInit {
     // Any auto-saved edit is unsubmitted work, so honestly flip the banner to the draft state immediately.
     // The row will be written as completed:false, so "Submitted ✓" would otherwise be misleading. Only Submit re-sets completed=true.
     this.completed = false;
-    const candidateId = element.candidate_id;
-    const existing = this.autoSaveTimers.get(candidateId);
-    if (existing) {
-      clearTimeout(existing);
+    // Upsert into the shared dirty map (re-edits overwrite with the freshest row reference)
+    // and re-arm the single debounce timer: one flush fires 1s after the LAST edit anywhere.
+    this.autoSaveDirty.set(element.candidate_id, element);
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
     }
-    const timer = setTimeout(() => {
-      this.autoSaveTimers.delete(candidateId);
-      this.autoSaveRow(element);
+    this.autoSaveTimer = setTimeout(() => {
+      this.autoSaveTimer = null;
+      this.autoSaveFlush();
     }, this.AUTO_SAVE_DEBOUNCE_MS);
-    this.autoSaveTimers.set(candidateId, timer);
   }
 
-  autoSaveRow(element: PollingSummary): void {
-    const candidateId = element.candidate_id;
-    // Coalesce: if a save for this candidate is already in flight, re-arm the debounce and return.
-    if (this.autoSaveInFlight.has(candidateId)) {
-      this.onRowChange(element);
+  autoSaveFlush(): void {
+    // Never overlap requests: if a flush is already in flight, defer by re-arming the timer.
+    if (this.autoSaveFlushInFlight) {
+      if (this.autoSaveTimer) {
+        clearTimeout(this.autoSaveTimer);
+      }
+      this.autoSaveTimer = setTimeout(() => {
+        this.autoSaveTimer = null;
+        this.autoSaveFlush();
+      }, this.AUTO_SAVE_DEBOUNCE_MS);
       return;
     }
-    // Send the same payload shape as Save Draft, as a 1-element array, with completed:false.
-    const row = { ...element, completed: false };
-    this.autoSaveInFlight.add(candidateId);
+    if (this.autoSaveDirty.size === 0) {
+      return;
+    }
+    // Snapshot the live row references, then send copies with completed:false
+    // (same payload shape as Save Draft; the endpoint accepts an array of any length).
+    const snapshot = [...this.autoSaveDirty.values()];
+    const rows = snapshot.map(r => ({ ...r, completed: false }));
+    this.autoSaveDirty.clear();
+    this.autoSaveFlushInFlight = true;
     this.autoSaveStatus = 'saving';
     if (this.autoSaveClearStatusTimer) {
       clearTimeout(this.autoSaveClearStatusTimer);
       this.autoSaveClearStatusTimer = null;
     }
-    const sub = this.pollingService.createPollingNotes([row], this.accessToken, this.votingMember).subscribe({
+    this.autoSaveFlushSub = this.pollingService.createPollingNotes(rows, this.accessToken, this.votingMember).subscribe({
       next: () => {
-        this.autoSaveInFlight.delete(candidateId);
-        this.autoSaveSubs.delete(candidateId);
+        this.autoSaveFlushInFlight = false;
+        this.autoSaveFlushSub = undefined;
         this.autoSaveStatus = 'saved';
         this.autoSaveClearStatusTimer = setTimeout(() => {
           if (this.autoSaveStatus === 'saved') {
@@ -202,17 +214,32 @@ export class PollingsComponent implements OnInit {
         }, this.AUTO_SAVE_STATUS_CLEAR_MS);
       },
       error: () => {
-        this.autoSaveInFlight.delete(candidateId);
-        this.autoSaveSubs.delete(candidateId);
+        this.autoSaveFlushInFlight = false;
+        this.autoSaveFlushSub = undefined;
         this.autoSaveStatus = 'error';
+        // Merge the failed rows back into the dirty map so the next edit retries them,
+        // WITHOUT clobbering rows re-edited while the flush was in flight.
+        // Merge the live row references (not the completed:false copies).
+        snapshot.forEach(r => {
+          if (!this.autoSaveDirty.has(r.candidate_id)) {
+            this.autoSaveDirty.set(r.candidate_id, r);
+          }
+        });
       }
     });
-    this.autoSaveSubs.set(candidateId, sub);
   }
 
-  private clearAllAutoSaveTimers(): void {
-    this.autoSaveTimers.forEach(timer => clearTimeout(timer));
-    this.autoSaveTimers.clear();
+  private clearAutoSaveState(): void {
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = null;
+    }
+    this.autoSaveDirty.clear();
+    if (this.autoSaveFlushSub) {
+      this.autoSaveFlushSub.unsubscribe();
+      this.autoSaveFlushSub = undefined;
+    }
+    this.autoSaveFlushInFlight = false;
   }
 
   submitPolling(draft: boolean) {
@@ -276,14 +303,11 @@ export class PollingsComponent implements OnInit {
     if (this.subscript4) {
       this.subscript4.unsubscribe();
     }
-    this.clearAllAutoSaveTimers();
+    this.clearAutoSaveState();
     if (this.autoSaveClearStatusTimer) {
       clearTimeout(this.autoSaveClearStatusTimer);
       this.autoSaveClearStatusTimer = null;
     }
-    this.autoSaveSubs.forEach(sub => sub.unsubscribe());
-    this.autoSaveSubs.clear();
-    this.autoSaveInFlight.clear();
   }
 
 }
