@@ -21,7 +21,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
-import { AngularEditorModule } from '@kolkov/angular-editor';
 import { CandidateTrendChartComponent } from '../candidate-trend-chart/candidate-trend-chart.component';
 import { ToastService } from '../services/toast.service';
 
@@ -39,7 +38,7 @@ import { ToastService } from '../services/toast.service';
     MatDatepickerModule,
     MatNativeDateModule,
     MatListModule,
-    AngularEditorModule,
+    
     RouterModule,
     CommonModule,
     CandidateTrendChartComponent,

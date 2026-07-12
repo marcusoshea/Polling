@@ -541,7 +541,6 @@ export class AdminComponent implements OnInit {
 
   editPolling(element: Polling & { isEditing: boolean }): void {
 
-    console.log(element.polling_id)
     if (element.polling_name && element.start_date !== null
       && element.end_date !== null) {
 
@@ -928,37 +927,25 @@ export class AdminComponent implements OnInit {
 
   // OrderPolicies methods
   loadOrderPolicy(): void {
-    console.log('Loading order policy for polling order ID:', this.pollingOrder.polling_order_id);
-    console.log('Access token:', this.accessToken ? 'Present' : 'Missing');
-    console.log('User is admin:', this.showAdmin);
-    
     // Only try to load if user is admin
     if (!this.showAdmin) {
-      console.log('User is not admin, skipping order policy load');
       this.errorMessage = 'Only order administrators can view order policies';
       return;
     }
-    
+
     this.orderPoliciesService.getOrderPolicyByPollingOrderId(Number(this.pollingOrder.polling_order_id), this.accessToken)
       .subscribe({
         next: (data) => {
-          console.log('Order policy response:', data);
           this.orderPolicy = data;
           this.orderPolicyContent = data ? data.polling_order_policy : '';
-          if (!data) {
-            console.log('No policy found for this polling order');
-          }
         },
         error: (err) => {
           console.error('Error loading order policy:', err);
-          console.error('Error details:', err.error);
-          console.error('Error status:', err.status);
-          
+
           if (err.status === 401) {
             this.errorMessage = 'Unauthorized: You may not have permission to view order policies';
           } else if (err.status === 500) {
             this.errorMessage = 'Server error occurred while loading order policy. Please check the backend logs.';
-            console.error('Server error - this might be a backend issue');
           } else {
             this.errorMessage = err.error?.message || 'Failed to load order policy';
           }

@@ -10,7 +10,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { AngularEditorModule } from '@kolkov/angular-editor';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -24,7 +23,7 @@ import { CommonModule } from '@angular/common';
     MatDatepickerModule,
     MatNativeDateModule,
     MatListModule,
-    AngularEditorModule,
+    
     CommonModule
   ],
   styleUrls: ['./register.component.css']

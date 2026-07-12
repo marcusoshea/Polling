@@ -46,10 +46,6 @@ export class AppComponent implements OnInit {
     ).subscribe(() => {
       this.checkAuthState();
     });
-
-    this.activatedRoute.params.subscribe(params => {
-      console.log(params);
-    });
   }
 
   checkAuthState(): void {

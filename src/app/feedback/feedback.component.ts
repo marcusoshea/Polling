@@ -47,7 +47,6 @@ export class FeedbackComponent {
 
     this.http.post(this.API_URL + '/feedback', feedbackData).subscribe({
       next: () => {
-        console.log('Feedback submitted successfully!');
         this.isSubmitted = true;
       },
       error: (err) => {

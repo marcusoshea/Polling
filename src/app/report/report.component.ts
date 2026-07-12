@@ -11,7 +11,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { AngularEditorModule } from '@kolkov/angular-editor';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PollingReportService } from '../services/polling-report.service';
@@ -36,7 +35,7 @@ const htmlToPdfmake = require("html-to-pdfmake");
     MatDatepickerModule,
     MatNativeDateModule,
     MatListModule,
-    AngularEditorModule,
+    
     RouterModule,
     CommonModule,
   ],

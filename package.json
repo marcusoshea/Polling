@@ -27,7 +27,6 @@
     "bootstrap": "^5.3.3",
     "chart.js": "^4.5.1",
     "html-to-pdfmake": "^2.5.15",
-    "jquery": "^3.7.1",
     "jspdf": "^2.5.2",
     "ng2-charts": "^8.0.0",
     "pdfmake": "^0.2.15",
