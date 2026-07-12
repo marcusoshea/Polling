@@ -95,6 +95,61 @@ describe('PollingsComponent', () => {
     });
   });
 
+  describe('vote meaning hint (expandable)', () => {
+    beforeEach(() => {
+      component.currentPolling = { polling_id: 10, polling_name: 'P' };
+      component.dataSourcePS.data = [makeRow({ name: 'Alice', candidate_id: 100 })];
+    });
+
+    it('is collapsed by default: toggle rendered with aria-expanded false, definitions absent', () => {
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      const toggle = el.querySelector('button[aria-controls="vote-help"]');
+      expect(toggle).toBeTruthy();
+      expect(toggle?.textContent).toContain('What do the votes mean?');
+      expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+      expect(el.querySelector('#vote-help')).toBeFalsy();
+    });
+
+    it('clicking the toggle shows the definitions and flips aria-expanded to true', () => {
+      // An order where Wait is a valid vote (not 1 or 8).
+      component.pollingOrder = { polling_order_id: 2 } as any;
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      const toggle = el.querySelector('button[aria-controls="vote-help"]') as HTMLButtonElement;
+
+      toggle.click();
+      fixture.detectChanges();
+
+      expect(toggle.getAttribute('aria-expanded')).toBe('true');
+      const help = el.querySelector('#vote-help');
+      expect(help).toBeTruthy();
+      expect(help?.textContent).toContain('the candidate is ready to join the order');
+      expect(help?.textContent).toContain('Wait');
+      expect(help?.textContent).toContain('showing good progress but not yet ready');
+      expect(help?.textContent).toContain('not ready to join the order');
+      expect(help?.textContent).toContain('you do not have an opinion on this candidate');
+
+      toggle.click();
+      fixture.detectChanges();
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
+      expect(el.querySelector('#vote-help')).toBeFalsy();
+    });
+
+    it('hides the Wait definition for polling order 1 (same condition as the Wait option)', () => {
+      // The default test storage stub is polling_order_id 1.
+      expect(component.pollingOrder.polling_order_id).toBe(1);
+      component.showVoteHelp = true;
+      fixture.detectChanges();
+
+      const help = (fixture.nativeElement as HTMLElement).querySelector('#vote-help');
+      expect(help).toBeTruthy();
+      expect(help?.textContent).not.toContain('Wait');
+      expect(help?.textContent).toContain('the candidate is ready to join the order');
+      expect(help?.textContent).toContain('you do not have an opinion on this candidate');
+    });
+  });
+
   describe('auto-save drafts (batched)', () => {
     it('editing 3 different rows within 1s produces ONE createPollingNotes call with 3 rows, all completed:false while not yet submitted (§2f refined invariant)', fakeAsync(() => {
       component.hasSubmitted = false; // never-submitted member: auto-save must NEVER write completed:true

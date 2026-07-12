@@ -21,16 +21,21 @@
           <div class="p-4">
             <label for="filter">Search candidates</label>
             <input type="text" class="form-control" id="filter" aria-label="Search candidates" [(ngModel)]="filterValue" (keyup)="applyFilter($event)" placeholder="Search candidates...">
+            <div class="form-check mt-2 text-start">
+              <input type="checkbox" class="form-check-input" id="watch-list-only" aria-label="Show watch list candidates only"
+                [(ngModel)]="watchListOnly" (ngModelChange)="toggleWatchListOnly()">
+              <label class="form-check-label" for="watch-list-only">Watch list only</label>
+            </div>
           </div>
           <div class="table-responsive" style="overflow-x:auto">
-          <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card">
+          <table mat-table [dataSource]="dataSourceCandidates" class="mat-table custom-card" matSort matSortActive="name" matSortDirection="asc">
             <ng-container matColumnDef="name">
-              <th mat-header-cell scope="col" *matHeaderCellDef class="p-4 h6"> Candidate List </th>
+              <th mat-header-cell scope="col" *matHeaderCellDef mat-sort-header class="p-4 h6"> Candidate List </th>
               <td mat-cell *matCellDef="let element"> <a (click)="viewCandidate(element)"
                   class="link-primary mt-2 mb-2 mx-2">{{element.name}} </a></td>
             </ng-container>
             <ng-container matColumnDef="watch_list">
-              <th mat-header-cell scope="col" *matHeaderCellDef class="p-4 h6 text-center"> Watch List </th>
+              <th mat-header-cell scope="col" *matHeaderCellDef mat-sort-header class="p-4 h6 text-center"> Watch List </th>
               <td mat-cell *matCellDef="let element">
                 <div class="text-center"><i class="bi bi-check-circle" *ngIf="element.watch_list"></i></div>
               </td>

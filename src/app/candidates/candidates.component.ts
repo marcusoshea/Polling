@@ -8,6 +8,7 @@ import { OrderMember } from '../interfaces/order-member'
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, FormsModule, Validators } from '@angular/forms';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { Candidate } from '../interfaces/candidate';
 import { Note } from '../interfaces/note';
 import { CandidateService } from '../services/candidate.service';
@@ -30,9 +31,10 @@ import { ToastService } from '../services/toast.service';
   templateUrl: './candidates.component.html',
   styleUrls: ['./candidates.component.css'],
   imports: [
-    MatExpansionModule, 
-    MatTableModule, 
-    FormsModule, 
+    MatExpansionModule,
+    MatTableModule,
+    MatSortModule,
+    FormsModule,
     MatFormFieldModule,
     MatDatepickerModule,
     MatNativeDateModule,
@@ -59,6 +61,7 @@ export class CandidatesComponent implements OnInit {
   candidate_id = 0;
   watch_list = false;
   filterValue = '';
+  watchListOnly = false;
   public subscript1?: Subscription;
   public subscript2?: Subscription;
   public subscript3?: Subscription;
@@ -79,7 +82,32 @@ export class CandidatesComponent implements OnInit {
   public dataSourceCandidateImages = new MatTableDataSource<CandidateImages>();
   candidateImageList: CandidateImages[] = [];
 
+  // The list table lives inside *ngIf="!candidateSelected", so its MatSort is
+  // destroyed and recreated when navigating into and back out of a candidate.
+  // A setter ViewChild re-attaches the fresh instance each time it reappears.
+  @ViewChild(MatSort) set matSort(ms: MatSort) {
+    if (ms) {
+      this.dataSourceCandidates.sort = ms;
+    }
+  }
+
   ngOnInit(): void {
+    // Combined filter: the filter string is always a JSON payload { text, watchOnly }.
+    // (MatTableDataSource skips filtering entirely on an empty string, so the
+    // payload is never empty — the predicate itself handles the "no filter" case.)
+    this.dataSourceCandidates.filterPredicate = (row: Candidate, filter: string): boolean => {
+      const { text, watchOnly } = JSON.parse(filter) as { text: string; watchOnly: boolean };
+      if (watchOnly && !row.watch_list) {
+        return false;
+      }
+      return !text || row.name.toLowerCase().includes(text);
+    };
+    this.dataSourceCandidates.sortingDataAccessor = (row: Candidate, columnName: string): string | number => {
+      if (columnName === 'watch_list') {
+        return row.watch_list ? 1 : 0;
+      }
+      return row.name.toLowerCase();
+    };
     const member = this.storageService.getMember()!;
     this.pollingOrder = this.storageService.getPollingOrder()!;
     this.accessToken = member.access_token;
@@ -97,8 +125,19 @@ export class CandidatesComponent implements OnInit {
   }
 
   applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSourceCandidates.filter = filterValue.trim().toLowerCase();
+    this.filterValue = (event.target as HTMLInputElement).value;
+    this.updateFilter();
+  }
+
+  toggleWatchListOnly(): void {
+    this.updateFilter();
+  }
+
+  private updateFilter(): void {
+    this.dataSourceCandidates.filter = JSON.stringify({
+      text: this.filterValue.trim().toLowerCase(),
+      watchOnly: this.watchListOnly,
+    });
   }
 
   resetCandidates(): void {

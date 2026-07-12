@@ -25,6 +25,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastService } from '../services/toast.service';
 import { SubmitReviewDialog } from './submit-review-dialog';
 
@@ -41,7 +42,8 @@ import { SubmitReviewDialog } from './submit-review-dialog';
     MatListModule,
     CommonModule,
     MatSelectModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatTooltipModule
   ],
   styleUrls: ['./pollings.component.css']
 })
@@ -103,6 +105,9 @@ export class PollingsComponent implements OnInit {
   // Deadline countdown (computed once when the current polling loads).
   public daysRemaining: number | null = null;
   public deadlineText = '';
+
+  // Inline expandable "What do the votes mean?" hint above the voting table.
+  public showVoteHelp = false;
 
   // Progress indicator: rows the member has voted on vs total candidates.
   get votedCount(): number {
