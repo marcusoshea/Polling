@@ -1,97 +1,108 @@
 <div class="col-md-12 mt-5">
   <div class="container">
     <div class="row">
-      <!-- Tile A: Active polling status -->
-      <div class="col-md-6 col-lg-3 mb-3">
+      <!-- Tile A: Active polling status (hidden when there is no active polling, §2c) -->
+      <div class="col-md-6 col-lg-3 mb-3" *ngIf="tileAVisible">
         <div class="card card-container custom-card h-100 p-3">
           <h5 class="fw-bold">Active Polling</h5>
           <div *ngIf="tileALoading" class="text-muted">Loading…</div>
           <div *ngIf="!tileALoading && tileAError" class="text-muted">Unable to load active polling.</div>
-          <ng-container *ngIf="!tileALoading && !tileAError">
-            <div *ngIf="hasActivePolling">
-              <div class="fw-bold">{{ activePollingName }}</div>
-              <div>Ends: {{ activeEndDate | date:'MM/dd/yyyy' }}</div>
-              <div>
-                <span *ngIf="daysRemaining !== null && daysRemaining >= 0">
-                  {{ daysRemaining }} day{{ daysRemaining === 1 ? '' : 's' }} remaining
-                </span>
-                <span *ngIf="daysRemaining !== null && daysRemaining < 0" class="text-muted">
-                  Polling period has ended
-                </span>
-              </div>
+          <div *ngIf="!tileALoading && !tileAError && hasActivePolling">
+            <div class="fw-bold">{{ activePollingName }}</div>
+            <div>Ends: {{ activeEndDate | date:'MM/dd/yyyy' }}</div>
+            <div>
+              <span *ngIf="daysRemaining !== null && daysRemaining >= 0">
+                {{ daysRemaining }} day{{ daysRemaining === 1 ? '' : 's' }} remaining
+              </span>
+              <span *ngIf="daysRemaining !== null && daysRemaining < 0" class="text-muted">
+                Polling period has ended
+              </span>
             </div>
-            <div *ngIf="!hasActivePolling" class="text-muted">No active polling in progress.</div>
-          </ng-container>
+          </div>
         </div>
       </div>
 
-      <!-- Tile B: Participation vs threshold -->
-      <div class="col-md-6 col-lg-3 mb-3">
+      <!-- Tile B: Participation vs threshold (hidden when no active polling, §2c) -->
+      <div class="col-md-6 col-lg-3 mb-3" *ngIf="tileBVisible">
         <div class="card card-container custom-card h-100 p-3">
           <h5 class="fw-bold">Participation</h5>
           <div *ngIf="tileBLoading" class="text-muted">Loading…</div>
           <div *ngIf="tileBError" class="text-muted">Unable to load participation.</div>
-          <ng-container *ngIf="!tileBLoading && !tileBError">
-            <div *ngIf="!hasActivePolling || !tileBAvailable" class="text-muted">No active polling in progress.</div>
-            <div *ngIf="hasActivePolling && tileBAvailable">
-              <div>{{ participatingMembers }} of {{ activeMembers }} = {{ participationRate }}%</div>
-              <div *ngIf="participationThreshold > 0">
-                <span *ngIf="onTrackToCertify" class="text-success fw-bold">On track to certify</span>
-                <span *ngIf="!onTrackToCertify" class="text-danger fw-bold">
-                  Below certification threshold ({{ participationThreshold }}%)
-                </span>
-              </div>
+          <div *ngIf="!tileBLoading && !tileBError && hasActivePolling && tileBAvailable">
+            <div>{{ participatingMembers }} of {{ activeMembers }} = {{ participationRate }}%</div>
+            <div *ngIf="participationThreshold > 0">
+              <span *ngIf="onTrackToCertify" class="text-success fw-bold">On track to certify</span>
+              <span *ngIf="!onTrackToCertify" class="text-danger fw-bold">
+                Below certification threshold ({{ participationThreshold }}%)
+              </span>
             </div>
-          </ng-container>
+          </div>
         </div>
       </div>
 
-      <!-- Tile C: Candidates vs recommendation bar (hidden when score is 0) -->
-      <div class="col-md-6 col-lg-3 mb-3" *ngIf="showTileC">
+      <!-- Tile C: Candidates vs recommendation bar (hidden when score is 0 or no candidates, §2c) -->
+      <div class="col-md-6 col-lg-3 mb-3" *ngIf="tileCVisible">
         <div class="card card-container custom-card h-100 p-3">
           <h5 class="fw-bold">Candidates vs Bar</h5>
           <div *ngIf="tileCLoading" class="text-muted">Loading…</div>
           <div *ngIf="tileCError" class="text-muted">Unable to load candidate ratings.</div>
-          <ng-container *ngIf="!tileCLoading && !tileCError">
-            <div *ngIf="candidateRatings.length === 0" class="text-muted">No candidate data available.</div>
-            <div *ngIf="candidateRatings.length > 0">
-              <div class="mb-2">{{ atOrAboveCount }} of {{ totalCandidates }} at/above {{ pollingScore }}%</div>
-              <ul class="list-unstyled mb-0">
-                <li *ngFor="let c of candidateRatings">
-                  {{ c.name }} — {{ c.rating }}%
-                  <span *ngIf="c.atOrAbove" class="text-success">&#9650;</span>
-                  <span *ngIf="!c.atOrAbove" class="text-danger">&#9660;</span>
-                </li>
-              </ul>
-            </div>
-          </ng-container>
+          <div *ngIf="!tileCLoading && !tileCError && candidateRatings.length > 0">
+            <div class="mb-2">{{ atOrAboveCount }} of {{ totalCandidates }} at/above {{ pollingScore }}%</div>
+            <ul class="list-unstyled mb-0">
+              <li *ngFor="let c of candidateRatingsShown">
+                {{ c.name }} — {{ c.rating }}%
+                <span *ngIf="c.atOrAbove" class="text-success">&#9650;</span>
+                <span *ngIf="!c.atOrAbove" class="text-danger">&#9660;</span>
+              </li>
+            </ul>
+            <div *ngIf="candidateOverflow > 0" class="text-muted">+{{ candidateOverflow }} more (see Report)</div>
+          </div>
         </div>
       </div>
 
-      <!-- Tile D: Chronic non-voters -->
-      <div class="col-md-6 col-lg-3 mb-3">
+      <!-- Tile E: Pending registrations (hidden when none, §2c) -->
+      <div class="col-md-6 col-lg-3 mb-3" *ngIf="tileEVisible">
         <div class="card card-container custom-card h-100 p-3">
-          <h5 class="fw-bold">Chronic Non-Voters</h5>
-          <div *ngIf="tileDLoading" class="text-muted">Loading…</div>
-          <div *ngIf="!tileDLoading && tileDError" class="text-muted">Unable to load non-voter report.</div>
-          <ng-container *ngIf="!tileDLoading && !tileDError">
-            <div *ngIf="!tileDHasHistory" class="text-muted">Not enough polling history.</div>
-            <div *ngIf="tileDHasHistory">
-              <div *ngIf="nonVoterNames.length === 0" class="text-muted">
-                Everyone has voted in at least one of the last {{ tileDPollingsCount }} pollings.
-              </div>
-              <div *ngIf="nonVoterNames.length > 0">
-                <div class="mb-1">
-                  {{ nonVoterNames.length }} missed all of the last {{ tileDPollingsCount }} pollings
-                </div>
-                <ul class="list-unstyled mb-0">
-                  <li *ngFor="let name of nonVoterNames">{{ name }}</li>
-                </ul>
-              </div>
-            </div>
-          </ng-container>
+          <h5 class="fw-bold">Pending Registrations</h5>
+          <div *ngIf="tileELoading" class="text-muted">Loading…</div>
+          <div *ngIf="!tileELoading && tileEError" class="text-muted">Unable to load registrations.</div>
+          <div *ngIf="!tileELoading && !tileEError && pendingCount > 0">
+            <div class="mb-1 fw-bold">{{ pendingCount }} awaiting approval</div>
+            <ul class="list-unstyled mb-1">
+              <li *ngFor="let name of pendingNames">{{ name }}</li>
+            </ul>
+            <div *ngIf="pendingOverflow > 0" class="text-muted">+{{ pendingOverflow }} more</div>
+            <div class="text-muted"><small>Approve or deny in Member Approval below.</small></div>
+          </div>
         </div>
       </div>
+
+      <!-- Tile D: Chronic non-voters (dismissible; hidden when empty, §2b/§2c) -->
+      <div class="col-md-6 col-lg-3 mb-3" *ngIf="tileDVisible">
+        <div class="card card-container custom-card h-100 p-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <h5 class="fw-bold">Chronic Non-Voters</h5>
+            <button type="button" class="btn-close" style="font-size: 0.7rem;"
+              aria-label="Hide the non-voters tile" title="Hide this tile"
+              (click)="hideNonVotersTile()"></button>
+          </div>
+          <div *ngIf="tileDLoading" class="text-muted">Loading…</div>
+          <div *ngIf="!tileDLoading && tileDError" class="text-muted">Unable to load non-voter report.</div>
+          <div *ngIf="!tileDLoading && !tileDError && tileDHasHistory && nonVoterNames.length > 0">
+            <div class="mb-1">
+              {{ nonVoterNames.length }} missed all of the last {{ tileDPollingsCount }} pollings
+            </div>
+            <ul class="list-unstyled mb-0">
+              <li *ngFor="let name of nonVoterNamesShown">{{ name }}</li>
+            </ul>
+            <div *ngIf="nonVoterOverflow > 0" class="text-muted">+{{ nonVoterOverflow }} more</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="hideNonVoters" class="text-end">
+      <a class="link-secondary" style="cursor: pointer; font-size: 0.85rem;"
+         (click)="showNonVotersTile()">Show non-voters tile</a>
     </div>
   </div>
 </div>

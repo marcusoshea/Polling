@@ -5,8 +5,10 @@ import { Observable, Subscription } from 'rxjs';
 import { StorageService } from '../services/storage.service';
 import { PollingService } from '../services/polling.service';
 import { NotesService } from '../services/notes.service';
+import { MemberService } from '../services/member.service';
 import { Polling } from '../interfaces/polling';
 import { PollingNote } from '../interfaces/polling-note';
+import { OrderMember } from '../interfaces/order-member';
 
 interface CandidateRating {
   name: string;
@@ -45,15 +47,51 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   public showTileC = false;
   public pollingScore = 0;
   public candidateRatings: CandidateRating[] = [];
+  public candidateRatingsShown: CandidateRating[] = [];
+  public candidateOverflow = 0;
   public atOrAboveCount = 0;
   public totalCandidates = 0;
 
-  // Tile D — chronic non-voters
+  // Tile D — chronic non-voters (dismissible: some orders don't track this)
   public tileDLoading = true;
   public tileDError = false;
   public tileDHasHistory = false;
   public tileDPollingsCount = 0;
   public nonVoterNames: string[] = [];
+  public nonVoterNamesShown: string[] = [];
+  public nonVoterOverflow = 0;
+  public hideNonVoters = false;
+
+  private static readonly HIDE_NONVOTERS_KEY = 'dashboard-hide-nonvoters';
+  private static readonly LIST_CAP = 8;
+
+  // §2c: tiles with nothing to show are hidden entirely. Error states stay
+  // visible so failures are never silently masked; loading renders briefly.
+  get tileAVisible(): boolean {
+    return this.tileALoading || this.tileAError || this.hasActivePolling;
+  }
+  get tileBVisible(): boolean {
+    return this.tileBLoading || this.tileBError || (this.hasActivePolling && this.tileBAvailable);
+  }
+  get tileCVisible(): boolean {
+    return this.showTileC && (this.tileCLoading || this.tileCError || this.candidateRatings.length > 0);
+  }
+  get tileDVisible(): boolean {
+    return !this.hideNonVoters
+      && (this.tileDLoading || this.tileDError || (this.tileDHasHistory && this.nonVoterNames.length > 0));
+  }
+  get tileEVisible(): boolean {
+    return this.tileELoading || this.tileEError || this.pendingCount > 0;
+  }
+
+  // Tile E — pending registrations
+  public tileELoading = true;
+  public tileEError = false;
+  public pendingCount = 0;
+  public pendingNames: string[] = [];
+  public pendingOverflow = 0;
+
+  private static readonly PENDING_NAMES_SHOWN = 8;
 
   private subs: Subscription[] = [];
 
@@ -61,9 +99,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private storageService: StorageService,
     private pollingService: PollingService,
     private notesService: NotesService,
+    private memberService: MemberService,
   ) { }
 
   ngOnInit(): void {
+    this.hideNonVoters = this.readHideNonVoters();
     const member = this.storageService.getMember();
     const pollingOrder = this.storageService.getPollingOrder();
     const token = member?.access_token;
@@ -75,11 +115,64 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       this.tileAError = true;
       this.tileDLoading = false;
       this.tileDError = true;
+      this.tileELoading = false;
+      this.tileEError = true;
       return;
     }
 
     this.loadActivePolling(orderId, token);
-    this.loadNonVoters(orderId, token);
+    if (!this.hideNonVoters) {
+      this.loadNonVoters(orderId, token);
+    }
+    this.loadPendingRegistrations(orderId, token);
+  }
+
+  public hideNonVotersTile(): void {
+    this.hideNonVoters = true;
+    try {
+      window.localStorage.setItem(AdminDashboardComponent.HIDE_NONVOTERS_KEY, '1');
+    } catch { /* storage unavailable: hide for this view only */ }
+  }
+
+  public showNonVotersTile(): void {
+    this.hideNonVoters = false;
+    try {
+      window.localStorage.removeItem(AdminDashboardComponent.HIDE_NONVOTERS_KEY);
+    } catch { /* ignore */ }
+    const member = this.storageService.getMember();
+    const pollingOrder = this.storageService.getPollingOrder();
+    if (member?.access_token && pollingOrder?.polling_order_id != null) {
+      this.loadNonVoters(pollingOrder.polling_order_id, member.access_token);
+    }
+  }
+
+  private readHideNonVoters(): boolean {
+    try {
+      return window.localStorage.getItem(AdminDashboardComponent.HIDE_NONVOTERS_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private loadPendingRegistrations(orderId: number, token: string): void {
+    this.tileELoading = true;
+    this.safeSubscribe<OrderMember[]>(
+      this.memberService.getAllOrderMembers(orderId, token),
+      (members: OrderMember[]) => {
+        this.tileELoading = false;
+        // Same filter the Member Approval panel uses, so the count always matches it.
+        const pending = (members ?? []).filter(m => m.approved === false);
+        this.pendingCount = pending.length;
+        this.pendingNames = pending
+          .slice(0, AdminDashboardComponent.PENDING_NAMES_SHOWN)
+          .map(m => m.name);
+        this.pendingOverflow = this.pendingCount - this.pendingNames.length;
+      },
+      () => {
+        this.tileELoading = false;
+        this.tileEError = true;
+      },
+    );
   }
 
   /**
@@ -174,6 +267,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.candidateRatings = this.buildCandidateRatings(rows || []);
         this.totalCandidates = this.candidateRatings.length;
         this.atOrAboveCount = this.candidateRatings.filter(c => c.atOrAbove).length;
+        this.candidateRatingsShown = this.candidateRatings.slice(0, AdminDashboardComponent.LIST_CAP);
+        this.candidateOverflow = this.candidateRatings.length - this.candidateRatingsShown.length;
       },
       () => {
         this.tileCLoading = false;
@@ -245,6 +340,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           .map((m: any) => m?.name)
           .filter((n: any): n is string => !!n)
           .sort((a: string, b: string) => a.localeCompare(b));
+        this.nonVoterNamesShown = this.nonVoterNames.slice(0, AdminDashboardComponent.LIST_CAP);
+        this.nonVoterOverflow = this.nonVoterNames.length - this.nonVoterNamesShown.length;
       },
       () => {
         this.tileDLoading = false;
