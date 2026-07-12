@@ -13,16 +13,40 @@ import { StorageService } from '../services/storage.service';
 
 // HttpClient has NO default timeout: a hung server leaves requests pending forever,
 // so error handlers (and their UI feedback / button re-enabling) never run.
+// Snappy default for interactive reads/actions.
 const DEFAULT_TIMEOUT_MS = 10000;
 // File uploads (multipart) get longer; progress events also reset the timer.
 const UPLOAD_TIMEOUT_MS = 90000;
+// Endpoints that are legitimately slow: SMTP-backed auth flows await the mail send
+// before responding; batched vote writes run 1-2 queries per candidate; report
+// aggregation transfers large payloads. 10s would false-fail these on slow links.
+const SLOW_TIMEOUT_MS = 30000;
+const SLOW_PATHS = [
+  '/member/create',           // register — awaits clerk-notification email
+  '/member/passwordToken',    // forgot password — awaits reset email
+  '/pollingnote/create',      // batched vote save/submit
+  '/pollingnote/all',
+  '/pollingnote/totals',
+  '/polling/pollingreport',
+  '/polling/inprocesspollingreport',
+  '/polling/missingvotes',
+];
+
+// 401s from credential/permission RECHECKS (not session expiry) must not clear the
+// session or redirect — the calling screen shows the error inline.
+const CREDENTIAL_CHECK_PATHS = ['/member/login', '/member/changePassword'];
 
 @Injectable()
 export class TheInterceptor implements HttpInterceptor {
   constructor(private storageService: StorageService, @Inject(DOCUMENT) private document: Document) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const timeoutMs = request.body instanceof FormData ? UPLOAD_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
+    let timeoutMs = DEFAULT_TIMEOUT_MS;
+    if (request.body instanceof FormData) {
+      timeoutMs = UPLOAD_TIMEOUT_MS;
+    } else if (SLOW_PATHS.some(p => request.url.includes(p))) {
+      timeoutMs = SLOW_TIMEOUT_MS;
+    }
     return next.handle(request).pipe(
       timeout(timeoutMs),
       catchError((caught: unknown) => {
@@ -42,10 +66,11 @@ export class TheInterceptor implements HttpInterceptor {
             message = 'Unable to connect to the server. Please check your connection.';
             break;
 
-          // A failed login attempt is also a 401 — stay on the login page and
-          // let it display the error instead of clearing state and reloading.
-          case error.status === 401 && request.url.includes('/member/login'):
-            message = error.error?.message ?? 'Invalid email or password.';
+          // 401 from a credential/permission recheck (failed login, wrong current
+          // password on change-password) — NOT session expiry. Stay on the page and
+          // let it show the error inline instead of clearing state and redirecting.
+          case error.status === 401 && CREDENTIAL_CHECK_PATHS.some(p => request.url.includes(p)):
+            message = error.error?.message ?? 'The information you entered is incorrect.';
             break;
 
           case error.status === 401:

@@ -124,7 +124,7 @@ describe('TheInterceptor', () => {
       error: (err: HttpErrorResponse) => {
         expect(storageService.clean).not.toHaveBeenCalled();
         expect(replaceSpy).not.toHaveBeenCalled();
-        expect(err.error.message).toBe('Invalid email or password.');
+        expect(err.error.message).toBe('The information you entered is incorrect.');
         done();
       }
     });
@@ -132,6 +132,47 @@ describe('TheInterceptor', () => {
     const req = httpMock.expectOne('/member/login');
     req.flush({}, { status: 401, statusText: 'Unauthorized' });
   });
+
+  it('should NOT log out on a wrong current password (401 from /member/changePassword)', (done) => {
+    http.put('/member/changePassword', {}).subscribe({
+      error: (err: HttpErrorResponse) => {
+        expect(storageService.clean).not.toHaveBeenCalled();
+        expect(replaceSpy).not.toHaveBeenCalled();
+        expect(err.error.message).toBe('Current password is incorrect');
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('/member/changePassword');
+    req.flush({ message: 'Current password is incorrect' }, { status: 401, statusText: 'Unauthorized' });
+  });
+
+  it('still logs out on a 401 from a normal guarded endpoint (real session expiry)', (done) => {
+    http.get('/polling/currentpolling/1').subscribe({
+      error: () => {
+        expect(storageService.clean).toHaveBeenCalled();
+        expect(replaceSpy).toHaveBeenCalledWith('/login');
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('/polling/currentpolling/1');
+    req.flush({}, { status: 401, statusText: 'Unauthorized' });
+  });
+
+  it('gives slow endpoints (SMTP/report/vote-write) a longer 30s timeout', fakeAsync(() => {
+    let received: HttpErrorResponse | undefined;
+    http.post('/member/create', {}).subscribe({
+      error: (err: HttpErrorResponse) => { received = err; }
+    });
+
+    httpMock.expectOne('/member/create');
+    tick(10001);
+    expect(received).toBeUndefined(); // default limit passed, slow endpoint still allowed
+    tick(20001);
+    expect(received).toBeDefined();
+    expect(received!.error.message).toBe('The server is not responding. Please check your connection and try again.');
+  }));
 
   it('should preserve original error in normalizedError.error.originalError', (done) => {
     http.get('/api/test').subscribe({
@@ -147,11 +188,11 @@ describe('TheInterceptor', () => {
 
   it('should error with a not-responding message when a request hangs past the timeout', fakeAsync(() => {
     let received: HttpErrorResponse | undefined;
-    http.post('/pollingnote/create', [{}]).subscribe({
+    http.get('/polling/currentpolling/1').subscribe({
       error: (err: HttpErrorResponse) => { received = err; }
     });
 
-    httpMock.expectOne('/pollingnote/create'); // never flushed: the server hangs
+    httpMock.expectOne('/polling/currentpolling/1'); // never flushed: the server hangs
     tick(9999);
     expect(received).toBeUndefined(); // still pending just under the limit
     tick(2);

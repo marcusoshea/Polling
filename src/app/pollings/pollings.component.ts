@@ -101,6 +101,13 @@ export class PollingsComponent implements OnInit {
   private autoSaveClearStatusTimer: any;
   private readonly AUTO_SAVE_DEBOUNCE_MS = 1000;
   private readonly AUTO_SAVE_STATUS_CLEAR_MS = 3000;
+  // A submit queued to run once an in-flight auto-save flush settles (see autoSaveFlush).
+  private pendingSubmit: boolean | null = null;
+  // Guards against a second review dialog opening on a double-click.
+  public reviewDialogOpen = false;
+  // True while getVotes is loading (incl. a proxy-voter switch): block edits so an
+  // auto-save can't write the previous voter's stale rows under the new voter.
+  public votesLoading = false;
 
   // Deadline countdown (computed once when the current polling loads).
   public daysRemaining: number | null = null;
@@ -158,6 +165,12 @@ export class PollingsComponent implements OnInit {
   }
 
   getVotes() {
+    // Cancel any prior in-flight load so a slow earlier response can't land last
+    // (matters on rapid proxy-voter switches).
+    if (this.subscript2) {
+      this.subscript2.unsubscribe();
+    }
+    this.votesLoading = true;
     this.subscript2 = this.pollingService.getPollingSummary(this.currentPolling?.polling_id, this.votingMember.toString(), this.accessToken).subscribe({
       next: data => {
         this.pollingSummary = data;
@@ -170,8 +183,10 @@ export class PollingsComponent implements OnInit {
         // §2f: a fully-submitted load means this member has already cast their vote.
         this.hasSubmitted = this.completed;
         this.dataSourcePS.sort = this.sort;
+        this.votesLoading = false;
       },
       error: err => {
+        this.votesLoading = false;
         this.toastService.show(err.error?.message ?? 'Your votes could not be loaded. Please try again.');
         this.errorMessage = err.error.message;
       }
@@ -200,12 +215,21 @@ export class PollingsComponent implements OnInit {
   changeVoter(info: Event) {
     // Clear all pending auto-save work so nothing stale fires against the newly selected voter.
     this.clearAutoSaveState();
+    this.pendingSubmit = null;
     this.votingMember = parseInt((info.target as HTMLInputElement).value);
+    // Reset per-voter state SYNCHRONOUSLY and drop the old voter's rows so an edit
+    // during the load window can't be auto-saved against the new voter (getVotes
+    // recomputes these when the new voter's summary arrives).
+    this.hasSubmitted = false;
+    this.completed = true;
+    this.dataSourcePS.data = [];
     this.getVotes();
   }
 
   onRowChange(element: PollingSummary): void {
-    if (this.isSubmitting) {
+    // Block edits while a submit is running or the (new) voter's rows are still loading
+    // — otherwise an auto-save could write stale rows under the wrong voter.
+    if (this.isSubmitting || this.votesLoading) {
       return;
     }
     // Skip entirely-empty rows.
@@ -263,6 +287,12 @@ export class PollingsComponent implements OnInit {
       next: () => {
         this.autoSaveFlushInFlight = false;
         this.autoSaveFlushSub = undefined;
+        // A submit queued while this flush was in flight must run NOW (after the flush
+        // committed) so the authoritative completed:true write lands last — otherwise a
+        // late flush could un-submit the vote server-side.
+        if (this.runQueuedSubmit()) {
+          return;
+        }
         this.autoSaveStatus = 'saved';
         this.autoSaveClearStatusTimer = setTimeout(() => {
           if (this.autoSaveStatus === 'saved') {
@@ -274,6 +304,10 @@ export class PollingsComponent implements OnInit {
       error: () => {
         this.autoSaveFlushInFlight = false;
         this.autoSaveFlushSub = undefined;
+        // The submit sends ALL rows authoritatively, so run it even if the flush failed.
+        if (this.runQueuedSubmit()) {
+          return;
+        }
         this.autoSaveStatus = 'error';
         // Merge the failed rows back into the dirty map so the next edit retries them,
         // WITHOUT clobbering rows re-edited while the flush was in flight.
@@ -287,6 +321,17 @@ export class PollingsComponent implements OnInit {
     });
   }
 
+  // If a submit was queued behind an in-flight flush, run it now. Returns true if it ran.
+  private runQueuedSubmit(): boolean {
+    if (this.pendingSubmit === null) {
+      return false;
+    }
+    const submit = this.pendingSubmit;
+    this.pendingSubmit = null;
+    this.executeSubmit(submit);
+    return true;
+  }
+
   private clearAutoSaveState(): void {
     if (this.autoSaveTimer) {
       clearTimeout(this.autoSaveTimer);
@@ -298,6 +343,13 @@ export class PollingsComponent implements OnInit {
       this.autoSaveFlushSub = undefined;
     }
     this.autoSaveFlushInFlight = false;
+    // Reset the status line — its observer callbacks (the only place it clears) will
+    // never fire after we've unsubscribed the flush above.
+    this.autoSaveStatus = '';
+    if (this.autoSaveClearStatusTimer) {
+      clearTimeout(this.autoSaveClearStatusTimer);
+      this.autoSaveClearStatusTimer = null;
+    }
   }
 
   // NOTE: the `draft` parameter name is historical and inverted-looking:
@@ -305,8 +357,8 @@ export class PollingsComponent implements OnInit {
   //   draft === false -> Save Draft (rows are written completed:false)
   // Behavior is preserved exactly; the template's two call sites rely on it.
   submitPolling(draft: boolean) {
-    if (this.isSubmitting) {
-      return; // Prevent double submission
+    if (this.isSubmitting || this.reviewDialogOpen) {
+      return; // Prevent double submission / a second review dialog on double-click.
     }
     if (!draft) {
       // Save Draft: post immediately, no confirmation needed.
@@ -314,11 +366,13 @@ export class PollingsComponent implements OnInit {
       return;
     }
     // Real submit: show the review/confirm dialog first; only proceed on Confirm.
+    this.reviewDialogOpen = true;
     const dialogRef = this.dialog.open(SubmitReviewDialog, {
       panelClass: 'custom-dialog-container',
       data: { rows: this.dataSourcePS.data }
     });
     dialogRef.afterClosed().subscribe(confirmed => {
+      this.reviewDialogOpen = false;
       if (confirmed === true) {
         this.doSubmitPolling(true);
       }
@@ -329,44 +383,65 @@ export class PollingsComponent implements OnInit {
     if (this.isSubmitting) {
       return; // Prevent double submission
     }
-    // Clear ALL pending auto-save state (debounce timer, dirty map, in-flight flush)
-    // BEFORE posting. The old page reload incidentally killed pending auto-save
-    // timers; without it, a debounce armed before Submit could fire after success
-    // and rewrite rows with completed:false, silently un-submitting the vote.
-    this.clearAutoSaveState();
     this.isSubmitting = true;
-    let finished = 0;
-    this.dataSourcePS.data.forEach(x => {
-      x.completed = submit;
-      finished++;
-      if (finished === this.dataSourcePS.data.length) {
-        this.subscript3 = this.pollingService.createPollingNotes(this.dataSourcePS.data, this.accessToken, this.votingMember).subscribe({
-          next: () => {
-            if (submit) {
-              // §2f: mark the vote as cast immediately so edits made before the
-              // getVotes refresh returns are already treated as amendments
-              // (auto-saved with completed:true). Draft saves must NOT set this.
-              this.hasSubmitted = true;
-            }
-            this.toastService.show(
-              submit
-                ? 'Your polling vote has been submitted.'
-                : 'Draft saved — your vote is NOT submitted yet.',
-              'success'
-            );
-            // Refresh rows and the submitted/draft banner in place (no reload).
-            this.getVotes();
-            this.isSubmitting = false;
-          },
-          error: err => {
-            this.toastService.show(err.error?.message ?? 'Your vote could not be submitted. Please try again.');
-            this.errorMessage = err.error?.message;
-            this.isSubmitting = false; // Re-enable buttons on error
-          }
-        });
-      }
-    })
+    // Stop any NEW auto-save from scheduling. Do NOT abandon an in-flight flush — its
+    // POST may already be committing server-side; unsubscribing only aborts the client,
+    // so a late flush (completed:false) could land AFTER our submit and un-submit the
+    // vote. Instead, queue the submit to run once the flush settles (runQueuedSubmit).
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = null;
+    }
+    this.autoSaveDirty.clear();
+    if (this.autoSaveFlushInFlight) {
+      this.pendingSubmit = submit;
+      return;
+    }
+    this.executeSubmit(submit);
+  }
 
+  private executeSubmit(submit: boolean): void {
+    this.isSubmitting = true;
+    // Clear any stale auto-save status now that we're doing an authoritative write.
+    this.autoSaveStatus = '';
+    if (this.autoSaveClearStatusTimer) {
+      clearTimeout(this.autoSaveClearStatusTimer);
+      this.autoSaveClearStatusTimer = null;
+    }
+    const rows = this.dataSourcePS.data;
+    if (rows.length === 0) {
+      // No candidates to submit (the create endpoint stamps auth onto body[0]).
+      this.isSubmitting = false;
+      return;
+    }
+    rows.forEach(x => x.completed = submit);
+    this.subscript3 = this.pollingService.createPollingNotes(rows, this.accessToken, this.votingMember).subscribe({
+      next: () => {
+        if (submit) {
+          // §2f: mark the vote as cast immediately so edits made before the
+          // getVotes refresh returns are already treated as amendments
+          // (auto-saved with completed:true). Draft saves must NOT set this.
+          this.hasSubmitted = true;
+        }
+        // Reflect the submitted/draft state immediately so the banner/buttons don't
+        // briefly show the old state (and can't be used to un-submit) before getVotes.
+        this.completed = submit;
+        this.toastService.show(
+          submit
+            ? 'Your polling vote has been submitted.'
+            : 'Draft saved — your vote is NOT submitted yet.',
+          'success'
+        );
+        // Refresh rows and the submitted/draft banner in place (no reload).
+        this.getVotes();
+        this.isSubmitting = false;
+      },
+      error: err => {
+        this.toastService.show(err.error?.message ?? 'Your vote could not be submitted. Please try again.');
+        this.errorMessage = err.error?.message;
+        this.isSubmitting = false; // Re-enable buttons on error
+      }
+    });
   }
 
   viewCandidate(enterAnimationDuration: string, exitAnimationDuration: string, element: any): void {

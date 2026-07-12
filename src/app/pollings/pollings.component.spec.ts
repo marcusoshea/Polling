@@ -508,6 +508,85 @@ describe('PollingsComponent', () => {
     }));
   });
 
+  describe('round-2 adversarial-review fixes', () => {
+    it('H1: a submit confirmed while an auto-save flush is IN FLIGHT defers until the flush completes, then submits last (completed:true)', fakeAsync(() => {
+      const flush$ = new Subject<any>();
+      // First call (the flush) stays in flight; second call (the submit) resolves.
+      pollingServiceSpy.createPollingNotes.and.returnValues(flush$ as any, of(undefined as any));
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
+      spyOn(component, 'getVotes');
+      const row = makeRow({ candidate_id: 100, vote: 1 });
+      component.dataSourcePS.data = [row];
+
+      component.onRowChange(row);
+      tick(1001); // flush fires and is now IN FLIGHT (flush$ not completed)
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+
+      component.submitPolling(true); // Confirm fires synchronously; flush still in flight
+      // Submit is DEFERRED, not fired concurrently, and not abandoning the flush.
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+      expect(component.isSubmitting).toBeTrue();
+
+      flush$.next(undefined); flush$.complete(); // flush commits → queued submit runs now
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(2);
+      const submitBody = pollingServiceSpy.createPollingNotes.calls.argsFor(1)[0] as any[];
+      submitBody.forEach(r => expect(r.completed).toBeTrue()); // authoritative write lands last
+      expect(component.hasSubmitted).toBeTrue();
+      expect(component.isSubmitting).toBeFalse();
+    }));
+
+    it('M1: changeVoter resets hasSubmitted synchronously and blocks edits until the new voter loads', fakeAsync(() => {
+      component.currentPolling = { polling_id: 10 };
+      const load$ = new Subject<any>();
+      pollingServiceSpy.getPollingSummary.and.returnValue(load$ as any);
+      component.hasSubmitted = true;
+      component.dataSourcePS.data = [makeRow({ candidate_id: 1 })];
+
+      component.changeVoter({ target: { value: '7' } } as any);
+      expect(component.hasSubmitted).toBeFalse();     // reset synchronously, not on response
+      expect(component.votingMember).toBe(7);
+      expect(component.dataSourcePS.data.length).toBe(0); // old voter's rows dropped
+
+      // An edit during the load window must NOT auto-save (would write stale rows).
+      component.onRowChange(makeRow({ candidate_id: 100, vote: 1 }));
+      tick(1001);
+      expect(pollingServiceSpy.createPollingNotes).not.toHaveBeenCalled();
+
+      // Once the new voter's rows arrive, editing works again.
+      load$.next([makeRow({ candidate_id: 100, completed: false })]); load$.complete();
+      component.onRowChange(makeRow({ candidate_id: 100, vote: 3 }));
+      tick(1001);
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+    }));
+
+    it('M2: changeVoter clears a stuck "saving" auto-save status', () => {
+      component.currentPolling = { polling_id: 10 };
+      component.autoSaveStatus = 'saving';
+      component.changeVoter({ target: { value: '7' } } as any);
+      expect(component.autoSaveStatus).toBe('');
+    });
+
+    it('M3: double-clicking Submit opens only ONE review dialog', () => {
+      const openSpy = spyOn(component.dialog, 'open')
+        .and.returnValue({ afterClosed: () => new Subject<any>() } as any); // dialog stays open
+      component.dataSourcePS.data = [makeRow({ vote: 1 })];
+
+      component.submitPolling(true);
+      component.submitPolling(true); // second click while the first dialog is still open
+      expect(openSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('L1: submit success sets completed=true immediately (before the getVotes refresh)', () => {
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
+      spyOn(component, 'getVotes'); // isolate: refresh must not be what sets completed
+      component.completed = false;
+      component.dataSourcePS.data = [makeRow({ vote: 1 })];
+
+      component.submitPolling(true);
+      expect(component.completed).toBeTrue();
+    });
+  });
+
   describe('in-place submit success (no alert, no reload)', () => {
     it('submit success shows a success toast, refreshes votes in place, and re-enables the buttons', () => {
       spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
