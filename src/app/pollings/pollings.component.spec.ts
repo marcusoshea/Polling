@@ -96,7 +96,8 @@ describe('PollingsComponent', () => {
   });
 
   describe('auto-save drafts (batched)', () => {
-    it('editing 3 different rows within 1s produces ONE createPollingNotes call with 3 rows, all completed:false', fakeAsync(() => {
+    it('editing 3 different rows within 1s produces ONE createPollingNotes call with 3 rows, all completed:false while not yet submitted (§2f refined invariant)', fakeAsync(() => {
+      component.hasSubmitted = false; // never-submitted member: auto-save must NEVER write completed:true
       component.votingMember = 42;
       const rowA = makeRow({ candidate_id: 100, vote: 1 });
       const rowB = makeRow({ candidate_id: 200, note: 'b' });
@@ -195,7 +196,8 @@ describe('PollingsComponent', () => {
       expect(pollingServiceSpy.createPollingNotes).not.toHaveBeenCalled();
     }));
 
-    it('onRowChange flips completed to false when a row with meaningful input is edited (banner shows draft state)', () => {
+    it('onRowChange flips completed to false when a row with meaningful input is edited while not yet submitted (banner shows draft state)', () => {
+      component.hasSubmitted = false;
       component.completed = true;
       const row = makeRow({ vote: 1 });
       component.onRowChange(row);
@@ -259,6 +261,8 @@ describe('PollingsComponent', () => {
 
   describe('error surfacing via toasts', () => {
     it('submitPolling error path calls ToastService.show with the server message', () => {
+      // Phase 5: a real submit shows the review dialog first — auto-confirm it here.
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
       pollingServiceSpy.createPollingNotes.and.returnValue(throwError(() => ({ error: { message: 'Vote failed on the server' } })));
       component.dataSourcePS.data = [makeRow({ vote: 1 })];
 
@@ -269,12 +273,292 @@ describe('PollingsComponent', () => {
     });
 
     it('submitPolling error path falls back to a friendly message when the error has no message', () => {
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
       pollingServiceSpy.createPollingNotes.and.returnValue(throwError(() => ({ error: {} })));
       component.dataSourcePS.data = [makeRow({ vote: 1 })];
 
       component.submitPolling(true);
 
       expect(toastServiceSpy.show).toHaveBeenCalledWith('Your vote could not be submitted. Please try again.');
+    });
+  });
+
+  describe('progress indicator', () => {
+    it('votedCount / totalCandidates count rows with a vote and update after an edit', () => {
+      component.dataSourcePS.data = [
+        makeRow({ candidate_id: 1, name: 'A', vote: 1 }),
+        makeRow({ candidate_id: 2, name: 'B' }),
+        makeRow({ candidate_id: 3, name: 'C' })
+      ];
+      expect(component.votedCount).toBe(1);
+      expect(component.totalCandidates).toBe(3);
+
+      component.dataSourcePS.data[1].vote = 3;
+      expect(component.votedCount).toBe(2);
+      expect(component.totalCandidates).toBe(3);
+    });
+
+    it('renders the progress line above the table', () => {
+      component.currentPolling = { polling_id: 10, polling_name: 'P' };
+      component.dataSourcePS.data = [
+        makeRow({ candidate_id: 1, name: 'A', vote: 1 }),
+        makeRow({ candidate_id: 2, name: 'B' })
+      ];
+      fixture.detectChanges();
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain('Polled 1 of 2 candidates.');
+    });
+  });
+
+  describe('deadline countdown', () => {
+    function loadPollingEnding(endDate: string): void {
+      pollingServiceSpy.getCurrentPolling.and.returnValue(of({
+        polling_id: 10,
+        polling_name: 'P',
+        start_date: '2026-01-01T00:00:00.000Z',
+        end_date: endDate
+      } as any));
+      component.ngOnInit();
+    }
+
+    it('computes daysRemaining and renders "— closes in N days"', () => {
+      loadPollingEnding(new Date(Date.now() + 5 * 86400000).toISOString());
+      expect(component.daysRemaining).toBe(5);
+      expect(component.deadlineText).toBe('— closes in 5 days');
+      fixture.detectChanges();
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain('— closes in 5 days');
+    });
+
+    it('shows "— closes today" when the polling ends today (N === 0)', () => {
+      loadPollingEnding(new Date().toISOString());
+      expect(component.daysRemaining).toBe(0);
+      expect(component.deadlineText).toBe('— closes today');
+    });
+
+    it('defensively shows "— closing" for an already-past end date', () => {
+      loadPollingEnding(new Date(Date.now() - 3 * 86400000).toISOString());
+      expect(component.daysRemaining).toBeLessThan(0);
+      expect(component.deadlineText).toBe('— closing');
+    });
+  });
+
+  describe('candidate filter', () => {
+    beforeEach(() => {
+      component.currentPolling = { polling_id: 10, polling_name: 'P' };
+      component.dataSourcePS.data = [
+        makeRow({ candidate_id: 1, name: 'Alice' }),
+        makeRow({ candidate_id: 2, name: 'Bob', vote: 1 })
+      ];
+      fixture.detectChanges();
+    });
+
+    function typeFilter(value: string): void {
+      const input = fixture.nativeElement.querySelector('#candidate-filter') as HTMLInputElement;
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    }
+
+    it('has a visible label and an aria-label (a11y conventions)', () => {
+      const el: HTMLElement = fixture.nativeElement;
+      const input = el.querySelector('#candidate-filter');
+      expect(input).toBeTruthy();
+      expect(input?.getAttribute('aria-label')).toBe('Filter candidates by name');
+      expect(el.querySelector('label[for="candidate-filter"]')?.textContent).toContain('Filter candidates');
+    });
+
+    it('reduces the rendered rows by name but leaves dataSourcePS.data untouched', () => {
+      expect(fixture.nativeElement.querySelectorAll('table tbody tr').length).toBe(2);
+
+      typeFilter('ali');
+
+      expect(component.dataSourcePS.filteredData.length).toBe(1);
+      expect(component.dataSourcePS.filteredData[0].name).toBe('Alice');
+      expect(fixture.nativeElement.querySelectorAll('table tbody tr').length).toBe(1);
+      // Submit/auto-save read dataSourcePS.data — filtering must never mutate it.
+      expect(component.dataSourcePS.data.length).toBe(2);
+    });
+
+    it('submit while a filter is active still posts ALL rows', () => {
+      typeFilter('ali');
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
+
+      component.submitPolling(true);
+
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+      const sentBody = pollingServiceSpy.createPollingNotes.calls.mostRecent().args[0] as any[];
+      expect(sentBody.length).toBe(2);
+      expect(sentBody.map(r => r.candidate_id).sort((a, b) => a - b)).toEqual([1, 2]);
+      sentBody.forEach(r => expect(r.completed).toBeTrue());
+    });
+  });
+
+  describe('pre-submit review dialog', () => {
+    it('a real submit opens the review dialog with the rows and posts completed:true after Confirm', () => {
+      const openSpy = spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
+      const rows = [makeRow({ candidate_id: 1, vote: 1 }), makeRow({ candidate_id: 2 })];
+      component.dataSourcePS.data = rows;
+
+      component.submitPolling(true);
+
+      expect(openSpy).toHaveBeenCalledTimes(1);
+      const dialogConfig = openSpy.calls.mostRecent().args[1] as any;
+      // The dialog receives the live rows array (getVotes() replaces dataSourcePS.data after success).
+      expect(dialogConfig.data.rows).toBe(rows);
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+      const sentBody = pollingServiceSpy.createPollingNotes.calls.mostRecent().args[0] as any[];
+      sentBody.forEach(r => expect(r.completed).toBeTrue());
+    });
+
+    it('Go Back closes the dialog and sends nothing', () => {
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(false) } as any);
+      component.dataSourcePS.data = [makeRow({ vote: 1 })];
+
+      component.submitPolling(true);
+
+      expect(pollingServiceSpy.createPollingNotes).not.toHaveBeenCalled();
+      expect(component.isSubmitting).toBeFalse();
+    });
+
+    it('Save Draft bypasses the dialog and posts completed:false immediately', () => {
+      const openSpy = spyOn(component.dialog, 'open');
+      component.dataSourcePS.data = [makeRow({ candidate_id: 1, vote: 1 })];
+
+      component.submitPolling(false);
+
+      expect(openSpy).not.toHaveBeenCalled();
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+      const sentBody = pollingServiceSpy.createPollingNotes.calls.mostRecent().args[0] as any[];
+      sentBody.forEach(r => expect(r.completed).toBeFalse());
+    });
+  });
+
+  describe('submit vs auto-save race', () => {
+    it('a pending auto-save debounce armed before Submit never fires after it: exactly ONE createPollingNotes call, no trailing completed:false write', fakeAsync(() => {
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
+      const row = makeRow({ candidate_id: 100, vote: 1 });
+      component.dataSourcePS.data = [row];
+
+      component.onRowChange(row); // arms the 1s auto-save debounce
+      tick(300);
+      component.submitPolling(true); // Confirm fires synchronously via of(true)
+
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+      const sentBody = pollingServiceSpy.createPollingNotes.calls.mostRecent().args[0] as any[];
+      sentBody.forEach(r => expect(r.completed).toBeTrue());
+
+      tick(5000); // well past the original debounce window
+      // Still only the submit's own call — no auto-save fired afterwards to
+      // rewrite the rows with completed:false (the old reload masked this race).
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+    }));
+  });
+
+  describe('in-place submit success (no alert, no reload)', () => {
+    it('submit success shows a success toast, refreshes votes in place, and re-enables the buttons', () => {
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
+      const getVotesSpy = spyOn(component, 'getVotes');
+      component.dataSourcePS.data = [makeRow({ vote: 1 })];
+
+      // No alert() and no window.location.reload() may run in this path.
+      expect(() => component.submitPolling(true)).not.toThrow();
+
+      expect(toastServiceSpy.show).toHaveBeenCalledWith('Your polling vote has been submitted.', 'success');
+      expect(getVotesSpy).toHaveBeenCalledTimes(1);
+      expect(component.isSubmitting).toBeFalse();
+    });
+
+    it('Save Draft success shows the draft toast and refreshes votes in place', () => {
+      const getVotesSpy = spyOn(component, 'getVotes');
+      component.dataSourcePS.data = [makeRow({ vote: 1 })];
+
+      component.submitPolling(false);
+
+      expect(toastServiceSpy.show).toHaveBeenCalledWith('Draft saved — your vote is NOT submitted yet.', 'success');
+      expect(getVotesSpy).toHaveBeenCalledTimes(1);
+      expect(component.isSubmitting).toBeFalse();
+    });
+  });
+
+  describe('once submitted, always submitted (§2f)', () => {
+    it('getVotes sets hasSubmitted from the loaded rows: fully submitted -> true, any draft row -> false', () => {
+      component.currentPolling = { polling_id: 10 };
+
+      pollingServiceSpy.getPollingSummary.and.returnValue(of([makeRow({ completed: true })] as any));
+      component.getVotes();
+      expect(component.completed).toBeTrue();
+      expect(component.hasSubmitted).toBeTrue();
+
+      // changeVoter re-runs getVotes, so a draft-state voter recomputes it to false.
+      pollingServiceSpy.getPollingSummary.and.returnValue(of([makeRow({ completed: false })] as any));
+      component.getVotes();
+      expect(component.completed).toBeFalse();
+      expect(component.hasSubmitted).toBeFalse();
+    });
+
+    it('while hasSubmitted is false, auto-save NEVER writes completed:true — even if a row object claims completed (refined safety invariant)', fakeAsync(() => {
+      component.hasSubmitted = false;
+      const row = makeRow({ candidate_id: 100, vote: 1, completed: true });
+      component.onRowChange(row);
+      tick(1001);
+
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+      const sentBody = pollingServiceSpy.createPollingNotes.calls.mostRecent().args[0] as any[];
+      sentBody.forEach(r => expect(r.completed).toBeFalse());
+    }));
+
+    it('hasSubmitted=true (loaded-submitted polling): editing keeps the Submitted banner and the flush payload has completed:true for every row', fakeAsync(() => {
+      component.hasSubmitted = true;
+      component.completed = true;
+      const rowA = makeRow({ candidate_id: 100, vote: 1 });
+      const rowB = makeRow({ candidate_id: 200, note: 'b' });
+
+      component.onRowChange(rowA);
+      component.onRowChange(rowB);
+      expect(component.completed).toBeTrue(); // banner does NOT flip back to draft
+
+      tick(1001);
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+      const sentBody = pollingServiceSpy.createPollingNotes.calls.mostRecent().args[0] as any[];
+      expect(sentBody.length).toBe(2);
+      sentBody.forEach(r => expect(r.completed).toBeTrue());
+    }));
+
+    it('after a successful real submit, a subsequent edit auto-saves with completed:true (amendment stays counted)', fakeAsync(() => {
+      spyOn(component.dialog, 'open').and.returnValue({ afterClosed: () => of(true) } as any);
+      component.currentPolling = { polling_id: 10 };
+      // The post-submit getVotes refresh returns the now-submitted row.
+      pollingServiceSpy.getPollingSummary.and.returnValue(of([makeRow({ candidate_id: 100, vote: 1, completed: true })] as any));
+      component.dataSourcePS.data = [makeRow({ candidate_id: 100, vote: 1 })];
+
+      component.submitPolling(true); // success fires synchronously via of()
+      expect(component.hasSubmitted).toBeTrue();
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(1);
+
+      // Amend the already-cast vote.
+      const edited = component.dataSourcePS.data[0];
+      edited.note = 'amended';
+      component.onRowChange(edited);
+      expect(component.completed).toBeTrue(); // banner stays "Submitted"
+      tick(1001);
+
+      expect(pollingServiceSpy.createPollingNotes).toHaveBeenCalledTimes(2);
+      const sentBody = pollingServiceSpy.createPollingNotes.calls.mostRecent().args[0] as any[];
+      expect(sentBody.length).toBe(1);
+      expect(sentBody[0].note).toBe('amended');
+      expect(sentBody[0].completed).toBeTrue();
+    }));
+
+    it('a draft save success does NOT set hasSubmitted (and a later edit still flips to the draft banner)', () => {
+      // Isolate the success handler; the real getVotes refresh would recompute from server rows.
+      spyOn(component, 'getVotes');
+      component.dataSourcePS.data = [makeRow({ vote: 1 })];
+
+      component.submitPolling(false);
+      expect(component.hasSubmitted).toBeFalse();
+
+      component.completed = true;
+      component.onRowChange(component.dataSourcePS.data[0]);
+      expect(component.completed).toBeFalse();
     });
   });
 });

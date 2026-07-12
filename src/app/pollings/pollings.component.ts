@@ -26,6 +26,7 @@ import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ToastService } from '../services/toast.service';
+import { SubmitReviewDialog } from './submit-review-dialog';
 
 @Component({
   selector: 'app-pollings',
@@ -81,6 +82,12 @@ export class PollingsComponent implements OnInit {
   polling_order_member_id!: Number;
   isAdmin: boolean = false;
   public completed: boolean = true;
+  // §2f "once submitted, always submitted": true once the member's polling loaded
+  // fully submitted OR after a successful real submit this session (recomputed by
+  // getVotes, which changeVoter also re-runs). While false, auto-save writes
+  // completed:false (drafts, never counted); once true, auto-saved edits are
+  // amendments to an already-cast vote and stay completed:true.
+  public hasSubmitted: boolean = false;
   public isSubmitting: boolean = false;
   orderMemberList: OrderMember[] = [];
 
@@ -93,7 +100,23 @@ export class PollingsComponent implements OnInit {
   private readonly AUTO_SAVE_DEBOUNCE_MS = 1000;
   private readonly AUTO_SAVE_STATUS_CLEAR_MS = 3000;
 
+  // Deadline countdown (computed once when the current polling loads).
+  public daysRemaining: number | null = null;
+  public deadlineText = '';
+
+  // Progress indicator: rows the member has voted on vs total candidates.
+  get votedCount(): number {
+    return this.dataSourcePS.data.filter(r => r.vote != null).length;
+  }
+
+  get totalCandidates(): number {
+    return this.dataSourcePS.data.length;
+  }
+
   async ngOnInit(): Promise<void> {
+    // Candidate filter matches on candidate name only; the filter string is
+    // lowercased in applyFilter. Filtering never mutates dataSourcePS.data.
+    this.dataSourcePS.filterPredicate = (row: PollingSummary, filter: string) => row.name.toLowerCase().includes(filter);
     const member = this.storageService.getMember()!;
     this.pollingOrder = this.storageService.getPollingOrder()!;
     this.accessToken = member.access_token;
@@ -104,6 +127,9 @@ export class PollingsComponent implements OnInit {
           this.currentPolling = data;
           this.startDate = this.currentPolling?.start_date.split('T')[0];
           this.endDate = this.currentPolling?.end_date.split('T')[0];
+          if (this.currentPolling?.end_date) {
+            this.computeDeadline(this.currentPolling.end_date);
+          }
           if (this.currentPolling?.polling_id) {
             this.getVotes();
           }
@@ -135,7 +161,9 @@ export class PollingsComponent implements OnInit {
           this.completed = false;
         } else {
           this.completed = true;
-        };    
+        };
+        // §2f: a fully-submitted load means this member has already cast their vote.
+        this.hasSubmitted = this.completed;
         this.dataSourcePS.sort = this.sort;
       },
       error: err => {
@@ -143,6 +171,25 @@ export class PollingsComponent implements OnInit {
         this.errorMessage = err.error.message;
       }
     });
+  }
+
+  // Same math as the admin dashboard tile: ceil of (end - now) in days.
+  private computeDeadline(endDate: string): void {
+    const end = new Date(endDate).getTime();
+    const today = new Date().getTime();
+    this.daysRemaining = Math.ceil((end - today) / 86400000);
+    if (this.daysRemaining === 0) {
+      this.deadlineText = '— closes today';
+    } else if (this.daysRemaining < 0) {
+      this.deadlineText = '— closing';
+    } else {
+      this.deadlineText = `— closes in ${this.daysRemaining} days`;
+    }
+  }
+
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSourcePS.filter = filterValue.trim().toLowerCase();
   }
 
   changeVoter(info: Event) {
@@ -160,9 +207,13 @@ export class PollingsComponent implements OnInit {
     if (!(element.vote != null || (element.note && element.note.trim().length > 0))) {
       return;
     }
-    // Any auto-saved edit is unsubmitted work, so honestly flip the banner to the draft state immediately.
-    // The row will be written as completed:false, so "Submitted ✓" would otherwise be misleading. Only Submit re-sets completed=true.
-    this.completed = false;
+    // Before first submission, any auto-saved edit is unsubmitted work: honestly flip the
+    // banner to the draft state (rows will be written completed:false; "Submitted ✓" would
+    // be misleading). Once submitted (§2f), edits are amendments to an already-cast vote
+    // (written completed:true) — the banner stays "Submitted".
+    if (!this.hasSubmitted) {
+      this.completed = false;
+    }
     // Upsert into the shared dirty map (re-edits overwrite with the freshest row reference)
     // and re-arm the single debounce timer: one flush fires 1s after the LAST edit anywhere.
     this.autoSaveDirty.set(element.candidate_id, element);
@@ -190,10 +241,12 @@ export class PollingsComponent implements OnInit {
     if (this.autoSaveDirty.size === 0) {
       return;
     }
-    // Snapshot the live row references, then send copies with completed:false
-    // (same payload shape as Save Draft; the endpoint accepts an array of any length).
+    // Snapshot the live row references, then send submission-aware copies (§2f):
+    // completed:false while the member has never submitted (drafts — a never-submitted
+    // member can only become counted by clicking Submit), completed:true after a
+    // submit (amendments to an already-cast vote remain counted in reports).
     const snapshot = [...this.autoSaveDirty.values()];
-    const rows = snapshot.map(r => ({ ...r, completed: false }));
+    const rows = snapshot.map(r => ({ ...r, completed: this.hasSubmitted }));
     this.autoSaveDirty.clear();
     this.autoSaveFlushInFlight = true;
     this.autoSaveStatus = 'saving';
@@ -242,30 +295,63 @@ export class PollingsComponent implements OnInit {
     this.autoSaveFlushInFlight = false;
   }
 
+  // NOTE: the `draft` parameter name is historical and inverted-looking:
+  //   draft === true  -> REAL submit (rows are written completed:true)
+  //   draft === false -> Save Draft (rows are written completed:false)
+  // Behavior is preserved exactly; the template's two call sites rely on it.
   submitPolling(draft: boolean) {
     if (this.isSubmitting) {
       return; // Prevent double submission
     }
-    
+    if (!draft) {
+      // Save Draft: post immediately, no confirmation needed.
+      this.doSubmitPolling(false);
+      return;
+    }
+    // Real submit: show the review/confirm dialog first; only proceed on Confirm.
+    const dialogRef = this.dialog.open(SubmitReviewDialog, {
+      panelClass: 'custom-dialog-container',
+      data: { rows: this.dataSourcePS.data }
+    });
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed === true) {
+        this.doSubmitPolling(true);
+      }
+    });
+  }
+
+  private doSubmitPolling(submit: boolean) {
+    if (this.isSubmitting) {
+      return; // Prevent double submission
+    }
+    // Clear ALL pending auto-save state (debounce timer, dirty map, in-flight flush)
+    // BEFORE posting. The old page reload incidentally killed pending auto-save
+    // timers; without it, a debounce armed before Submit could fire after success
+    // and rewrite rows with completed:false, silently un-submitting the vote.
+    this.clearAutoSaveState();
     this.isSubmitting = true;
     let finished = 0;
     this.dataSourcePS.data.forEach(x => {
-      x.completed = draft;
+      x.completed = submit;
       finished++;
       if (finished === this.dataSourcePS.data.length) {
         this.subscript3 = this.pollingService.createPollingNotes(this.dataSourcePS.data, this.accessToken, this.votingMember).subscribe({
-          next: data => {
-            if (draft) {
-              alert("Polling Submitted");
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
-            } else {
-              alert("Draft Saved, Polling NOT submitted");
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
+          next: () => {
+            if (submit) {
+              // §2f: mark the vote as cast immediately so edits made before the
+              // getVotes refresh returns are already treated as amendments
+              // (auto-saved with completed:true). Draft saves must NOT set this.
+              this.hasSubmitted = true;
             }
+            this.toastService.show(
+              submit
+                ? 'Your polling vote has been submitted.'
+                : 'Draft saved — your vote is NOT submitted yet.',
+              'success'
+            );
+            // Refresh rows and the submitted/draft banner in place (no reload).
+            this.getVotes();
+            this.isSubmitting = false;
           },
           error: err => {
             this.toastService.show(err.error?.message ?? 'Your vote could not be submitted. Please try again.');

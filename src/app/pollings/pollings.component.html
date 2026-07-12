@@ -4,7 +4,7 @@
 
 <div class="col-md-12  m-2 title" *ngIf="currentPolling">
   <h2>{{currentPolling?.polling_name}}</h2>
-  <h3>Polling Dates: {{this.startDate}} thru {{this.endDate}} </h3>
+  <h3>Polling Dates: {{this.startDate}} thru {{this.endDate}} <span *ngIf="deadlineText">{{deadlineText}}</span></h3>
 
   <div class="form-group m-3" *ngIf="isAdmin" >
     <label for="pollingOrder">Order Clerk Proxy Vote As:</label>
@@ -21,6 +21,12 @@
       <div class="row">
         <div class="col">
           <div class="card card-container custom-card">
+            <p class="text-muted m-3 mb-0">Polled {{votedCount}} of {{totalCandidates}} candidates.</p>
+            <div class="form-group m-3 text-start">
+              <label for="candidate-filter">Filter candidates</label>
+              <input type="text" id="candidate-filter" class="form-control" aria-label="Filter candidates by name"
+                placeholder="Start typing a candidate name" (input)="applyFilter($event)">
+            </div>
             <div class="table-responsive" style="overflow-x:auto">
             <table mat-table [dataSource]="dataSourcePS" class="mat-table custom-card" matSort matSortActive="name" matSortDirection="asc">
               <ng-container matColumnDef="name">
