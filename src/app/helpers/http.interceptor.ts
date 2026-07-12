@@ -25,6 +25,12 @@ export class TheInterceptor implements HttpInterceptor {
             message = 'Unable to connect to the server. Please check your connection.';
             break;
 
+          // A failed login attempt is also a 401 — stay on the login page and
+          // let it display the error instead of clearing state and reloading.
+          case error.status === 401 && request.url.includes('/member/login'):
+            message = error.error?.message ?? 'Invalid email or password.';
+            break;
+
           case error.status === 401:
             this.storageService.clean();
             this.document.defaultView?.location.replace('/login');

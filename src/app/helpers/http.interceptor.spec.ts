@@ -119,6 +119,20 @@ describe('TheInterceptor', () => {
     req.flush({}, { status: 401, statusText: 'Unauthorized' });
   });
 
+  it('should NOT redirect or clear storage on a failed login (401 from /member/login)', (done) => {
+    http.post('/member/login', {}).subscribe({
+      error: (err: HttpErrorResponse) => {
+        expect(storageService.clean).not.toHaveBeenCalled();
+        expect(replaceSpy).not.toHaveBeenCalled();
+        expect(err.error.message).toBe('Invalid email or password.');
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('/member/login');
+    req.flush({}, { status: 401, statusText: 'Unauthorized' });
+  });
+
   it('should preserve original error in normalizedError.error.originalError', (done) => {
     http.get('/api/test').subscribe({
       error: (err: HttpErrorResponse) => {
