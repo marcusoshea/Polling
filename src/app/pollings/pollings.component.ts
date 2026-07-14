@@ -448,6 +448,10 @@ export class PollingsComponent implements OnInit {
   viewCandidate(enterAnimationDuration: string, exitAnimationDuration: string, element: any): void {
     const dialogRef = this.dialog.open(PollingCandidate, {
       panelClass: 'custom-dialog-container',
+      // Reasonable reading width for the trend chart + notes: near-full on phones,
+      // capped so it doesn't stretch edge-to-edge on large screens.
+      width: '90vw',
+      maxWidth: '900px',
       enterAnimationDuration,
       exitAnimationDuration,
       data: {
