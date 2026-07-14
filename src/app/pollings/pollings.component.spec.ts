@@ -700,6 +700,8 @@ describe('PollingsComponent', () => {
 describe('PollingCandidate dialog', () => {
   let notesServiceSpy: jasmine.SpyObj<NotesService>;
   let candidateServiceSpy: jasmine.SpyObj<CandidateService>;
+  let pollingServiceSpy: jasmine.SpyObj<PollingService>;
+  let lastFixture: ComponentFixture<PollingCandidate>;
 
   const dialogData = {
     candidate: { candidate_id: 100, name: 'Cand', link: '' },
@@ -713,24 +715,28 @@ describe('PollingCandidate dialog', () => {
       'getMyPollingNotesByCandidateId'
     ]);
     candidateServiceSpy = jasmine.createSpyObj('CandidateService', ['getAllCandidateImages']);
+    // The embedded readiness-trend chart pulls its data from PollingService.
+    pollingServiceSpy = jasmine.createSpyObj('PollingService', ['getCandidateTrend']);
 
     notesServiceSpy.getExternalNoteByCandidateId.and.returnValue(of([]));
     notesServiceSpy.getPollingNoteByCandidateId.and.returnValue(of([]));
     notesServiceSpy.getMyPollingNotesByCandidateId.and.returnValue(of(myNotes));
     candidateServiceSpy.getAllCandidateImages.and.returnValue(of([]));
+    pollingServiceSpy.getCandidateTrend.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [PollingCandidate, NoopAnimationsModule, MatDialogModule],
       providers: [
         { provide: NotesService, useValue: notesServiceSpy },
         { provide: CandidateService, useValue: candidateServiceSpy },
+        { provide: PollingService, useValue: pollingServiceSpy },
         { provide: MatDialogRef, useValue: { close: () => {} } },
         { provide: MAT_DIALOG_DATA, useValue: dialogData }
       ]
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(PollingCandidate);
-    return fixture.componentInstance;
+    lastFixture = TestBed.createComponent(PollingCandidate);
+    return lastFixture.componentInstance;
   }
 
   afterEach(() => {
@@ -740,6 +746,18 @@ describe('PollingCandidate dialog', () => {
   it('calls getMyPollingNotesByCandidateId with the candidate id and token', async () => {
     await setup([]);
     expect(notesServiceSpy.getMyPollingNotesByCandidateId).toHaveBeenCalledWith(100, 'token');
+  });
+
+  it('renders the readiness-trend chart wired to the candidate id and token', async () => {
+    const dialog = await setup([]);
+    expect(dialog.candidateId).toBe(100);
+    expect(dialog.accessToken).toBe('token');
+
+    lastFixture.detectChanges();
+    const chart = lastFixture.nativeElement.querySelector('app-candidate-trend-chart');
+    expect(chart).toBeTruthy();
+    // The chart fetched its trend series for this candidate.
+    expect(pollingServiceSpy.getCandidateTrend).toHaveBeenCalledWith(100, 'token');
   });
 
   it('groups the response into myPollingNames (unique, end_date DESC) and myPollingNotes (array of arrays)', async () => {

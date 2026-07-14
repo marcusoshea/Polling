@@ -28,6 +28,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastService } from '../services/toast.service';
 import { SubmitReviewDialog } from './submit-review-dialog';
+import { CandidateTrendChartComponent } from '../candidate-trend-chart/candidate-trend-chart.component';
 
 @Component({
   selector: 'app-pollings',
@@ -491,8 +492,9 @@ export class PollingsComponent implements OnInit {
     MatNativeDateModule,
     MatListModule,
     MatDialogModule,
-    FormsModule, 
-    CommonModule
+    FormsModule,
+    CommonModule,
+    CandidateTrendChartComponent
   ],
 })
 export class PollingCandidate {
@@ -503,6 +505,8 @@ export class PollingCandidate {
   private errorMessage = '';
   public candidateName = '';
   public candidateLink = '';
+  public candidateId!: number;
+  public accessToken = '';
   public pollingNames = [];
   public pollingNotes = [];
   public myPollingNames: any[] = [];
@@ -514,6 +518,8 @@ export class PollingCandidate {
   constructor(public dialogRef: MatDialogRef<PollingCandidate>, private notesService: NotesService, private candidateService: CandidateService,  @Inject(MAT_DIALOG_DATA) public data: any) {
     this.candidateName = this.data.candidate.name;
     this.candidateLink = this.data.candidate.link;
+    this.candidateId = this.data.candidate.candidate_id;
+    this.accessToken = this.data.accessToken;
     this.notesService.getExternalNoteByCandidateId(data.candidate.candidate_id, data.accessToken).subscribe({
       next: data => {
         this.dataSourceNotes.data = data;
