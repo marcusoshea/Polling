@@ -37,7 +37,8 @@
                 <li><strong>Abstain</strong> — you do not have an opinion on this candidate.</li>
               </ul>
             </div>
-            <div class="table-responsive" style="overflow-x:auto">
+            <!-- Desktop / tablet (≥576px): the full data table. -->
+            <div class="table-responsive d-none d-sm-block" style="overflow-x:auto">
             <table mat-table [dataSource]="dataSourcePS" class="mat-table custom-card" matSort matSortActive="name" matSortDirection="asc">
               <ng-container matColumnDef="name">
                 <th mat-header-cell scope="col" *matHeaderCellDef class="h6 col-md-3"> Polling Candidate </th>
@@ -72,6 +73,37 @@
               <tr mat-header-row *matHeaderRowDef="displayedColumnsPS"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumnsPS;"></tr>
             </table>
+            </div>
+
+            <!-- Mobile (<576px): purpose-built card list. Same row objects + handlers as
+                 the table above, so auto-save/submit/filter logic is shared unchanged. -->
+            <div class="mobile-poll-list d-block d-sm-none">
+              <p *ngIf="mobileRows.length === 0" class="text-muted m-3">No candidates match your filter.</p>
+              <div class="mobile-poll-card" *ngFor="let element of mobileRows; trackBy: trackByCandidate">
+                <div class="mobile-poll-name">
+                  <a (click)="viewCandidate('500ms', '1500ms', element)" class="link-primary">{{element.name}}</a>
+                </div>
+                <div class="mobile-poll-field">
+                  <label class="mobile-poll-label" [attr.for]="'m-note-' + element.candidate_id">Your Note</label>
+                  <textarea class="form-control" [id]="'m-note-' + element.candidate_id"
+                    [attr.aria-label]="'Note for ' + element.name" [(ngModel)]="element.note"
+                    (ngModelChange)="onRowChange(element)"></textarea>
+                </div>
+                <div class="mobile-poll-field">
+                  <label class="mobile-poll-label">Your Vote</label>
+                  <mat-select class="mobile-poll-select" [(ngModel)]="element.vote" (ngModelChange)="onRowChange(element)"
+                    [aria-label]="'Your vote for ' + element.name" placeholder="Select Your Vote">
+                    <mat-option [value]="1" matTooltip="The candidate is ready to join the order.">Yes</mat-option>
+                    <mat-option *ngIf="pollingOrder.polling_order_id !==1 && pollingOrder.polling_order_id !==8" [value]="2" matTooltip="Showing good progress but not yet ready.">Wait</mat-option>
+                    <mat-option [value]="3" matTooltip="Not ready to join the order.">No</mat-option>
+                    <mat-option [value]="4" matTooltip="You do not have an opinion on this candidate.">Abstain</mat-option>
+                  </mat-select>
+                </div>
+                <div class="mobile-poll-field">
+                  <mat-checkbox [(ngModel)]="element.private" (ngModelChange)="onRowChange(element)"
+                    [aria-label]="'Mark note private for ' + element.name">Keep my note private</mat-checkbox>
+                </div>
+              </div>
             </div>
             <div class="alert alert-warning m-3" role="alert" *ngIf="!completed">
               <strong>Draft — not yet submitted.</strong> Click Submit to cast your vote.

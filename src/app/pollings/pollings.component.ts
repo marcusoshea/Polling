@@ -126,6 +126,17 @@ export class PollingsComponent implements OnInit {
     return this.dataSourcePS.data.length;
   }
 
+  // Rows for the mobile card list: the same filtered rows the table shows (respects the
+  // candidate filter), sorted by name to match the table's default order. Returns the
+  // live row objects so ngModel edits flow through the shared onRowChange/auto-save path.
+  get mobileRows(): PollingSummary[] {
+    return [...this.dataSourcePS.filteredData].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  trackByCandidate(_index: number, row: PollingSummary): number {
+    return row.candidate_id;
+  }
+
   async ngOnInit(): Promise<void> {
     // Candidate filter matches on candidate name only; the filter string is
     // lowercased in applyFilter. Filtering never mutates dataSourcePS.data.
