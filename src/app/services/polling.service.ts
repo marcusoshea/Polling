@@ -114,7 +114,7 @@ export class PollingService {
     return this.http.post<void>(API_URL + '/polling/candidates', pollingCandidates, { headers: reqHeader });
   }
 
-  createPollingNotes(body: Array<{ polling_id: number; candidate_id: number; polling_candidate_id: number; note: string; vote: number; authToken?: string; polling_order_member_id?: number }>, accessToken: string, memberId: number): Observable<void> {
+  createPollingNotes(body: Array<{ polling_id: number; candidate_id: number; polling_candidate_id: number; note: string; vote: number; private?: boolean; anonymous?: boolean; authToken?: string; polling_order_member_id?: number }>, accessToken: string, memberId: number): Observable<void> {
     const reqHeader = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + accessToken

@@ -57,6 +57,8 @@ export class CandidatesComponent implements OnInit {
   noteList!: any[];
   noteListPolling!: any[];
   newExternalNote = '';
+  newExternalNoteAnonymous = false;
+  allowAnonymous = false;
   candidate_id = 0;
   watch_list = false;
   filterValue = '';
@@ -109,6 +111,7 @@ export class CandidatesComponent implements OnInit {
     };
     const member = this.storageService.getMember()!;
     this.pollingOrder = this.storageService.getPollingOrder()!;
+    this.allowAnonymous = !!this.pollingOrder?.polling_order_allow_anonymous;
     this.accessToken = member.access_token;
     this.memberId = member.memberId;
     this.subscript1 = this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
@@ -201,8 +204,10 @@ export class CandidatesComponent implements OnInit {
       "candidate_id": this.candidate_id
     }
     this.subscript4 = this.notesService.createExternalNote(this.newExternalNote, this.candidate_id,
-      this.memberId, this.accessToken).subscribe({
+      this.memberId, this.accessToken, this.newExternalNoteAnonymous).subscribe({
         next: () => {
+          this.newExternalNote = '';
+          this.newExternalNoteAnonymous = false;
           this.viewCandidate(element);
         },
         error: err => {

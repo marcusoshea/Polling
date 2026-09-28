@@ -81,7 +81,7 @@ export class NotesService {
     return this.http.delete<void>(API_URL + '/candidate/delete', options);
   }
 
-  createExternalNote(external_note: string, candidate_id: number, polling_order_member_id: number, accessToken: string): Observable<Note> {
+  createExternalNote(external_note: string, candidate_id: number, polling_order_member_id: number, accessToken: string, anonymous: boolean = false): Observable<Note> {
     const today = new Date();
     today.setDate(today.getDate() + 1);
     const created = today.toISOString().split('T')[0];
@@ -96,6 +96,7 @@ export class NotesService {
         candidate_id,
         polling_order_member_id,
         en_created_at: created,
+        anonymous,
         authToken: accessToken
       },
       { headers: reqHeader }

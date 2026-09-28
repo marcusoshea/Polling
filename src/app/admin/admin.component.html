@@ -537,6 +537,7 @@
                                         <ng-container *ngIf="showAdminVotes || note.note">
                                           <li>
                                             <span *ngIf="note.private"><b>--PRIVATE RESPONSE-- </b></span>
+                                            <span *ngIf="note.anonymous"><b>--ANONYMOUS-- </b></span>
                                             <span *ngIf="showAdminVotes">
                                               <span *ngIf="note.vote === 1">Yes</span><span *ngIf="note.vote === 2">Wait</span><span *ngIf="note.vote === 3">No</span><span *ngIf="note.vote === 4">Abstain</span>
                                             </span>

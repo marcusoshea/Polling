@@ -13,4 +13,6 @@ export interface PollingSummary {
     pn_created_at: string;
     polling_order_member_id: number;
     completed: boolean;
+    private?: boolean;
+    anonymous?: boolean;
 }

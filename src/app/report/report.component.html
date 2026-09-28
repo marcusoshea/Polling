@@ -95,6 +95,7 @@
                                                             <span *ngIf="note.note && note.note !== ''">
                                         <li>
                                             <span *ngIf="note.private"><b>--PRIVATE RESPONSE--</b></span>
+                                            <span *ngIf="note.anonymous"><b>--ANONYMOUS--</b></span>
                                             "{{note.note}}"
                                             <span class="px-3 fst-italic">- {{note.member_name}}</span>
                                         </li>
@@ -181,6 +182,7 @@
                                                             <span *ngIf="note.note && note.note !== ''">
                                         <li>
                                             <span *ngIf="note.private"><b>--PRIVATE RESPONSE--</b></span>
+                                            <span *ngIf="note.anonymous"><b>--ANONYMOUS--</b></span>
                                             "{{note.note}}"
                                             <span class="px-3 fst-italic">- {{note.member_name}}</span>
                                         </li>
