@@ -126,7 +126,7 @@
                 </div>
 
                 <div class="px-3 fst-italic">- {{element.polling_order_member_id?.name}}
-                  <span *ngIf="element.anonymous"><b>--ANONYMOUS--</b></span> on {{element.en_created_at |
+                  <span *ngIf="element.anonymous && isOrderAdmin"><b>--ANONYMOUS--</b></span> on {{element.en_created_at |
                   date }}
 
                 </div>

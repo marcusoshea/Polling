@@ -59,6 +59,7 @@ export class CandidatesComponent implements OnInit {
   newExternalNote = '';
   newExternalNoteAnonymous = false;
   allowAnonymous = false;
+  isOrderAdmin = false;
   candidate_id = 0;
   watch_list = false;
   filterValue = '';
@@ -114,6 +115,7 @@ export class CandidatesComponent implements OnInit {
     this.allowAnonymous = !!this.pollingOrder?.polling_order_allow_anonymous;
     this.accessToken = member.access_token;
     this.memberId = member.memberId;
+    this.isOrderAdmin = member.isOrderAdmin;
     this.subscript1 = this.candidateService.getAllCandidates(this.pollingOrder.polling_order_id, this.accessToken).subscribe({
       next: data => {
         this.candidateList = data;
