@@ -56,18 +56,24 @@
               <ng-container matColumnDef="vote">
                 <th mat-header-cell scope="col" *matHeaderCellDef class="p-4 h6 col-md-2"> Your Vote </th>
                 <td mat-cell *matCellDef="let element" class="p-4 h6 mt-2 mb-2 mx-2">
-                  <mat-select [(ngModel)]="element.vote" (ngModelChange)="onRowChange(element)" [aria-label]="'Your vote for ' + element.name" placeholder="Select Your Vote">
-                    <mat-option [value]="1" matTooltip="The candidate is ready to join the order.">Yes</mat-option>
-                    <mat-option *ngIf="pollingOrder.polling_order_id !==1 && pollingOrder.polling_order_id !==8" [value]="2" matTooltip="Showing good progress but not yet ready.">Wait</mat-option>
-                    <mat-option [value]="3" matTooltip="Not ready to join the order.">No</mat-option>
-                    <mat-option [value]="4" matTooltip="You do not have an opinion on this candidate.">Abstain</mat-option>
+                  <mat-select [(ngModel)]="element.vote" (ngModelChange)="onRowChange(element)" [aria-label]="'Your vote for ' + element.name" placeholder="Select Your Vote" panelClass="vote-select-panel">
+                    <mat-select-trigger>{{ voteLabel(element.vote) }}</mat-select-trigger>
+                    <mat-option class="vote-option" [value]="1">Yes<span class="vote-option-hint">Ready to join the order.</span></mat-option>
+                    <mat-option class="vote-option" *ngIf="pollingOrder.polling_order_id !==1 && pollingOrder.polling_order_id !==8" [value]="2">Wait<span class="vote-option-hint">Good progress but not yet ready.</span></mat-option>
+                    <mat-option class="vote-option" [value]="3">No<span class="vote-option-hint">Not ready to join the order.</span></mat-option>
+                    <mat-option class="vote-option" [value]="4">Abstain<span class="vote-option-hint">No opinion on this candidate.</span></mat-option>
                   </mat-select>
                 </td>
               </ng-container>
-              <ng-container matColumnDef="private">
-                <th mat-header-cell scope="col" *matHeaderCellDef class="p-4 h6 col-md-2"> Private Response </th>
+              <ng-container matColumnDef="visibility">
+                <th mat-header-cell scope="col" *matHeaderCellDef class="p-4 h6 col-md-2"> Response Visibility </th>
                 <td mat-cell *matCellDef="let element" class="p-4 h6 mt-2 mb-2 mx-2">
-                    <mat-checkbox [(ngModel)]="element.private" (ngModelChange)="onRowChange(element)" [aria-label]="'Mark note private for ' + element.name" class="m-2">Private</mat-checkbox>
+                    <mat-button-toggle-group [value]="visibilityOf(element)" (change)="setVisibility(element, $event.value)"
+                      [aria-label]="'Response visibility for ' + element.name" class="m-2">
+                      <mat-button-toggle value="normal" matTooltip="Your name is shown with your note.">Normal</mat-button-toggle>
+                      <mat-button-toggle value="private" matTooltip="Only order admins can see your note and will send this to royals.">Private</mat-button-toggle>
+                      <mat-button-toggle *ngIf="allowAnonymous" value="anonymous" matTooltip="Your note is shown as 'Anonymous' to members, except for order admins.">Anonymous</mat-button-toggle>
+                    </mat-button-toggle-group>
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="displayedColumnsPS"></tr>
@@ -92,16 +98,22 @@
                 <div class="mobile-poll-field">
                   <label class="mobile-poll-label">Your Vote</label>
                   <mat-select class="mobile-poll-select" [(ngModel)]="element.vote" (ngModelChange)="onRowChange(element)"
-                    [aria-label]="'Your vote for ' + element.name" placeholder="Select Your Vote">
-                    <mat-option [value]="1" matTooltip="The candidate is ready to join the order.">Yes</mat-option>
-                    <mat-option *ngIf="pollingOrder.polling_order_id !==1 && pollingOrder.polling_order_id !==8" [value]="2" matTooltip="Showing good progress but not yet ready.">Wait</mat-option>
-                    <mat-option [value]="3" matTooltip="Not ready to join the order.">No</mat-option>
-                    <mat-option [value]="4" matTooltip="You do not have an opinion on this candidate.">Abstain</mat-option>
+                    [aria-label]="'Your vote for ' + element.name" placeholder="Select Your Vote" panelClass="vote-select-panel">
+                    <mat-select-trigger>{{ voteLabel(element.vote) }}</mat-select-trigger>
+                    <mat-option class="vote-option" [value]="1">Yes<span class="vote-option-hint">Ready to join the order.</span></mat-option>
+                    <mat-option class="vote-option" *ngIf="pollingOrder.polling_order_id !==1 && pollingOrder.polling_order_id !==8" [value]="2">Wait<span class="vote-option-hint">Good progress but not yet ready.</span></mat-option>
+                    <mat-option class="vote-option" [value]="3">No<span class="vote-option-hint">Not ready to join the order.</span></mat-option>
+                    <mat-option class="vote-option" [value]="4">Abstain<span class="vote-option-hint">No opinion on this candidate.</span></mat-option>
                   </mat-select>
                 </div>
                 <div class="mobile-poll-field">
-                  <mat-checkbox [(ngModel)]="element.private" (ngModelChange)="onRowChange(element)"
-                    [aria-label]="'Mark note private for ' + element.name">Keep my note private</mat-checkbox>
+                  <label class="mobile-poll-label">Response Visibility</label>
+                  <mat-button-toggle-group [value]="visibilityOf(element)" (change)="setVisibility(element, $event.value)"
+                    [aria-label]="'Response visibility for ' + element.name">
+                    <mat-button-toggle value="normal" matTooltip="Your name is shown with your note.">Normal</mat-button-toggle>
+                    <mat-button-toggle value="private" matTooltip="Only order admins can see your note and will send this to royals.">Private</mat-button-toggle>
+                    <mat-button-toggle *ngIf="allowAnonymous" value="anonymous" matTooltip="Your note is shown as 'Anonymous' to members, except for order admins.">Anonymous</mat-button-toggle>
+                  </mat-button-toggle-group>
                 </div>
               </div>
             </div>

@@ -4,4 +4,5 @@ export interface Note {
     polling_order_member_id: number;
     external_note: string;
     en_created_at: string;
+    anonymous: boolean;
 }

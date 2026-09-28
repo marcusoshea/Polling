@@ -9,6 +9,7 @@ export interface PollingNote {
     pn_created_at: string;
     completed: boolean;
     private: boolean;
+    anonymous: boolean;
     polling_name?: string;
     end_date?: string;
     start_date?: string;

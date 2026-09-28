@@ -805,13 +805,18 @@ export class AdminComponent implements OnInit {
           if (note.private) {
             line += 'PRIVATE RESPONSE: ';
           }
+          if (note.anonymous) {
+            line += 'ANONYMOUS RESPONSE: ';
+          }
           if (this.showAdminVotes) {
             line += voteWord(note.vote);
           }
           if (note.note) {
             line += ` --- ${note.note}`;
           }
-          line += ` - ${note.member_name ?? ''}`;
+          // Redact the author on anonymous notes so the exported/shareable PDF never
+          // reveals who wrote it, even though the clerk can see the name on screen.
+          line += note.anonymous ? ' - Anonymous' : ` - ${note.member_name ?? ''}`;
           lines.push(line);
         });
         if (lines.length === 0) {

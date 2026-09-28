@@ -25,6 +25,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastService } from '../services/toast.service';
 import { SubmitReviewDialog } from './submit-review-dialog';
@@ -44,6 +45,7 @@ import { CandidateTrendChartComponent } from '../candidate-trend-chart/candidate
     CommonModule,
     MatSelectModule,
     MatCheckboxModule,
+    MatButtonToggleModule,
     MatTooltipModule
   ],
   styleUrls: ['./pollings.component.css']
@@ -69,7 +71,7 @@ export class PollingsComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   
   constructor(private pollingService: PollingService, private memberService: MemberService, private storageService: StorageService, public dialog: MatDialog, private toastService: ToastService) { }
-  public displayedColumnsPS = ['name', 'note', 'vote', 'private'];
+  public displayedColumnsPS = ['name', 'note', 'vote', 'visibility'];
   polling_id!: Number;
   polling_name!: string;
   start_date!: string;
@@ -84,6 +86,7 @@ export class PollingsComponent implements OnInit {
   pn_created_at!: string;
   polling_order_member_id!: Number;
   isAdmin: boolean = false;
+  public allowAnonymous: boolean = false;
   public completed: boolean = true;
   // §2f "once submitted, always submitted": true once the member's polling loaded
   // fully submitted OR after a successful real submit this session (recomputed by
@@ -117,6 +120,20 @@ export class PollingsComponent implements OnInit {
   // Inline expandable "What do the votes mean?" hint above the voting table.
   public showVoteHelp = false;
 
+  // The vote options render their explanation as a second line, so mat-select's
+  // default trigger text (the option's whole textContent) would read
+  // "YesReady to join the order." Drive the closed trigger from this map instead.
+  private readonly voteLabels: Record<number, string> = {
+    1: 'Yes',
+    2: 'Wait',
+    3: 'No',
+    4: 'Abstain',
+  };
+
+  public voteLabel(vote: number | null | undefined): string {
+    return vote == null ? '' : (this.voteLabels[vote] ?? '');
+  }
+
   // Progress indicator: rows the member has voted on vs total candidates.
   get votedCount(): number {
     return this.dataSourcePS.data.filter(r => r.vote != null).length;
@@ -143,6 +160,7 @@ export class PollingsComponent implements OnInit {
     this.dataSourcePS.filterPredicate = (row: PollingSummary, filter: string) => row.name.toLowerCase().includes(filter);
     const member = this.storageService.getMember()!;
     this.pollingOrder = this.storageService.getPollingOrder()!;
+    this.allowAnonymous = !!this.pollingOrder?.polling_order_allow_anonymous;
     this.accessToken = member.access_token;
     this.isAdmin = member.isOrderAdmin;
     this.votingMember = member.memberId,
@@ -236,6 +254,24 @@ export class PollingsComponent implements OnInit {
     this.completed = true;
     this.dataSourcePS.data = [];
     this.getVotes();
+  }
+
+  // Visibility is a single mutually-exclusive choice ('normal' | 'private' | 'anonymous')
+  // backed by the two row booleans. These helpers keep them from ever both being true.
+  visibilityOf(element: PollingSummary): 'normal' | 'private' | 'anonymous' {
+    if (element.anonymous) {
+      return 'anonymous';
+    }
+    if (element.private) {
+      return 'private';
+    }
+    return 'normal';
+  }
+
+  setVisibility(element: PollingSummary, value: 'normal' | 'private' | 'anonymous'): void {
+    element.private = value === 'private';
+    element.anonymous = value === 'anonymous';
+    this.onRowChange(element);
   }
 
   onRowChange(element: PollingSummary): void {

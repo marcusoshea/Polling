@@ -59,6 +59,11 @@
               <label for="cn">Create New Non-Polling Note</label>
               <textarea class="form-control ps-4" name="newCandidateName" [(ngModel)]="newExternalNote"
                 required></textarea>
+              <div class="form-check mt-2" *ngIf="allowAnonymous">
+                <input class="form-check-input" type="checkbox" id="newExternalNoteAnonymous"
+                  name="newExternalNoteAnonymous" [(ngModel)]="newExternalNoteAnonymous">
+                <label class="form-check-label" for="newExternalNoteAnonymous">Post anonymously</label>
+              </div>
               <button type="input" (click)="addExternalNote()" class="btn btn-success mt-2 mb-2">Create
               </button>
             </div>
@@ -120,8 +125,9 @@
                   </span>
                 </div>
 
-                <div class="px-3 fst-italic">- {{element.polling_order_member_id?.name}} on {{element.en_created_at |
-                  date }} 
+                <div class="px-3 fst-italic">- {{element.polling_order_member_id?.name}}
+                  <span *ngIf="element.anonymous"><b>--ANONYMOUS--</b></span> on {{element.en_created_at |
+                  date }}
 
                 </div>
               </td>
