@@ -549,6 +549,10 @@ export class PollingsComponent implements OnInit {
   ],
 })
 export class PollingCandidate {
+  // The --ANONYMOUS-- marker is only meaningful next to a real name. Non-admins already
+  // see the author rendered as "Anonymous" (the API masks it), so showing the badge to
+  // them reads as "Anonymous --ANONYMOUS--".
+  public isOrderAdmin = false;
   public polling!: Polling;
   public polling_id!: number;
   public displayedColumnsNotes = ['external_note'];
@@ -566,7 +570,8 @@ export class PollingCandidate {
   public dataSourceCandidateImages = new MatTableDataSource<CandidateImages>();
   candidateImageList: CandidateImages[] = [];
 
-  constructor(public dialogRef: MatDialogRef<PollingCandidate>, private notesService: NotesService, private candidateService: CandidateService,  @Inject(MAT_DIALOG_DATA) public data: any) {
+  constructor(public dialogRef: MatDialogRef<PollingCandidate>, private notesService: NotesService, private candidateService: CandidateService, storageService: StorageService,  @Inject(MAT_DIALOG_DATA) public data: any) {
+    this.isOrderAdmin = !!storageService.getMember()?.isOrderAdmin;
     this.candidateName = this.data.candidate.name;
     this.candidateLink = this.data.candidate.link;
     this.candidateId = this.data.candidate.candidate_id;
