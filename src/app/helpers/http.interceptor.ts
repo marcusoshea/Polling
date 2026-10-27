@@ -34,7 +34,9 @@ const SLOW_PATHS = [
 
 // 401s from credential/permission RECHECKS (not session expiry) must not clear the
 // session or redirect — the calling screen shows the error inline.
-const CREDENTIAL_CHECK_PATHS = ['/member/login', '/member/changePassword'];
+// '/member/verify' is the password-reset submit: the caller is not logged in, and a
+// 401 there means the reset link is bad or expired, not that a session ended.
+const CREDENTIAL_CHECK_PATHS = ['/member/login', '/member/changePassword', '/member/verify'];
 
 @Injectable()
 export class TheInterceptor implements HttpInterceptor {
