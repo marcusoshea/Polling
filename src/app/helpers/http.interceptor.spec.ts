@@ -147,6 +147,25 @@ describe('TheInterceptor', () => {
     req.flush({ message: 'Current password is incorrect' }, { status: 401, statusText: 'Unauthorized' });
   });
 
+  it('should NOT log out on an invalid reset link (401 from /member/verify)', (done) => {
+    http.post('/member/verify/123', {}).subscribe({
+      error: (err: HttpErrorResponse) => {
+        // The caller is not logged in; bouncing them to /login with "session expired"
+        // would hide the real problem with their reset link.
+        expect(storageService.clean).not.toHaveBeenCalled();
+        expect(replaceSpy).not.toHaveBeenCalled();
+        expect(err.error.message).toBe('This password reset link is invalid or has expired. Please request a new one.');
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('/member/verify/123');
+    req.flush(
+      { message: 'This password reset link is invalid or has expired. Please request a new one.' },
+      { status: 401, statusText: 'Unauthorized' }
+    );
+  });
+
   it('still logs out on a 401 from a normal guarded endpoint (real session expiry)', (done) => {
     http.get('/polling/currentpolling/1').subscribe({
       error: () => {
